@@ -147,3 +147,22 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# macOS
+.DS_Store
+
+# Python (tracers and their CPython tests)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Local-only Claude Code skills and settings (not shared with the repo)
+.claude/skills/
+.claude/settings.local.json
+# Impeccable skill's project state
+.impeccable/
+
+# Assembled GitHub Pages output (npm run build)
+site/

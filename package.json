@@ -1,0 +1,26 @@
+{
+  "name": "dstutor",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=24.21.0"
+  },
+  "scripts": {
+    "dev:hub": "npm run dev -w @dstutor/hub",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:tracers": "cd tracers/datascience && ${PYTHON:-python3} -m unittest discover -p '*_test.py'",
+    "check": "npm run typecheck && npm test && npm run test:tracers",
+    "build": "npm run build --workspaces --if-present && node scripts/assemble.mjs",
+    "preview": "npm run build && vite preview --outDir site --port 4173"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "typescript": "6.0.3",
+    "vite": "8.3.4"
+  }
+}
