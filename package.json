@@ -22,7 +22,7 @@
     "record:demos": "npm run build && node scripts/record-demos.mjs"
   },
   "devDependencies": {
-    "@eslint/js": "9.39.5",
+    "@eslint/js": "10.0.1",
     "@types/node": "24.19.2",
     "eslint": "9.39.5",
     "eslint-plugin-jsx-a11y": "6.10.2",
