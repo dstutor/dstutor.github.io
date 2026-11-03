@@ -1,8 +1,11 @@
 import { useState } from 'react';
-import { examples, categories, type Example } from './examples';
+import type { Example, Gallery } from './gallery';
 import './ExamplesGallery.css';
 
 interface ExamplesGalleryProps {
+  gallery: Gallery;
+  /** What the examples operate on, e.g. 'Table' */
+  dataNoun: string;
   onSelectExample: (example: Example) => void;
   /** Restore the starter notebook */
   onReset: () => void;
@@ -11,7 +14,8 @@ interface ExamplesGalleryProps {
 
 const CLOSE_MS = 140;
 
-export default function ExamplesGallery({ onSelectExample, onReset, onClose }: ExamplesGalleryProps) {
+export default function ExamplesGallery({ gallery, dataNoun, onSelectExample, onReset, onClose }: ExamplesGalleryProps) {
+  const { examples, categories } = gallery;
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [closing, setClosing] = useState(false);
 
@@ -32,8 +36,8 @@ export default function ExamplesGallery({ onSelectExample, onReset, onClose }: E
       <div className="gallery-modal">
         <div className="gallery-header">
           <div>
-            <h1>Table Operation Examples</h1>
-            <p>Select an example to see how Table operations transform data step-by-step</p>
+            <h1>{dataNoun} Operation Examples</h1>
+            <p>Select an example to see how {dataNoun} operations transform data step-by-step</p>
             <p className="inspiration">Inspired by <a href="https://pandastutor.com/" target="_blank" rel="noopener noreferrer">PandasTutor</a></p>
           </div>
           <button className="close-button" onClick={() => requestClose()} aria-label="Close">×</button>

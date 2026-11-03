@@ -1,36 +1,59 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { NotebookCells, ipynbToJson, parseIpynb, encodeNotebook, decodeNotebook, type NotebookCell, type CellType } from '@dstutor/notebook-ui';
+// The tutor app shell shared by every library: notebook on the left, step-by-step visualization
+// on the right, examples, share links, exports and Present mode. Everything specific to one
+// library (its kernel, starter cells, examples, completions and wording) comes in TutorConfig.
+import { useState, useEffect, useRef, useCallback, type ReactNode } from 'react';
+import type * as Monaco from 'monaco-editor';
+// Stylesheet order matters (later rules win): the cells', then the viz components', then the app's
+import NotebookCells, { type NotebookCell, type CellType } from './NotebookCells';
+import { ipynbToJson, parseIpynb } from './ipynb';
+import { encodeNotebook, decodeNotebook } from './share';
 import { StepSlideshow, StepCard, framesFor, renderStepCanvases, saveStepsPdf, stepsZip, type Frame, type DetailLevel } from '@dstutor/viz';
 import type { RunOutput, TraceRecord } from '@dstutor/trace-schema';
-import './App.css';
+import './TutorApp.css';
 import TracePanel from './TracePanel';
 import ExamplesGallery from './ExamplesGallery';
-import { InterruptedError } from '@dstutor/runtime-pyodide';
-import { runtime } from './runtime';
 import Cel from './Cel';
-import { registerPythonCompletions, setUserNamesProvider, extractUserNames } from './completions';
-import { type Example, getExampleById } from './examples';
+import type { Example, Gallery } from './gallery';
 
-const DEFAULT_MARKDOWN = `## How to use this notebook
+/** The Python runtime a tutor runs cells in (createRuntime() from @dstutor/runtime-pyodide) */
+export interface Kernel {
+  /** Load Python; resolves once cells can run. Safe to call repeatedly. */
+  init(): Promise<void>;
+  runCell(code: string, options?: { enableTracing?: boolean; resetTrace?: boolean; cellId?: string }): Promise<RunOutput>;
+  /** Forget every name cells defined, keeping the interpreter loaded */
+  restart(): Promise<void>;
+  /** Terminate mid-cell; pending calls reject with an Error named 'InterruptedError' */
+  stop(): void;
+}
 
-- **Cells:** Click a cell's margin to select it, press **Enter** to edit and **Esc** to get back. In this mode single keys act on the selected cell, like Jupyter: **a**/**b** add a cell above/below, **d d** deletes, **m**/**y** switch it to markdown/code, **z** undoes a delete.
-- **Running:** **Ctrl+Enter** (**Cmd+Enter** on Mac) runs a cell; **Shift+Enter** runs it and moves on. A table named on the last line of a cell is shown beneath it. **Run all** runs every cell top to bottom; **Restart** forgets everything the cells defined.
-- **Visualize:** **Run all & visualize** runs everything and shows each Table operation step by step on the right. **Visualize** on its own shows the operations from whichever cells you have run so far. Use the arrows to step through, **Export** to save a PDF, or **Share** to copy a permanent link.`;
+export interface TutorConfig {
+  /** The library taught, shown in the header, e.g. 'datascience' */
+  library: string;
+  /** The tutor's name, e.g. 'Table Tutor' */
+  productName: string;
+  /** What the tracer visualizes, e.g. 'Table' (as in "each Table operation") */
+  dataNoun: string;
+  kernel: Kernel;
+  /** The starter notebook on first visit and after Reset */
+  defaultCells: Array<{ type: CellType; source: string }>;
+  gallery: Gallery;
+  /** Which calls are visualized, shown when code ran but produced no steps */
+  tracedNote: ReactNode;
+  /** Starter code shown in the empty visualization panel */
+  tryThis: string;
+  /** Added to the "Things to check" list under a cell's error */
+  errorHint?: ReactNode;
+  /** Register editor completions; userCode returns the source of every code cell */
+  registerCompletions?: (monaco: typeof Monaco, userCode: () => string[]) => void;
+  /** localStorage key for the saved notebook; every tutor shares one origin, so make it unique */
+  notebookStorageKey: string;
+  /** An older key the notebook was saved under, read when notebookStorageKey has nothing */
+  legacyNotebookStorageKey?: string;
+}
 
-const DEFAULT_CELLS: Array<{ type: CellType; source: string }> = [
-  { type: 'markdown', source: DEFAULT_MARKDOWN },
-  { type: 'code', source: `from datascience import *` },
-  { type: 'code', source: `cones = Table().with_columns(
-    'Flavor', make_array('strawberry', 'chocolate', 'vanilla'),
-    'Price', make_array(3.55, 4.75, 4.25)
-)
-cones` },
-];
-
-/** Added to the "Things to check" list under a cell's error */
-const DATASCIENCE_ERROR_HINT = (
-  <li>Start with <code>from datascience import *</code> so <code>Table</code>, <code>make_array</code> and <code>are</code> are available</li>
-);
+function isInterrupted(error: unknown): boolean {
+  return error instanceof Error && error.name === 'InterruptedError';
+}
 
 let cellIdCounter = 0;
 function newCell(source: string, type: CellType = 'code'): NotebookCell {
@@ -79,10 +102,10 @@ function readStoredTheme(): AppTheme {
 type MobileView = 'notebook' | 'visualization';
 
 const NOTEBOOK_WIDTH_STORAGE_KEY = 'notebookWidthPercent';
-const NOTEBOOK_STORAGE_KEY = 'notebook';
 
-function App() {
-  const [cells, setCells] = useState<NotebookCell[]>(() => DEFAULT_CELLS.map(c => newCell(c.source, c.type)));
+export default function TutorApp({ config }: { config: TutorConfig }) {
+  const { kernel, defaultCells, gallery, library, productName, dataNoun } = config;
+  const [cells, setCells] = useState<NotebookCell[]>(() => defaultCells.map(c => newCell(c.source, c.type)));
   const [runningCellId, setRunningCellId] = useState<string | null>(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [sharePopover, setSharePopover] = useState<{ url: string; copied: boolean } | null>(null);
@@ -193,12 +216,8 @@ function App() {
   // Completions see the names defined anywhere in the notebook
   const cellsRef = useRef(cells);
   cellsRef.current = cells;
-  useEffect(() => {
-    setUserNamesProvider(() => extractUserNames(cellsRef.current.filter(c => c.type === 'code').map(c => c.source)));
-  }, []);
-
-  const handleEditorWillMount = (monaco: typeof import('monaco-editor')) => {
-    registerPythonCompletions(monaco);
+  const handleEditorWillMount = (monaco: typeof Monaco) => {
+    config.registerCompletions?.(monaco, () => cellsRef.current.filter(c => c.type === 'code').map(c => c.source));
     monaco.editor.defineTheme('data8-dark', {
       base: 'vs-dark',
       inherit: true,
@@ -311,7 +330,7 @@ function App() {
       }
       // A link to a gallery example by id (?example=filter-rows), used by embeds and the course site
       const exampleParam = params.get('example');
-      const example = exampleParam ? getExampleById(exampleParam) : undefined;
+      const example = exampleParam ? gallery.getExampleById(exampleParam) : undefined;
       if (example) {
         setCells(exampleCells(example));
         setNotebookVersion(v => v + 1);
@@ -320,7 +339,8 @@ function App() {
         return;
       }
       if (embed) return;
-      const saved = localStorage.getItem(NOTEBOOK_STORAGE_KEY);
+      const saved = localStorage.getItem(config.notebookStorageKey)
+        ?? (config.legacyNotebookStorageKey ? localStorage.getItem(config.legacyNotebookStorageKey) : null);
       if (saved) {
         const parsed = JSON.parse(saved) as { cells?: unknown; markdown?: string; example?: string };
         let loaded = parseStoredCells(parsed.cells);
@@ -342,7 +362,7 @@ function App() {
     const timeoutId = setTimeout(() => {
       try {
         localStorage.setItem(
-          NOTEBOOK_STORAGE_KEY,
+          config.notebookStorageKey,
           JSON.stringify({ cells: cells.map(c => ({ type: c.type, source: c.source })), example: currentExample })
         );
       } catch {
@@ -350,7 +370,7 @@ function App() {
       }
     }, 500);
     return () => clearTimeout(timeoutId);
-  }, [cells, currentExample, embed]);
+  }, [cells, currentExample, embed, config.notebookStorageKey]);
 
   // Initialize Pyodide on mount. The notebook is fully usable meanwhile: editing, examples and
   // sharing work, and a run requested before the kernel is ready is queued and starts on its own.
@@ -358,7 +378,7 @@ function App() {
     const init = async () => {
       try {
         setStatusMessage('Loading Python (about 10 s)...');
-        await runtime.init();
+        await kernel.init();
         pyodideStatusRef.current = 'ready';
         setPyodideStatus('ready');
         const pending = pendingRunRef.current;
@@ -371,7 +391,7 @@ function App() {
         }
       } catch (error) {
         // Stopped or restarted while loading: whoever stopped it starts the next load
-        if (error instanceof InterruptedError) return;
+        if (isInterrupted(error)) return;
         setPyodideStatus('error');
         setStatusMessage(error instanceof Error ? error.message : 'Failed to load Pyodide');
         console.error('Pyodide initialization error:', error);
@@ -379,7 +399,7 @@ function App() {
     };
 
     init();
-  }, []);
+  }, [kernel]);
 
   const closeShareOnEscape = (e: React.KeyboardEvent) => {
     if (e.key !== 'Escape') return;
@@ -465,12 +485,12 @@ function App() {
   /** Run one cell in the shared kernel. Returns the result, or null if the run was superseded. */
   const executeCell = useCallback(async (cell: NotebookCell, token: number, trace: { enabled: boolean; reset: boolean }) => {
     setRunningCellId(cell.id);
-    const result = await runtime.runCell(cell.source, { enableTracing: trace.enabled, resetTrace: trace.reset, cellId: cell.id });
+    const result = await kernel.runCell(cell.source, { enableTracing: trace.enabled, resetTrace: trace.reset, cellId: cell.id });
     if (token !== runTokenRef.current) return null;
     execCounterRef.current += 1;
     setCellOutput(cell.id, result, execCounterRef.current);
     return result;
-  }, [setCellOutput]);
+  }, [setCellOutput, kernel]);
 
   /** Show the operations traced so far in the visualization panel */
   const showSessionTrace = useCallback(() => {
@@ -575,7 +595,7 @@ function App() {
 
   /**
    * Run every cell top to bottom, stopping at the first error like a notebook's Run All.
-   * With `visualize`, Table operations are traced and the visualization panel shows them.
+   * With `visualize`, the library's operations are traced and the visualization panel shows them.
    */
   const runAll = useCallback(async (visualize: boolean) => {
     if (deferIfLoading({ kind: 'all', visualize })) return;
@@ -799,12 +819,12 @@ function App() {
     setStatusMessage(message);
     try {
       if (pyodideStatusRef.current === 'ready') {
-        await runtime.restart();
+        await kernel.restart();
       } else {
-        runtime.stop();
+        kernel.stop();
         pyodideStatusRef.current = 'loading';
         setPyodideStatus('loading');
-        await runtime.init();
+        await kernel.init();
         pyodideStatusRef.current = 'ready';
         setPyodideStatus('ready');
       }
@@ -817,7 +837,7 @@ function App() {
       setStatusMessage('Failed to restart the kernel');
       return false;
     }
-  }, [clearRunState]);
+  }, [clearRunState, kernel]);
 
   /**
    * Interrupt (i i): Python runs in a worker, which is terminated (a `while True` loop included)
@@ -830,13 +850,13 @@ function App() {
     setIsRunning(false);
     setRunningCellId(null);
     clearRunState();
-    runtime.stop();
+    kernel.stop();
     pyodideStatusRef.current = 'loading';
     setPyodideStatus('loading');
     setStatusMessage('Interrupted. Reloading Python...');
     (async () => {
       try {
-        await runtime.init();
+        await kernel.init();
         pyodideStatusRef.current = 'ready';
         setPyodideStatus('ready');
         setStatusMessage('Ready to run Python code!');
@@ -846,7 +866,7 @@ function App() {
         setStatusMessage('Failed to reload after interrupt');
       }
     })();
-  }, [isRunning, clearRunState]);
+  }, [isRunning, clearRunState, kernel]);
 
   const handleRestartKernel = useCallback(() => {
     void restartKernel('Restarting the kernel...');
@@ -901,12 +921,12 @@ function App() {
     switchMobileView('notebook');
     // A kernel that is still loading is already clean; otherwise forget the previous notebook's names
     if (pyodideStatusRef.current === 'ready') {
-      runtime.restart().catch(e => console.error('Failed to reset the kernel:', e));
+      kernel.restart().catch(e => console.error('Failed to reset the kernel:', e));
     }
-  }, [switchMobileView]);
+  }, [switchMobileView, kernel]);
 
   // Back to the starter notebook (what you see on first visit)
-  const handleResetNotebook = () => openNotebook(DEFAULT_CELLS.map(c => newCell(c.source, c.type)), '');
+  const handleResetNotebook = () => openNotebook(defaultCells.map(c => newCell(c.source, c.type)), '');
 
   const handleSelectExample = (example: Example) => openNotebook(exampleCells(example), example.title);
 
@@ -917,10 +937,10 @@ function App() {
       {embed ? (
         <div className="embed-bar">
           <span className="embed-title">
-            <code className="brand-code">datascience</code> Table Tutor{currentExample ? `: ${currentExample}` : ''}
+            <code className="brand-code">{library}</code> {productName}{currentExample ? `: ${currentExample}` : ''}
           </span>
           <a className="embed-open" href={window.location.href.replace(/([?&])embed=1&?/, '$1').replace(/[?&]$/, '')} target="_blank" rel="noopener noreferrer">
-            Open in Table Tutor
+            Open in {productName}
           </a>
         </div>
       ) : (
@@ -930,7 +950,7 @@ function App() {
             <Cel state="brand" className="brand-cel" />
             <div className="brand-title">
               <span className="brand-name">Data Science Tutor</span>
-              <code className="brand-code">datascience</code>
+              <code className="brand-code">{library}</code>
             </div>
           </a>
           {currentExample && (
@@ -1109,7 +1129,7 @@ function App() {
                 className="run-button"
                 onClick={handleRunAllAndVisualize}
                 disabled={pyodideStatus === 'error' || isRunning}
-                title="Run every cell top to bottom, then show each Table operation step by step"
+                title={`Run every cell top to bottom, then show each ${dataNoun} operation step by step`}
               >
                 <span className="btn-icon" aria-hidden="true">▶▶</span>
                 {isRunning ? 'Running...' : 'Run all & visualize'}
@@ -1126,7 +1146,7 @@ function App() {
                 className="toolbar-button"
                 onClick={handleVisualize}
                 disabled={isRunning}
-                title="Show the Table operations from the cells you have run since the last restart or Run all"
+                title={`Show the ${dataNoun} operations from the cells you have run since the last restart or Run all`}
               >
                 <span className="btn-icon" aria-hidden="true">◈</span>
                 Visualize
@@ -1188,7 +1208,7 @@ function App() {
               kernelAvailable={pyodideStatus !== 'error'}
               onEditorWillMount={handleEditorWillMount}
               editorTheme={theme === 'jupyter' ? 'data8-light' : 'data8-dark'}
-              errorHints={DATASCIENCE_ERROR_HINT}
+              errorHints={config.errorHint}
             />
           </div>
         </div>
@@ -1213,6 +1233,9 @@ function App() {
         {/* Right: Visualization */}
         <TracePanel
           output={output}
+          dataNoun={dataNoun}
+          tracedNote={config.tracedNote}
+          tryThis={config.tryThis}
           slideshowRef={slideshowRef}
           version={visualizationVersion}
           onPresent={output.trace?.length ? startPresentation : undefined}
@@ -1227,7 +1250,7 @@ function App() {
         // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
         <div className="presentation fade-in" ref={presentationRef} tabIndex={0} role="dialog" aria-label="Presentation">
           <div className="presentation-bar">
-            <span className="presentation-title">{currentExample || 'Table Tutor'}</span>
+            <span className="presentation-title">{currentExample || productName}</span>
             <button type="button" className="presentation-exit" onClick={() => setPresenting(false)} title="Leave presentation (Esc)">
               Exit
             </button>
@@ -1260,6 +1283,8 @@ function App() {
       {/* Examples Gallery Modal */}
       {showGallery && (
         <ExamplesGallery
+          gallery={gallery}
+          dataNoun={dataNoun}
           onSelectExample={handleSelectExample}
           onReset={handleResetNotebook}
           onClose={() => setShowGallery(false)}
@@ -1269,5 +1294,4 @@ function App() {
   );
 }
 
-export default App;
 

@@ -7,9 +7,12 @@
  * and lets the app fall back to a plain editor if this chunk cannot load. Imported dynamically
  * from editorAvailability.ts so a load failure here never takes the rest of the app down.
  */
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api.js';
-import 'monaco-editor/esm/vs/basic-languages/python/python.contribution.js';
-import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker.js?worker';
+// monaco-editor 0.56+ entry points: the editor core, every editor feature (suggest, find,
+// folding, ...), and just the Python language definition
+import * as monaco from 'monaco-editor/editor';
+import 'monaco-editor/features/register.all';
+import 'monaco-editor/languages/definitions/python/register';
+import editorWorker from 'monaco-editor/editor/editor.worker.js?worker';
 import { loader } from '@monaco-editor/react';
 
 self.MonacoEnvironment = {

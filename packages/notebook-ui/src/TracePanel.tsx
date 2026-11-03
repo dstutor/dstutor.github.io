@@ -1,10 +1,16 @@
-import type { RefObject } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import type { RunOutput } from '@dstutor/trace-schema';
 import type { Frame, DetailLevel } from '@dstutor/viz';
 import { StepSlideshow } from '@dstutor/viz';
 
 interface TracePanelProps {
   output: RunOutput;
+  /** What the tracer visualizes, e.g. 'Table' */
+  dataNoun: string;
+  /** Which calls are visualized, shown when code ran but produced no steps */
+  tracedNote: ReactNode;
+  /** Starter code shown in the empty panel */
+  tryThis: string;
   slideshowRef?: RefObject<HTMLDivElement>;
   /** Changes with each new visualization; keys the view so it fades in fresh */
   version?: number;
@@ -16,7 +22,7 @@ interface TracePanelProps {
   onDetailChange?: (detail: DetailLevel) => void;
 }
 
-export default function TracePanel({ output, slideshowRef, version = 0, onPresent, onFrameChange, detail = 'all', onDetailChange }: TracePanelProps) {
+export default function TracePanel({ output, dataNoun, tracedNote, tryThis, slideshowRef, version = 0, onPresent, onFrameChange, detail = 'all', onDetailChange }: TracePanelProps) {
   const hasTrace = output.trace && output.trace.length > 0;
   const hasOutput = output.stdout || output.stderr || output.error;
 
@@ -47,26 +53,19 @@ export default function TracePanel({ output, slideshowRef, version = 0, onPresen
             <StepSlideshow ref={slideshowRef} trace={output.trace!} onFrameChange={onFrameChange} detail={detail} />
           ) : hasOutput ? (
             <div className="empty-state">
-              <h3>No table operations to show.</h3>
+              <h3>No {dataNoun.toLowerCase()} operations to show.</h3>
               <div className="trace-note">
                 <strong>The code ran, but nothing was traced</strong>
-                Only <code>datascience.Table</code> methods are visualized. Any printed output or errors appear under the code cell.
+                {tracedNote} Any printed output or errors appear under the code cell.
               </div>
             </div>
           ) : (
             <div className="empty-state">
-              <h3>See what each Table operation does, one step at a time.</h3>
+              <h3>See what each {dataNoun} operation does, one step at a time.</h3>
               <p>Run the code cell and this panel walks through every operation, showing the table before and after. Pick something from Examples to start, or write your own.</p>
               <div className="example-hint">
                 <strong>Try this</strong>
-                <pre>{`from datascience import *
-
-cones = Table().with_columns(
-    'Flavor', make_array('strawberry', 'chocolate', 'vanilla'),
-    'Price', make_array(3.55, 4.75, 4.25)
-)
-
-cones.where('Flavor', 'chocolate')`}</pre>
+                <pre>{tryThis}</pre>
               </div>
             </div>
           )}

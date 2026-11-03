@@ -4,18 +4,21 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./base.css": "./src/base.css"
   },
   "scripts": {
     "typecheck": "tsc -p .",
     "test": "vitest run"
   },
   "dependencies": {
+    "@dstutor/brand": "0.0.0",
     "@dstutor/trace-schema": "0.0.0",
+    "@dstutor/viz": "0.0.0",
     "@monaco-editor/react": "4.7.0",
     "fflate": "0.8.3",
     "katex": "0.16.28",
-    "monaco-editor": "0.55.1",
+    "monaco-editor": "0.57.0",
     "react-markdown": "10.1.0",
     "rehype-katex": "7.0.1",
     "remark-math": "6.0.0"

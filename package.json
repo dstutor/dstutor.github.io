@@ -11,16 +11,29 @@
   },
   "scripts": {
     "dev:hub": "npm run dev -w @dstutor/hub",
+    "lint": "eslint .",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "test:tracers": "cd tracers/datascience && ${PYTHON:-python3} -m unittest discover -p '*_test.py'",
-    "check": "npm run typecheck && npm test && npm run test:tracers",
+    "check": "npm run lint && npm run typecheck && npm test && npm run test:tracers",
     "build": "npm run build --workspaces --if-present && node scripts/assemble.mjs",
     "preview": "npm run build && vite preview --outDir site --port 4173"
   },
   "devDependencies": {
+    "@eslint/js": "9.39.5",
     "@types/node": "24.19.2",
+    "eslint": "9.39.5",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "eslint-plugin-react": "7.37.5",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "17.13.0",
     "typescript": "6.0.3",
+    "typescript-eslint": "8.71.2",
     "vite": "8.3.4"
+  },
+  "overrides": {
+    "monaco-editor": {
+      "dompurify": "3.4.17"
+    }
   }
 }

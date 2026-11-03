@@ -8,7 +8,7 @@ Python runs in the browser through Pyodide, so there is no server.
 
 | Tutor | Library | URL |
 |---|---|---|
-| datascience | Data 8 `Table` | [/datascience/](https://dstutor.github.io/datascience/) |
+| datascience | UC Berkeley's intro data science library (`Table`) | [/datascience/](https://dstutor.github.io/datascience/) |
 | pandas | pandas DataFrames | [/pandas/](https://dstutor.github.io/pandas/) |
 | polars | polars DataFrames and lazy queries | [/polars/](https://dstutor.github.io/polars/) |
 | SQL | SQL queries, one clause at a time | [/sql/](https://dstutor.github.io/sql/) |
@@ -20,7 +20,8 @@ for lecture.
 
 ## View the site locally
 
-You need Node 24.21.0 (see `.nvmrc`). The tracer tests also need Python 3.12.
+You need Node 24.21.0 (see `.nvmrc`). The tracer tests also need Python 3.14,
+the version Pyodide 314.0.7 runs.
 
 ```bash
 npm install
@@ -40,7 +41,7 @@ npm run dev -w @dstutor/datascience    # tutor at http://localhost:5173/datascie
 ## Check and build
 
 ```bash
-npm run check   # type-check every workspace, run unit tests and the tracer tests
+npm run check   # lint, type-check every workspace, run unit tests and the tracer tests
 npm run build   # build every app and assemble the site into site/
 ```
 
@@ -67,14 +68,16 @@ packages/
   brand/             Cel, the bracket mascot, in each of its states
   trace-schema/      JSON Schema and TS types for TraceRecord, SubStep and TableState
   viz/               StepSlideshow, DataTransformation, PDF and PNG exports
-  notebook-ui/       cells, Monaco editor, .ipynb open/save, share links
+  notebook-ui/       TutorApp (the shell every tutor renders), cells, Monaco editor,
+                     examples gallery, .ipynb open/save, share links
   runtime-pyodide/   Pyodide in a Web Worker, the notebook cell runner, the service worker
 tracers/
   datascience/       method patching on Table
   pandas/            AST rewriting
 apps/
   hub/               this landing page; loads no runtime
-  datascience/       one thin app per library: picks a tracer and runtime config
+  datascience/       one thin app per library: a TutorConfig with its runtime, tracer,
+                     examples, completions and wording
 scripts/
   assemble.mjs       puts every app's build into one site/ for GitHub Pages
 ```
@@ -87,7 +90,9 @@ The runner itself is Python too ([runner.py](packages/runtime-pyodide/src/runner
 tracer tests run cells exactly the way the app does.
 The visualization reads only the trace schema and knows nothing about Python or any library,
 so a new library needs a tracer and a thin app (packages, tracer and setup code passed to
-`createRuntime()`), with no changes to the visualization.
+`createRuntime()`, and a `TutorConfig` passed to `TutorApp`), with no changes to the
+visualization or the notebook. Tutors share one origin, so each saves its notebook under its
+own `localStorage` key (`datascience:notebook`).
 
 The datascience tutor also takes `?example=<id>` to open a gallery example, and `?embed=1`
 for a read-only notebook without the header, for iframes in a textbook or course site. Its

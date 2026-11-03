@@ -13,9 +13,7 @@
     "@dstutor/brand": "0.0.0",
     "@dstutor/notebook-ui": "0.0.0",
     "@dstutor/runtime-pyodide": "0.0.0",
-    "@dstutor/trace-schema": "0.0.0",
-    "@dstutor/viz": "0.0.0",
-    "monaco-editor": "0.55.1",
+    "monaco-editor": "0.57.0",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },

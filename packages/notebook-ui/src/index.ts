@@ -1,5 +1,8 @@
-// Notebook cells, the Monaco editor (with a plain-textarea fallback), .ipynb open/save and
-// share links. Knows nothing about which library the cells use.
+// Notebook cells, the Monaco editor (with a plain-textarea fallback), .ipynb open/save, share
+// links, and TutorApp, the shell every tutor renders. Knows nothing about which library the
+// cells use: each tutor passes that in as a TutorConfig.
+export { default as TutorApp, type TutorConfig, type Kernel } from './TutorApp';
+export { loadGallery, type Gallery, type Example, type Category } from './gallery';
 export {
   default as NotebookCells,
   MOD_KEY,

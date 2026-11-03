@@ -12,6 +12,6 @@
   "dependencies": {
     "@dstutor/trace-schema": "0.0.0",
     "comlink": "4.4.2",
-    "pyodide": "0.26.4"
+    "pyodide": "314.0.7"
   }
 }
