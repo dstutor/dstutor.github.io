@@ -1,0 +1,210 @@
+{
+ "error": null,
+ "trace": [
+  {
+   "args": [
+    "Flavor",
+    [
+     "strawberry",
+     "chocolate",
+     "vanilla",
+     "chocolate",
+     "strawberry",
+     "mint"
+    ],
+    "Color",
+    [
+     "pink",
+     "light brown",
+     "white",
+     "dark brown",
+     "pink",
+     "green"
+    ],
+    "Price",
+    [
+     3.55,
+     4.75,
+     4.25,
+     5.25,
+     3.95,
+     4.5
+    ]
+   ],
+   "explanation": "Created table with 3 columns and 6 rows",
+   "input": {
+    "columns": [],
+    "num_columns": 0,
+    "num_rows": 0,
+    "preview": []
+   },
+   "kwargs": {},
+   "operation": "with_columns",
+   "output": {
+    "columns": [
+     "Flavor",
+     "Color",
+     "Price"
+    ],
+    "num_columns": 3,
+    "num_rows": 6,
+    "preview": [
+     [
+      "strawberry",
+      "pink",
+      3.55
+     ],
+     [
+      "chocolate",
+      "light brown",
+      4.75
+     ],
+     [
+      "vanilla",
+      "white",
+      4.25
+     ],
+     [
+      "chocolate",
+      "dark brown",
+      5.25
+     ],
+     [
+      "strawberry",
+      "pink",
+      3.95
+     ],
+     [
+      "mint",
+      "green",
+      4.5
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 6,
+    "stmt_start": 2,
+    "target": "cones"
+   },
+   "step_id": 1
+  },
+  {
+   "args": [
+    "Flavor",
+    "chocolate"
+   ],
+   "explanation": "Filtered rows. Kept 2, removed 4.",
+   "input": {
+    "columns": [
+     "Flavor",
+     "Color",
+     "Price"
+    ],
+    "num_columns": 3,
+    "num_rows": 6,
+    "preview": [
+     [
+      "strawberry",
+      "pink",
+      3.55
+     ],
+     [
+      "chocolate",
+      "light brown",
+      4.75
+     ],
+     [
+      "vanilla",
+      "white",
+      4.25
+     ],
+     [
+      "chocolate",
+      "dark brown",
+      5.25
+     ],
+     [
+      "strawberry",
+      "pink",
+      3.95
+     ],
+     [
+      "mint",
+      "green",
+      4.5
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "where",
+   "output": {
+    "columns": [
+     "Flavor",
+     "Color",
+     "Price"
+    ],
+    "num_columns": 3,
+    "num_rows": 2,
+    "preview": [
+     [
+      "chocolate",
+      "light brown",
+      4.75
+     ],
+     [
+      "chocolate",
+      "dark brown",
+      5.25
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": "chocolate"
+   },
+   "step_id": 2,
+   "sub_steps": [
+    {
+     "detail": "Keep rows where value == 'chocolate'",
+     "input_highlights": {
+      "columns": [
+       "Flavor"
+      ]
+     },
+     "message": "where checks every row's 'Flavor' value against the condition.",
+     "output_state": {
+      "columns": [
+       "Flavor",
+       "Color",
+       "Price"
+      ],
+      "num_columns": 3,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Flavor"
+      ],
+      "rows": [
+       1,
+       3
+      ],
+      "rows_removed": [
+       0,
+       2,
+       4,
+       5
+      ]
+     },
+     "message": "Keep the 2 rows that satisfy the condition; the other 4 (struck through) are removed."
+    }
+   ]
+  }
+ ]
+}

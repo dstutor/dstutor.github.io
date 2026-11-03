@@ -1,0 +1,503 @@
+/* Notebook: one markdown cell followed by any number of code cells, laid out like
+   a Jupyter notebook: a prompt gutter (In [n]: / Out[n]:) beside each cell's body. */
+
+.notebook-cells-container {
+  --prompt-width: 4.75rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem 1.25rem 2rem 0.75rem;
+  min-height: 0;
+  overflow-y: auto;
+  outline: none;
+}
+
+/* Selected cell: a bar in the margin, like JupyterLab. Stronger while the notebook has
+   focus (command mode), so it is obvious where a / b / d d will act. */
+.nb-cell {
+  position: relative;
+  padding-left: 0.5rem;
+  border-left: 3px solid transparent;
+  border-radius: 3px 0 0 3px;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.nb-cell.selected {
+  border-left-color: var(--border-strong);
+}
+
+.notebook-cells-container:focus .nb-cell.selected {
+  border-left-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* Shared row: gutter | body */
+.cell-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.cell-prompt {
+  flex: 0 0 var(--prompt-width);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+  padding-top: 0.55rem;
+  min-width: 0;
+}
+
+.prompt-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--prompt-in, var(--text-tertiary));
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.prompt-out {
+  color: var(--prompt-out, var(--accent-hover));
+}
+
+/* ---------- Markdown cells ---------- */
+.cell-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.markdown-preview-only {
+  animation: fade-in 150ms ease-out both;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+  min-height: 2.5rem;
+  cursor: text;
+  outline: none;
+  border-radius: var(--radius-control);
+}
+
+.markdown-preview-only:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--outline-focus);
+}
+
+.markdown-preview-placeholder {
+  color: var(--text-tertiary);
+}
+
+.markdown-preview-only p { margin: 0 0 0.6rem; }
+.markdown-preview-only p:last-child { margin-bottom: 0; }
+.markdown-preview-only h1,
+.markdown-preview-only h2,
+.markdown-preview-only h3 {
+  font-family: var(--font-sans);
+  font-weight: bold;
+  color: var(--text-primary);
+}
+.markdown-preview-only h1 { font-size: 1.5rem; line-height: 1.2; margin: 0 0 0.6rem; }
+.markdown-preview-only h2 { font-size: 1.3rem; line-height: 1.25; margin: 0 0 0.5rem; }
+.markdown-preview-only h3 { font-size: 1.1rem; margin: 0.6rem 0 0.3rem; }
+.markdown-preview-only ul, .markdown-preview-only ol { margin: 0.25rem 0 0.6rem; padding-left: 1.4rem; }
+.markdown-preview-only li { margin-bottom: 0.35rem; }
+.markdown-preview-only li::marker { color: var(--text-tertiary); }
+.markdown-preview-only strong { font-weight: 600; }
+.markdown-preview-only code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  background: var(--accent-soft);
+  color: var(--accent-hover);
+}
+.markdown-preview-only pre {
+  margin: 0.6rem 0;
+  padding: 0.85rem 1rem;
+  background: var(--bg-panel-muted);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+  overflow-x: auto;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+}
+.markdown-preview-only pre code { background: none; padding: 0; }
+.markdown-preview-only a { color: var(--accent-hover); text-decoration: underline; text-underline-offset: 2px; }
+.markdown-preview-only blockquote {
+  margin: 0.6rem 0;
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--border-strong);
+  color: var(--text-secondary);
+}
+
+.markdown-preview-only .katex,
+.markdown-preview-only .katex-display {
+  color: var(--text-primary);
+}
+
+.markdown-input {
+  display: block;
+  width: 100%;
+  min-height: 60px;
+  padding: 0.6rem 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--text-primary);
+  background: var(--editor-bg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  resize: vertical;
+  outline: none;
+}
+
+.markdown-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.markdown-input:focus {
+  border-color: var(--outline-focus);
+  box-shadow: 0 0 0 3px var(--accent-muted);
+}
+
+.cell-btn {
+  min-height: 28px;
+  padding: 0 0.6rem;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border-radius: 6px;
+}
+
+.cell-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.cell-btn-run {
+  background: var(--primary-bg);
+  color: var(--primary-fg);
+  border-color: var(--primary-bg);
+}
+
+.cell-btn-run:hover:not(:disabled) {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+  color: var(--primary-fg);
+}
+
+/* ---------- Code cells ---------- */
+.code-cell {
+  position: relative;
+}
+
+.cell-editor {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+  background: var(--editor-bg);
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.code-cell:focus-within .cell-editor {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.code-cell.is-running .cell-editor {
+  border-color: var(--accent);
+}
+
+.code-cell.is-running .prompt-label {
+  color: var(--accent-hover);
+}
+
+.cell-editor .monaco-editor,
+.cell-editor .monaco-editor-background,
+.cell-editor .monaco-editor .margin {
+  background-color: var(--editor-bg) !important;
+}
+
+/* Gutter buttons: run always visible, delete on hover/focus */
+.cell-gutter-actions {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.gutter-btn {
+  width: 22px;
+  height: 22px;
+  min-height: 0;
+  padding: 0;
+  border-radius: 5px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--text-tertiary);
+}
+
+.gutter-btn:hover:not(:disabled) {
+  background: var(--bg-sunken);
+  border-color: transparent;
+  color: var(--text-primary);
+}
+
+.gutter-btn-run:hover:not(:disabled) {
+  color: var(--accent-hover);
+}
+
+.gutter-btn-delete {
+  opacity: 0;
+}
+
+.code-cell:hover .gutter-btn-delete,
+.code-cell:focus-within .gutter-btn-delete,
+.gutter-btn-delete:focus-visible {
+  opacity: 1;
+}
+
+.gutter-btn-delete:hover:not(:disabled) {
+  color: var(--danger);
+}
+
+/* ---------- Output ---------- */
+.cell-output {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-top: 0.35rem;
+  animation: fade-in 200ms ease-out both;
+}
+
+.output-row .cell-prompt {
+  padding-top: 0.35rem;
+}
+
+.output-body {
+  flex: 1;
+  min-width: 0;
+  padding: 0.3rem 0.75rem 0.3rem calc(16px + 1px); /* align with the editor's text column */
+}
+
+.output-stream,
+.output-result,
+.output-error .error-message {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--text-primary);
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.output-stderr {
+  color: var(--accent-hover);
+}
+
+.output-result {
+  padding-top: 0.05rem;
+}
+
+.output-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.output-error {
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--danger);
+  background: var(--danger-bg);
+}
+
+.output-error .error-message {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.output-error .error-help {
+  margin-top: 0.7rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--border-subtle);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.output-error .error-help strong {
+  display: block;
+  margin-bottom: 0.3rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.output-error .error-help ul {
+  margin-left: 1.1rem;
+}
+
+.output-error .error-help li {
+  margin-bottom: 0.25rem;
+}
+
+.output-error .error-help code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  padding: 0.05em 0.3em;
+  border-radius: 4px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+}
+
+/* ---------- Insert-below control: a hairline that reveals a button on hover ---------- */
+.cell-insert {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  height: 1.25rem;
+  margin: 0.2rem 0 0.2rem calc(var(--prompt-width) + 0.6rem);
+  position: relative;
+}
+
+.cell-insert::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: var(--border-subtle);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.insert-btn {
+  position: relative;
+  min-height: 0;
+  height: 1.25rem;
+  padding: 0 0.5rem;
+  gap: 0.3rem;
+  font-size: 0.7rem;
+  border-radius: 999px;
+  background: var(--bg-panel-muted);
+  color: var(--text-tertiary);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.cell-insert:hover::before,
+.code-cell:last-of-type .cell-insert::before,
+.cell-insert:focus-within::before {
+  opacity: 1;
+}
+
+.cell-insert:hover .insert-btn,
+.code-cell:last-of-type .insert-btn,
+.insert-btn:focus-visible {
+  opacity: 1;
+}
+
+.insert-btn:hover:not(:disabled) {
+  color: var(--text-primary);
+  border-color: var(--text-tertiary);
+}
+
+.notebook-hint {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin: 1rem 0 0 calc(var(--prompt-width) + 1.1rem);
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+}
+
+.notebook-hint kbd {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  padding: 0.05rem 0.3rem;
+  margin-right: 0.15rem;
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: var(--bg-panel);
+  color: var(--text-secondary);
+}
+
+.hint-sep {
+  margin: 0 0.35rem;
+}
+
+@media (max-width: 768px) {
+  .notebook-cells-container {
+    --prompt-width: 3.4rem;
+    padding: 0.75rem 0.75rem 1.5rem;
+  }
+
+  .cell-row {
+    gap: 0.4rem;
+  }
+
+  .prompt-label {
+    font-size: 0.66rem;
+  }
+
+  .cell-insert,
+  .notebook-hint {
+    margin-left: 0;
+  }
+
+  .notebook-hint {
+    display: none; /* keyboard shortcuts are meaningless on touch */
+  }
+
+  .gutter-btn-delete,
+  .insert-btn,
+  .cell-insert::before {
+    opacity: 1; /* no hover on touch */
+  }
+
+  .markdown-input {
+    font-size: 16px; /* prevents iOS Safari from zooming the page on focus */
+  }
+}
+
+/* The statement behind the visualization's current step */
+.monaco-editor .trace-line {
+  background: var(--hl-cell);
+}
+
+.monaco-editor .trace-line-gutter {
+  background: var(--accent);
+  width: 3px !important;
+  margin-left: 2px;
+}
+
+/* Plain editor used until Monaco has loaded, or instead of it when it cannot load */
+.code-fallback {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background: var(--editor-bg);
+  border: none;
+  outline: none;
+  resize: vertical;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+  tab-size: 4;
+}
+
+@media (max-width: 768px) {
+  .code-fallback {
+    font-size: 16px; /* prevents iOS Safari from zooming on focus */
+    white-space: pre-wrap;
+  }
+}

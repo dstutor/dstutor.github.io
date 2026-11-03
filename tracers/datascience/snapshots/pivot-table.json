@@ -1,0 +1,728 @@
+{
+ "error": null,
+ "trace": [
+  {
+   "args": [
+    "name",
+    [
+     "One World Trade Center",
+     "Willis Tower",
+     "Empire State Building",
+     "Salesforce Tower",
+     "Aon Center",
+     "Transamerica Pyramid",
+     "30 Hudson Yards"
+    ],
+    "material",
+    [
+     "composite",
+     "steel",
+     "steel",
+     "composite",
+     "steel",
+     "concrete",
+     "composite"
+    ],
+    "city",
+    [
+     "New York City",
+     "Chicago",
+     "New York City",
+     "San Francisco",
+     "Chicago",
+     "San Francisco",
+     "New York City"
+    ],
+    "height",
+    [
+     541,
+     442,
+     381,
+     326,
+     346,
+     260,
+     387
+    ],
+    "completed",
+    [
+     2014,
+     1974,
+     1931,
+     2018,
+     1973,
+     1972,
+     2019
+    ]
+   ],
+   "explanation": "Created table with 5 columns and 7 rows",
+   "input": {
+    "columns": [],
+    "num_columns": 0,
+    "num_rows": 0,
+    "preview": []
+   },
+   "kwargs": {},
+   "operation": "with_columns",
+   "output": {
+    "columns": [
+     "name",
+     "material",
+     "city",
+     "height",
+     "completed"
+    ],
+    "num_columns": 5,
+    "num_rows": 7,
+    "preview": [
+     [
+      "One World Trade Center",
+      "composite",
+      "New York City",
+      541,
+      2014
+     ],
+     [
+      "Willis Tower",
+      "steel",
+      "Chicago",
+      442,
+      1974
+     ],
+     [
+      "Empire State Building",
+      "steel",
+      "New York City",
+      381,
+      1931
+     ],
+     [
+      "Salesforce Tower",
+      "composite",
+      "San Francisco",
+      326,
+      2018
+     ],
+     [
+      "Aon Center",
+      "steel",
+      "Chicago",
+      346,
+      1973
+     ],
+     [
+      "Transamerica Pyramid",
+      "concrete",
+      "San Francisco",
+      260,
+      1972
+     ],
+     [
+      "30 Hudson Yards",
+      "composite",
+      "New York City",
+      387,
+      2019
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 8,
+    "stmt_start": 2,
+    "target": "skyscrapers"
+   },
+   "step_id": 1
+  },
+  {
+   "args": [
+    "material",
+    "city",
+    "height",
+    "max"
+   ],
+   "explanation": "Pivoted table: unique 'material' values become columns, unique 'city' values become rows.",
+   "input": {
+    "columns": [
+     "name",
+     "material",
+     "city",
+     "height",
+     "completed"
+    ],
+    "num_columns": 5,
+    "num_rows": 7,
+    "preview": [
+     [
+      "One World Trade Center",
+      "composite",
+      "New York City",
+      541,
+      2014
+     ],
+     [
+      "Willis Tower",
+      "steel",
+      "Chicago",
+      442,
+      1974
+     ],
+     [
+      "Empire State Building",
+      "steel",
+      "New York City",
+      381,
+      1931
+     ],
+     [
+      "Salesforce Tower",
+      "composite",
+      "San Francisco",
+      326,
+      2018
+     ],
+     [
+      "Aon Center",
+      "steel",
+      "Chicago",
+      346,
+      1973
+     ],
+     [
+      "Transamerica Pyramid",
+      "concrete",
+      "San Francisco",
+      260,
+      1972
+     ],
+     [
+      "30 Hudson Yards",
+      "composite",
+      "New York City",
+      387,
+      2019
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "pivot",
+   "output": {
+    "columns": [
+     "city",
+     "composite",
+     "concrete",
+     "steel"
+    ],
+    "num_columns": 4,
+    "num_rows": 3,
+    "preview": [
+     [
+      "Chicago",
+      0,
+      0,
+      442
+     ],
+     [
+      "New York City",
+      541,
+      0,
+      381
+     ],
+     [
+      "San Francisco",
+      326,
+      260,
+      0
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": null
+   },
+   "step_id": 2,
+   "sub_steps": [
+    {
+     "detail": "Unique values in 'material' (sorted): ['composite', 'concrete', 'steel']",
+     "input_highlights": {
+      "columns": [
+       "material"
+      ]
+     },
+     "message": "pivot builds a grid: the unique values of 'material' become the result's column headers.",
+     "output_state": {
+      "columns": [
+       "city",
+       "composite",
+       "concrete",
+       "steel"
+      ],
+      "num_columns": 4,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "detail": "Unique values in 'city' (sorted): ['Chicago', 'New York City', 'San Francisco']",
+     "input_highlights": {
+      "columns": [
+       "city"
+      ]
+     },
+     "message": "The unique values of 'city' become the row labels; each cell will collect 'height' values, then max combines them. Cells start empty.",
+     "output_state": {
+      "columns": [
+       "city",
+       "composite",
+       "concrete",
+       "steel"
+      ],
+      "num_columns": 4,
+      "num_rows": 3,
+      "preview": [
+       [
+        "Chicago",
+        [],
+        [],
+        []
+       ],
+       [
+        "New York City",
+        [],
+        [],
+        []
+       ],
+       [
+        "San Francisco",
+        [],
+        [],
+        []
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "cells": [
+       [
+        0,
+        "height"
+       ]
+      ],
+      "rows": [
+       0
+      ]
+     },
+     "message": "Row 0 has (city='New York City', material='composite') \u2192 add its 'height' value 541 to cell ('New York City', 'composite').",
+     "output_highlights": {
+      "cells": [
+       [
+        1,
+        "composite"
+       ]
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "city",
+       "composite",
+       "concrete",
+       "steel"
+      ],
+      "num_columns": 4,
+      "num_rows": 3,
+      "preview": [
+       [
+        "Chicago",
+        [],
+        [],
+        []
+       ],
+       [
+        "New York City",
+        [
+         541
+        ],
+        [],
+        []
+       ],
+       [
+        "San Francisco",
+        [],
+        [],
+        []
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "cells": [
+       [
+        1,
+        "height"
+       ]
+      ],
+      "rows": [
+       1
+      ]
+     },
+     "message": "Row 1 has (city='Chicago', material='steel') \u2192 add its 'height' value 442 to cell ('Chicago', 'steel').",
+     "output_highlights": {
+      "cells": [
+       [
+        0,
+        "steel"
+       ]
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "city",
+       "composite",
+       "concrete",
+       "steel"
+      ],
+      "num_columns": 4,
+      "num_rows": 3,
+      "preview": [
+       [
+        "Chicago",
+        [],
+        [],
+        [
+         442
+        ]
+       ],
+       [
+        "New York City",
+        [
+         541
+        ],
+        [],
+        []
+       ],
+       [
+        "San Francisco",
+        [],
+        [],
+        []
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "cells": [
+       [
+        2,
+        "height"
+       ]
+      ],
+      "rows": [
+       2
+      ]
+     },
+     "message": "Row 2 has (city='New York City', material='steel') \u2192 add its 'height' value 381 to cell ('New York City', 'steel').",
+     "output_highlights": {
+      "cells": [
+       [
+        1,
+        "steel"
+       ]
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "city",
+       "composite",
+       "concrete",
+       "steel"
+      ],
+      "num_columns": 4,
+      "num_rows": 3,
+      "preview": [
+       [
+        "Chicago",
+        [],
+        [],
+        [
+         442
+        ]
+       ],
+       [
+        "New York City",
+        [
+         541
+        ],
+        [],
+        [
+         381
+        ]
+       ],
+       [
+        "San Francisco",
+        [],
+        [],
+        []
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "cells": [
+       [
+        3,
+        "height"
+       ]
+      ],
+      "rows": [
+       3
+      ]
+     },
+     "message": "Row 3 has (city='San Francisco', material='composite') \u2192 add its 'height' value 326 to cell ('San Francisco', 'composite').",
+     "output_highlights": {
+      "cells": [
+       [
+        2,
+        "composite"
+       ]
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "city",
+       "composite",
+       "concrete",
+       "steel"
+      ],
+      "num_columns": 4,
+      "num_rows": 3,
+      "preview": [
+       [
+        "Chicago",
+        [],
+        [],
+        [
+         442
+        ]
+       ],
+       [
+        "New York City",
+        [
+         541
+        ],
+        [],
+        [
+         381
+        ]
+       ],
+       [
+        "San Francisco",
+        [
+         326
+        ],
+        [],
+        []
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "cells": [
+       [
+        4,
+        "height"
+       ]
+      ],
+      "rows": [
+       4
+      ]
+     },
+     "message": "Row 4 has (city='Chicago', material='steel') \u2192 add its 'height' value 346 to cell ('Chicago', 'steel').",
+     "output_highlights": {
+      "cells": [
+       [
+        0,
+        "steel"
+       ]
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "city",
+       "composite",
+       "concrete",
+       "steel"
+      ],
+      "num_columns": 4,
+      "num_rows": 3,
+      "preview": [
+       [
+        "Chicago",
+        [],
+        [],
+        [
+         442,
+         346
+        ]
+       ],
+       [
+        "New York City",
+        [
+         541
+        ],
+        [],
+        [
+         381
+        ]
+       ],
+       [
+        "San Francisco",
+        [
+         326
+        ],
+        [],
+        []
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "cells": [
+       [
+        5,
+        "height"
+       ]
+      ],
+      "rows": [
+       5
+      ]
+     },
+     "message": "Row 5 has (city='San Francisco', material='concrete') \u2192 add its 'height' value 260 to cell ('San Francisco', 'concrete').",
+     "output_highlights": {
+      "cells": [
+       [
+        2,
+        "concrete"
+       ]
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "city",
+       "composite",
+       "concrete",
+       "steel"
+      ],
+      "num_columns": 4,
+      "num_rows": 3,
+      "preview": [
+       [
+        "Chicago",
+        [],
+        [],
+        [
+         442,
+         346
+        ]
+       ],
+       [
+        "New York City",
+        [
+         541
+        ],
+        [],
+        [
+         381
+        ]
+       ],
+       [
+        "San Francisco",
+        [
+         326
+        ],
+        [
+         260
+        ],
+        []
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "cells": [
+       [
+        6,
+        "height"
+       ]
+      ],
+      "rows": [
+       6
+      ]
+     },
+     "message": "Row 6 has (city='New York City', material='composite') \u2192 add its 'height' value 387 to cell ('New York City', 'composite').",
+     "output_highlights": {
+      "cells": [
+       [
+        1,
+        "composite"
+       ]
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "city",
+       "composite",
+       "concrete",
+       "steel"
+      ],
+      "num_columns": 4,
+      "num_rows": 3,
+      "preview": [
+       [
+        "Chicago",
+        [],
+        [],
+        [
+         442,
+         346
+        ]
+       ],
+       [
+        "New York City",
+        [
+         541,
+         387
+        ],
+        [],
+        [
+         381
+        ]
+       ],
+       [
+        "San Francisco",
+        [
+         326
+        ],
+        [
+         260
+        ],
+        []
+       ]
+      ]
+     }
+    },
+    {
+     "detail": "max([442, 346]) = 442",
+     "message": "Finally, apply max to the array in each cell. Empty cells get a default value."
+    }
+   ]
+  }
+ ]
+}

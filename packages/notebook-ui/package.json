@@ -7,6 +7,25 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "typecheck": "tsc -p ."
+    "typecheck": "tsc -p .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@dstutor/trace-schema": "0.0.0",
+    "@monaco-editor/react": "4.7.0",
+    "fflate": "0.8.3",
+    "katex": "0.16.28",
+    "monaco-editor": "0.55.1",
+    "react-markdown": "10.1.0",
+    "rehype-katex": "7.0.1",
+    "remark-math": "6.0.0"
+  },
+  "peerDependencies": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.26",
+    "vitest": "5.0.5"
   }
 }

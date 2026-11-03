@@ -1,0 +1,568 @@
+{
+ "error": null,
+ "trace": [
+  {
+   "args": [
+    "Country",
+    [
+     "Brazil",
+     "Brazil",
+     "Kenya",
+     "Kenya",
+     "Japan",
+     "Japan"
+    ],
+    "Year",
+    [
+     2000,
+     2010,
+     2000,
+     2010,
+     2000,
+     2010
+    ],
+    "Population",
+    [
+     175,
+     196,
+     31,
+     42,
+     127,
+     128
+    ]
+   ],
+   "explanation": "Created table with 3 columns and 6 rows",
+   "input": {
+    "columns": [],
+    "num_columns": 0,
+    "num_rows": 0,
+    "preview": []
+   },
+   "kwargs": {},
+   "operation": "with_columns",
+   "output": {
+    "columns": [
+     "Country",
+     "Year",
+     "Population"
+    ],
+    "num_columns": 3,
+    "num_rows": 6,
+    "preview": [
+     [
+      "Brazil",
+      2000,
+      175
+     ],
+     [
+      "Brazil",
+      2010,
+      196
+     ],
+     [
+      "Kenya",
+      2000,
+      31
+     ],
+     [
+      "Kenya",
+      2010,
+      42
+     ],
+     [
+      "Japan",
+      2000,
+      127
+     ],
+     [
+      "Japan",
+      2010,
+      128
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 6,
+    "stmt_start": 2,
+    "target": "population"
+   },
+   "step_id": 1
+  },
+  {
+   "args": [
+    "Year",
+    "Country",
+    "Population",
+    "sum"
+   ],
+   "explanation": "Pivoted table: unique 'Year' values become columns, unique 'Country' values become rows.",
+   "input": {
+    "columns": [
+     "Country",
+     "Year",
+     "Population"
+    ],
+    "num_columns": 3,
+    "num_rows": 6,
+    "preview": [
+     [
+      "Brazil",
+      2000,
+      175
+     ],
+     [
+      "Brazil",
+      2010,
+      196
+     ],
+     [
+      "Kenya",
+      2000,
+      31
+     ],
+     [
+      "Kenya",
+      2010,
+      42
+     ],
+     [
+      "Japan",
+      2000,
+      127
+     ],
+     [
+      "Japan",
+      2010,
+      128
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "pivot",
+   "output": {
+    "columns": [
+     "Country",
+     "2000",
+     "2010"
+    ],
+    "num_columns": 3,
+    "num_rows": 3,
+    "preview": [
+     [
+      "Brazil",
+      175,
+      196
+     ],
+     [
+      "Japan",
+      127,
+      128
+     ],
+     [
+      "Kenya",
+      31,
+      42
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": null
+   },
+   "step_id": 2,
+   "sub_steps": [
+    {
+     "detail": "Unique values in 'Year' (sorted): [2000, 2010]",
+     "input_highlights": {
+      "columns": [
+       "Year"
+      ]
+     },
+     "message": "pivot builds a grid: the unique values of 'Year' become the result's column headers.",
+     "output_state": {
+      "columns": [
+       "Country",
+       "2000",
+       "2010"
+      ],
+      "num_columns": 3,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "detail": "Unique values in 'Country' (sorted): ['Brazil', 'Japan', 'Kenya']",
+     "input_highlights": {
+      "columns": [
+       "Country"
+      ]
+     },
+     "message": "The unique values of 'Country' become the row labels; each cell will collect 'Population' values, then sum combines them. Cells start empty.",
+     "output_state": {
+      "columns": [
+       "Country",
+       "2000",
+       "2010"
+      ],
+      "num_columns": 3,
+      "num_rows": 3,
+      "preview": [
+       [
+        "Brazil",
+        [],
+        []
+       ],
+       [
+        "Japan",
+        [],
+        []
+       ],
+       [
+        "Kenya",
+        [],
+        []
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "cells": [
+       [
+        0,
+        "Population"
+       ]
+      ],
+      "rows": [
+       0
+      ]
+     },
+     "message": "Row 0 has (Country='Brazil', Year=2000) \u2192 add its 'Population' value 175 to cell ('Brazil', 2000).",
+     "output_highlights": {
+      "cells": [
+       [
+        0,
+        "2000"
+       ]
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Country",
+       "2000",
+       "2010"
+      ],
+      "num_columns": 3,
+      "num_rows": 3,
+      "preview": [
+       [
+        "Brazil",
+        [
+         175
+        ],
+        []
+       ],
+       [
+        "Japan",
+        [],
+        []
+       ],
+       [
+        "Kenya",
+        [],
+        []
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "cells": [
+       [
+        1,
+        "Population"
+       ]
+      ],
+      "rows": [
+       1
+      ]
+     },
+     "message": "Row 1 has (Country='Brazil', Year=2010) \u2192 add its 'Population' value 196 to cell ('Brazil', 2010).",
+     "output_highlights": {
+      "cells": [
+       [
+        0,
+        "2010"
+       ]
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Country",
+       "2000",
+       "2010"
+      ],
+      "num_columns": 3,
+      "num_rows": 3,
+      "preview": [
+       [
+        "Brazil",
+        [
+         175
+        ],
+        [
+         196
+        ]
+       ],
+       [
+        "Japan",
+        [],
+        []
+       ],
+       [
+        "Kenya",
+        [],
+        []
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "cells": [
+       [
+        2,
+        "Population"
+       ]
+      ],
+      "rows": [
+       2
+      ]
+     },
+     "message": "Row 2 has (Country='Kenya', Year=2000) \u2192 add its 'Population' value 31 to cell ('Kenya', 2000).",
+     "output_highlights": {
+      "cells": [
+       [
+        2,
+        "2000"
+       ]
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Country",
+       "2000",
+       "2010"
+      ],
+      "num_columns": 3,
+      "num_rows": 3,
+      "preview": [
+       [
+        "Brazil",
+        [
+         175
+        ],
+        [
+         196
+        ]
+       ],
+       [
+        "Japan",
+        [],
+        []
+       ],
+       [
+        "Kenya",
+        [
+         31
+        ],
+        []
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "cells": [
+       [
+        3,
+        "Population"
+       ]
+      ],
+      "rows": [
+       3
+      ]
+     },
+     "message": "Row 3 has (Country='Kenya', Year=2010) \u2192 add its 'Population' value 42 to cell ('Kenya', 2010).",
+     "output_highlights": {
+      "cells": [
+       [
+        2,
+        "2010"
+       ]
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Country",
+       "2000",
+       "2010"
+      ],
+      "num_columns": 3,
+      "num_rows": 3,
+      "preview": [
+       [
+        "Brazil",
+        [
+         175
+        ],
+        [
+         196
+        ]
+       ],
+       [
+        "Japan",
+        [],
+        []
+       ],
+       [
+        "Kenya",
+        [
+         31
+        ],
+        [
+         42
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "cells": [
+       [
+        4,
+        "Population"
+       ]
+      ],
+      "rows": [
+       4
+      ]
+     },
+     "message": "Row 4 has (Country='Japan', Year=2000) \u2192 add its 'Population' value 127 to cell ('Japan', 2000).",
+     "output_highlights": {
+      "cells": [
+       [
+        1,
+        "2000"
+       ]
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Country",
+       "2000",
+       "2010"
+      ],
+      "num_columns": 3,
+      "num_rows": 3,
+      "preview": [
+       [
+        "Brazil",
+        [
+         175
+        ],
+        [
+         196
+        ]
+       ],
+       [
+        "Japan",
+        [
+         127
+        ],
+        []
+       ],
+       [
+        "Kenya",
+        [
+         31
+        ],
+        [
+         42
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "cells": [
+       [
+        5,
+        "Population"
+       ]
+      ],
+      "rows": [
+       5
+      ]
+     },
+     "message": "Row 5 has (Country='Japan', Year=2010) \u2192 add its 'Population' value 128 to cell ('Japan', 2010).",
+     "output_highlights": {
+      "cells": [
+       [
+        1,
+        "2010"
+       ]
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Country",
+       "2000",
+       "2010"
+      ],
+      "num_columns": 3,
+      "num_rows": 3,
+      "preview": [
+       [
+        "Brazil",
+        [
+         175
+        ],
+        [
+         196
+        ]
+       ],
+       [
+        "Japan",
+        [
+         127
+        ],
+        [
+         128
+        ]
+       ],
+       [
+        "Kenya",
+        [
+         31
+        ],
+        [
+         42
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "detail": "sum([175]) = 175",
+     "message": "Finally, apply sum to the array in each cell. Empty cells get a default value."
+    }
+   ]
+  }
+ ]
+}

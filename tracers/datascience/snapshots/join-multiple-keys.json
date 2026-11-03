@@ -1,0 +1,480 @@
+{
+ "error": null,
+ "trace": [
+  {
+   "args": [
+    "Title",
+    [
+     "Star Wars",
+     "E.T.",
+     "Titanic",
+     "Jurassic Park",
+     "The Lion King",
+     "Avatar",
+     "Jaws"
+    ],
+    "Studio",
+    [
+     "Fox",
+     "Universal",
+     "Paramount",
+     "Universal",
+     "Buena Vista",
+     "Fox",
+     "Universal"
+    ],
+    "Gross",
+    [
+     461,
+     435,
+     659,
+     402,
+     423,
+     761,
+     260
+    ],
+    "Year",
+    [
+     1977,
+     1982,
+     1997,
+     1993,
+     1994,
+     2009,
+     1975
+    ]
+   ],
+   "explanation": "Created table with 4 columns and 7 rows",
+   "input": {
+    "columns": [],
+    "num_columns": 0,
+    "num_rows": 0,
+    "preview": []
+   },
+   "kwargs": {},
+   "operation": "with_columns",
+   "output": {
+    "columns": [
+     "Title",
+     "Studio",
+     "Gross",
+     "Year"
+    ],
+    "num_columns": 4,
+    "num_rows": 7,
+    "preview": [
+     [
+      "Star Wars",
+      "Fox",
+      461,
+      1977
+     ],
+     [
+      "E.T.",
+      "Universal",
+      435,
+      1982
+     ],
+     [
+      "Titanic",
+      "Paramount",
+      659,
+      1997
+     ],
+     [
+      "Jurassic Park",
+      "Universal",
+      402,
+      1993
+     ],
+     [
+      "The Lion King",
+      "Buena Vista",
+      423,
+      1994
+     ],
+     [
+      "Avatar",
+      "Fox",
+      761,
+      2009
+     ],
+     [
+      "Jaws",
+      "Universal",
+      260,
+      1975
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 7,
+    "stmt_start": 2,
+    "target": "top"
+   },
+   "step_id": 1
+  },
+  {
+   "args": [
+    "Studio",
+    [
+     "Fox",
+     "Universal",
+     "Paramount",
+     "Buena Vista"
+    ],
+    "Founded",
+    [
+     1935,
+     1912,
+     1912,
+     1953
+    ]
+   ],
+   "explanation": "Created table with 2 columns and 4 rows",
+   "input": {
+    "columns": [],
+    "num_columns": 0,
+    "num_rows": 0,
+    "preview": []
+   },
+   "kwargs": {},
+   "operation": "with_columns",
+   "output": {
+    "columns": [
+     "Studio",
+     "Founded"
+    ],
+    "num_columns": 2,
+    "num_rows": 4,
+    "preview": [
+     [
+      "Fox",
+      1935
+     ],
+     [
+      "Universal",
+      1912
+     ],
+     [
+      "Paramount",
+      1912
+     ],
+     [
+      "Buena Vista",
+      1953
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 5,
+    "stmt_start": 2,
+    "target": "studios"
+   },
+   "step_id": 2
+  },
+  {
+   "args": [
+    "Studio",
+    "Studio      | Founded\nFox         | 1935\nUniversal   | 1912\nParamount   | 1912\nBuena Vista | 1953"
+   ],
+   "explanation": "Joined on 'Studio'.",
+   "input": {
+    "columns": [
+     "Title",
+     "Studio",
+     "Gross",
+     "Year"
+    ],
+    "num_columns": 4,
+    "num_rows": 7,
+    "preview": [
+     [
+      "Star Wars",
+      "Fox",
+      461,
+      1977
+     ],
+     [
+      "E.T.",
+      "Universal",
+      435,
+      1982
+     ],
+     [
+      "Titanic",
+      "Paramount",
+      659,
+      1997
+     ],
+     [
+      "Jurassic Park",
+      "Universal",
+      402,
+      1993
+     ],
+     [
+      "The Lion King",
+      "Buena Vista",
+      423,
+      1994
+     ],
+     [
+      "Avatar",
+      "Fox",
+      761,
+      2009
+     ],
+     [
+      "Jaws",
+      "Universal",
+      260,
+      1975
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "join",
+   "output": {
+    "columns": [
+     "Studio",
+     "Title",
+     "Gross",
+     "Year",
+     "Founded"
+    ],
+    "num_columns": 5,
+    "num_rows": 7,
+    "preview": [
+     [
+      "Buena Vista",
+      "The Lion King",
+      423,
+      1994,
+      1953
+     ],
+     [
+      "Fox",
+      "Star Wars",
+      461,
+      1977,
+      1935
+     ],
+     [
+      "Fox",
+      "Avatar",
+      761,
+      2009,
+      1935
+     ],
+     [
+      "Paramount",
+      "Titanic",
+      659,
+      1997,
+      1912
+     ],
+     [
+      "Universal",
+      "E.T.",
+      435,
+      1982,
+      1912
+     ],
+     [
+      "Universal",
+      "Jurassic Park",
+      402,
+      1993,
+      1912
+     ],
+     [
+      "Universal",
+      "Jaws",
+      260,
+      1975,
+      1912
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": null
+   },
+   "step_id": 3,
+   "sub_steps": [
+    {
+     "aux_table": {
+      "highlights": {
+       "columns": [
+        "Studio"
+       ]
+      },
+      "label": "Second table",
+      "state": {
+       "columns": [
+        "Studio",
+        "Founded"
+       ],
+       "num_columns": 2,
+       "num_rows": 4,
+       "preview": [
+        [
+         "Fox",
+         1935
+        ],
+        [
+         "Universal",
+         1912
+        ],
+        [
+         "Paramount",
+         1912
+        ],
+        [
+         "Buena Vista",
+         1953
+        ]
+       ]
+      }
+     },
+     "input_highlights": {
+      "columns": [
+       "Studio"
+      ]
+     },
+     "message": "join combines two tables: it matches rows whose key columns 'Studio' hold the same value.",
+     "output_state": {
+      "columns": [
+       "Studio",
+       "Title",
+       "Gross",
+       "Year",
+       "Founded"
+      ],
+      "num_columns": 5,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "aux_table": {
+      "highlights": {
+       "columns": [
+        "Studio"
+       ],
+       "rows": [
+        0,
+        1,
+        2,
+        3
+       ]
+      },
+      "label": "Second table",
+      "state": {
+       "columns": [
+        "Studio",
+        "Founded"
+       ],
+       "num_columns": 2,
+       "num_rows": 4,
+       "preview": [
+        [
+         "Fox",
+         1935
+        ],
+        [
+         "Universal",
+         1912
+        ],
+        [
+         "Paramount",
+         1912
+        ],
+        [
+         "Buena Vista",
+         1953
+        ]
+       ]
+      }
+     },
+     "detail": "Keys found in both tables: ['Buena Vista', 'Fox', 'Paramount', 'Universal']",
+     "input_highlights": {
+      "columns": [
+       "Studio"
+      ],
+      "rows": [
+       0,
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ]
+     },
+     "message": "Find the key values that appear in BOTH tables. Only those rows will be joined.",
+     "output_state": {
+      "columns": [
+       "Studio",
+       "Title",
+       "Gross",
+       "Year",
+       "Founded"
+      ],
+      "num_columns": 5,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "aux_table": {
+      "highlights": {
+       "columns": [
+        "Studio"
+       ],
+       "rows": [
+        0,
+        1,
+        2,
+        3
+       ]
+      },
+      "label": "Second table",
+      "state": {
+       "columns": [
+        "Studio",
+        "Founded"
+       ],
+       "num_columns": 2,
+       "num_rows": 4,
+       "preview": [
+        [
+         "Fox",
+         1935
+        ],
+        [
+         "Universal",
+         1912
+        ],
+        [
+         "Paramount",
+         1912
+        ],
+        [
+         "Buena Vista",
+         1953
+        ]
+       ]
+      }
+     },
+     "message": "Each pair of rows with equal keys becomes one combined row (all columns from both tables). Rows whose key has no match are dropped."
+    }
+   ]
+  }
+ ]
+}

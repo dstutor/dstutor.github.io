@@ -1,0 +1,364 @@
+{
+ "error": null,
+ "trace": [
+  {
+   "args": [
+    "Drink",
+    [
+     "Milk Tea",
+     "Espresso",
+     "Latte",
+     "Espresso"
+    ],
+    "Cafe",
+    [
+     "Asha",
+     "Strada",
+     "Strada",
+     "FSM"
+    ],
+    "Price",
+    [
+     4.0,
+     2.0,
+     3.0,
+     2.0
+    ]
+   ],
+   "explanation": "Created table with 3 columns and 4 rows",
+   "input": {
+    "columns": [],
+    "num_columns": 0,
+    "num_rows": 0,
+    "preview": []
+   },
+   "kwargs": {},
+   "operation": "with_columns",
+   "output": {
+    "columns": [
+     "Drink",
+     "Cafe",
+     "Price"
+    ],
+    "num_columns": 3,
+    "num_rows": 4,
+    "preview": [
+     [
+      "Milk Tea",
+      "Asha",
+      4.0
+     ],
+     [
+      "Espresso",
+      "Strada",
+      2.0
+     ],
+     [
+      "Latte",
+      "Strada",
+      3.0
+     ],
+     [
+      "Espresso",
+      "FSM",
+      2.0
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 6,
+    "stmt_start": 2,
+    "target": "drinks"
+   },
+   "step_id": 1
+  },
+  {
+   "args": [
+    "Coupon % off",
+    [
+     10,
+     25,
+     5
+    ],
+    "Location",
+    [
+     "Asha",
+     "Strada",
+     "Asha"
+    ]
+   ],
+   "explanation": "Created table with 2 columns and 3 rows",
+   "input": {
+    "columns": [],
+    "num_columns": 0,
+    "num_rows": 0,
+    "preview": []
+   },
+   "kwargs": {},
+   "operation": "with_columns",
+   "output": {
+    "columns": [
+     "Coupon % off",
+     "Location"
+    ],
+    "num_columns": 2,
+    "num_rows": 3,
+    "preview": [
+     [
+      10,
+      "Asha"
+     ],
+     [
+      25,
+      "Strada"
+     ],
+     [
+      5,
+      "Asha"
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 5,
+    "stmt_start": 2,
+    "target": "discounts"
+   },
+   "step_id": 2
+  },
+  {
+   "args": [
+    "Cafe",
+    "Coupon % off | Location\n10           | Asha\n25           | Strada\n5            | Asha",
+    "Location"
+   ],
+   "explanation": "Joined on 'Cafe'.",
+   "input": {
+    "columns": [
+     "Drink",
+     "Cafe",
+     "Price"
+    ],
+    "num_columns": 3,
+    "num_rows": 4,
+    "preview": [
+     [
+      "Milk Tea",
+      "Asha",
+      4.0
+     ],
+     [
+      "Espresso",
+      "Strada",
+      2.0
+     ],
+     [
+      "Latte",
+      "Strada",
+      3.0
+     ],
+     [
+      "Espresso",
+      "FSM",
+      2.0
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "join",
+   "output": {
+    "columns": [
+     "Cafe",
+     "Drink",
+     "Price",
+     "Coupon % off"
+    ],
+    "num_columns": 4,
+    "num_rows": 4,
+    "preview": [
+     [
+      "Asha",
+      "Milk Tea",
+      4.0,
+      10
+     ],
+     [
+      "Asha",
+      "Milk Tea",
+      4.0,
+      5
+     ],
+     [
+      "Strada",
+      "Espresso",
+      2.0,
+      25
+     ],
+     [
+      "Strada",
+      "Latte",
+      3.0,
+      25
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": null
+   },
+   "step_id": 3,
+   "sub_steps": [
+    {
+     "aux_table": {
+      "highlights": {
+       "columns": [
+        "Location"
+       ]
+      },
+      "label": "Second table",
+      "state": {
+       "columns": [
+        "Coupon % off",
+        "Location"
+       ],
+       "num_columns": 2,
+       "num_rows": 3,
+       "preview": [
+        [
+         10,
+         "Asha"
+        ],
+        [
+         25,
+         "Strada"
+        ],
+        [
+         5,
+         "Asha"
+        ]
+       ]
+      }
+     },
+     "input_highlights": {
+      "columns": [
+       "Cafe"
+      ]
+     },
+     "message": "join combines two tables: it matches rows whose key columns 'Cafe' (left) and 'Location' (right) hold the same value.",
+     "output_state": {
+      "columns": [
+       "Cafe",
+       "Drink",
+       "Price",
+       "Coupon % off"
+      ],
+      "num_columns": 4,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "aux_table": {
+      "highlights": {
+       "columns": [
+        "Location"
+       ],
+       "rows": [
+        0,
+        1,
+        2
+       ]
+      },
+      "label": "Second table",
+      "state": {
+       "columns": [
+        "Coupon % off",
+        "Location"
+       ],
+       "num_columns": 2,
+       "num_rows": 3,
+       "preview": [
+        [
+         10,
+         "Asha"
+        ],
+        [
+         25,
+         "Strada"
+        ],
+        [
+         5,
+         "Asha"
+        ]
+       ]
+      }
+     },
+     "detail": "Keys found in both tables: ['Asha', 'Strada']",
+     "input_highlights": {
+      "columns": [
+       "Cafe"
+      ],
+      "rows": [
+       0,
+       1,
+       2
+      ]
+     },
+     "message": "Find the key values that appear in BOTH tables. Only those rows will be joined.",
+     "output_state": {
+      "columns": [
+       "Cafe",
+       "Drink",
+       "Price",
+       "Coupon % off"
+      ],
+      "num_columns": 4,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "aux_table": {
+      "highlights": {
+       "columns": [
+        "Location"
+       ],
+       "rows": [
+        0,
+        1,
+        2
+       ]
+      },
+      "label": "Second table",
+      "state": {
+       "columns": [
+        "Coupon % off",
+        "Location"
+       ],
+       "num_columns": 2,
+       "num_rows": 3,
+       "preview": [
+        [
+         10,
+         "Asha"
+        ],
+        [
+         25,
+         "Strada"
+        ],
+        [
+         5,
+         "Asha"
+        ]
+       ]
+      }
+     },
+     "message": "Each pair of rows with equal keys becomes one combined row (all columns from both tables). Rows whose key has no match are dropped."
+    }
+   ]
+  }
+ ]
+}

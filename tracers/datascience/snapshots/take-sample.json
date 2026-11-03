@@ -1,0 +1,378 @@
+{
+ "error": null,
+ "trace": [
+  {
+   "args": [
+    "Title",
+    [
+     "Star Wars",
+     "E.T.",
+     "Titanic",
+     "Jurassic Park",
+     "The Lion King",
+     "Avatar",
+     "Jaws"
+    ],
+    "Studio",
+    [
+     "Fox",
+     "Universal",
+     "Paramount",
+     "Universal",
+     "Buena Vista",
+     "Fox",
+     "Universal"
+    ],
+    "Gross",
+    [
+     461,
+     435,
+     659,
+     402,
+     423,
+     761,
+     260
+    ],
+    "Year",
+    [
+     1977,
+     1982,
+     1997,
+     1993,
+     1994,
+     2009,
+     1975
+    ]
+   ],
+   "explanation": "Created table with 4 columns and 7 rows",
+   "input": {
+    "columns": [],
+    "num_columns": 0,
+    "num_rows": 0,
+    "preview": []
+   },
+   "kwargs": {},
+   "operation": "with_columns",
+   "output": {
+    "columns": [
+     "Title",
+     "Studio",
+     "Gross",
+     "Year"
+    ],
+    "num_columns": 4,
+    "num_rows": 7,
+    "preview": [
+     [
+      "Star Wars",
+      "Fox",
+      461,
+      1977
+     ],
+     [
+      "E.T.",
+      "Universal",
+      435,
+      1982
+     ],
+     [
+      "Titanic",
+      "Paramount",
+      659,
+      1997
+     ],
+     [
+      "Jurassic Park",
+      "Universal",
+      402,
+      1993
+     ],
+     [
+      "The Lion King",
+      "Buena Vista",
+      423,
+      1994
+     ],
+     [
+      "Avatar",
+      "Fox",
+      761,
+      2009
+     ],
+     [
+      "Jaws",
+      "Universal",
+      260,
+      1975
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 7,
+    "stmt_start": 2,
+    "target": "top"
+   },
+   "step_id": 1
+  },
+  {
+   "args": [
+    "Gross"
+   ],
+   "explanation": "Sorted by 'Gross'.",
+   "input": {
+    "columns": [
+     "Title",
+     "Studio",
+     "Gross",
+     "Year"
+    ],
+    "num_columns": 4,
+    "num_rows": 7,
+    "preview": [
+     [
+      "Star Wars",
+      "Fox",
+      461,
+      1977
+     ],
+     [
+      "E.T.",
+      "Universal",
+      435,
+      1982
+     ],
+     [
+      "Titanic",
+      "Paramount",
+      659,
+      1997
+     ],
+     [
+      "Jurassic Park",
+      "Universal",
+      402,
+      1993
+     ],
+     [
+      "The Lion King",
+      "Buena Vista",
+      423,
+      1994
+     ],
+     [
+      "Avatar",
+      "Fox",
+      761,
+      2009
+     ],
+     [
+      "Jaws",
+      "Universal",
+      260,
+      1975
+     ]
+    ]
+   },
+   "kwargs": {
+    "descending": true
+   },
+   "operation": "sort",
+   "output": {
+    "columns": [
+     "Title",
+     "Studio",
+     "Gross",
+     "Year"
+    ],
+    "num_columns": 4,
+    "num_rows": 7,
+    "preview": [
+     [
+      "Avatar",
+      "Fox",
+      761,
+      2009
+     ],
+     [
+      "Titanic",
+      "Paramount",
+      659,
+      1997
+     ],
+     [
+      "Star Wars",
+      "Fox",
+      461,
+      1977
+     ],
+     [
+      "E.T.",
+      "Universal",
+      435,
+      1982
+     ],
+     [
+      "The Lion King",
+      "Buena Vista",
+      423,
+      1994
+     ],
+     [
+      "Jurassic Park",
+      "Universal",
+      402,
+      1993
+     ],
+     [
+      "Jaws",
+      "Universal",
+      260,
+      1975
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": null
+   },
+   "step_id": 2,
+   "sub_steps": [
+    {
+     "input_highlights": {
+      "columns": [
+       "Gross"
+      ]
+     },
+     "message": "sort reorders all rows by their 'Gross' value, largest first. No rows are added or removed."
+    },
+    {
+     "detail": "New order of original row positions (starting at 0): [5, 2, 0, 1, 4, 3, 6]",
+     "message": "Rows keep all their values. Only their order changes.",
+     "output_highlights": {
+      "columns": [
+       "Gross"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "args": [
+    [
+     0,
+     1,
+     2
+    ]
+   ],
+   "explanation": "Took 3 rows by position.",
+   "input": {
+    "columns": [
+     "Title",
+     "Studio",
+     "Gross",
+     "Year"
+    ],
+    "num_columns": 4,
+    "num_rows": 7,
+    "preview": [
+     [
+      "Avatar",
+      "Fox",
+      761,
+      2009
+     ],
+     [
+      "Titanic",
+      "Paramount",
+      659,
+      1997
+     ],
+     [
+      "Star Wars",
+      "Fox",
+      461,
+      1977
+     ],
+     [
+      "E.T.",
+      "Universal",
+      435,
+      1982
+     ],
+     [
+      "The Lion King",
+      "Buena Vista",
+      423,
+      1994
+     ],
+     [
+      "Jurassic Park",
+      "Universal",
+      402,
+      1993
+     ],
+     [
+      "Jaws",
+      "Universal",
+      260,
+      1975
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "take",
+   "output": {
+    "columns": [
+     "Title",
+     "Studio",
+     "Gross",
+     "Year"
+    ],
+    "num_columns": 4,
+    "num_rows": 3,
+    "preview": [
+     [
+      "Avatar",
+      "Fox",
+      761,
+      2009
+     ],
+     [
+      "Titanic",
+      "Paramount",
+      659,
+      1997
+     ],
+     [
+      "Star Wars",
+      "Fox",
+      461,
+      1977
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": null
+   },
+   "step_id": 3,
+   "sub_steps": [
+    {
+     "input_highlights": {
+      "rows": [
+       0,
+       1,
+       2
+      ]
+     },
+     "message": "take picks rows by their position (starting at 0): [0, 1, 2]. The highlighted rows form the new table."
+    }
+   ]
+  }
+ ]
+}

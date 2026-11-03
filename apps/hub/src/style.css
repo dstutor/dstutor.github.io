@@ -1,48 +1,47 @@
-@import '@fontsource-variable/manrope';
-
-/* dstutor brand: teal #0F9D94 and navy #1E2A38, from _static/dstutor-brand.
-   Dark is the default; the header toggle switches to light. */
+/* dstutor brand: Cel orange #F37726 on neutral greys. Dark is the default; the header
+   toggle switches to light. */
 :root {
   color-scheme: dark;
-  --bg: #0e141c;
-  --hero-bg: #111c28;
-  --grid-dot: rgba(120, 220, 212, 0.12);
-  --surface: #18212c;
-  --surface-2: #212c39;
-  --border: #2b3746;
-  --ink: #eef2f6;
-  --ink-muted: #9aa6b2;
-  --teal: #2bb8ae;
-  --teal-ink: #4fd1c7;
-  --teal-soft: rgba(43, 184, 174, 0.18);
-  --scan: rgba(79, 209, 199, 0.32);
-  --on-teal: #062421;
-  --teal-shadow: #0d6f69;
-  --dropped: #5f6c7a;
-  --glint: #18212c;
+  --bg: #121212;
+  --hero-bg: #1a1a1a;
+  --grid-dot: rgba(243, 119, 38, 0.13);
+  --surface: #1f1f1f;
+  --surface-2: #292929;
+  --border: #363636;
+  --ink: #f2f2f2;
+  --ink-muted: #a6a6a6;
+  --accent: #f37726;
+  --accent-ink: #ff9a5c;
+  --accent-soft: rgba(243, 119, 38, 0.18);
+  --scan: rgba(255, 154, 92, 0.3);
+  --on-accent: #1a1a1a;
+  --accent-shadow: #a84a0e;
+  --dropped: #6f6f6f;
+  --glint: #1f1f1f;
 
-  --font-sans: 'Manrope Variable', Manrope, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  /* Jupyter's font stacks, the same as the tutors */
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --font-mono: Menlo, Consolas, 'DejaVu Sans Mono', monospace;
   --radius: 12px;
 }
 
 :root[data-theme='light'] {
   color-scheme: light;
   --bg: #ffffff;
-  --hero-bg: #eef6f6;
-  --grid-dot: rgba(15, 157, 148, 0.16);
+  --hero-bg: #f4f4f4;
+  --grid-dot: rgba(243, 119, 38, 0.18);
   --surface: #ffffff;
-  --surface-2: #f1f5f8;
-  --border: #d5dee6;
-  --ink: #1e2a38;
-  --ink-muted: #556270;
-  --teal: #0f9d94;
-  --teal-ink: #0a7b74;
-  --teal-soft: rgba(15, 157, 148, 0.13);
-  --scan: rgba(15, 157, 148, 0.28);
-  --on-teal: #ffffff;
-  --teal-shadow: #0a6b65;
-  --dropped: #9aa5b1;
+  --surface-2: #f2f2f2;
+  --border: #dcdcdc;
+  --ink: #1f1f1f;
+  --ink-muted: #5e5e5e;
+  --accent: #f37726;
+  --accent-ink: #b84e0c;
+  --accent-soft: rgba(243, 119, 38, 0.13);
+  --scan: rgba(243, 119, 38, 0.26);
+  --on-accent: #1a1a1a;
+  --accent-shadow: #b84e0c;
+  --dropped: #a0a0a0;
   --glint: #ffffff;
 }
 
@@ -67,7 +66,7 @@ body {
 }
 
 a {
-  color: var(--teal-ink);
+  color: var(--accent-ink);
 }
 
 code {
@@ -130,7 +129,7 @@ main,
 
 .logo-bracket {
   fill: none;
-  stroke: var(--teal);
+  stroke: var(--accent);
   stroke-width: 11;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -164,7 +163,7 @@ main,
 }
 
 .icon-button:hover {
-  border-color: var(--teal);
+  border-color: var(--accent);
   transform: translateY(-1px);
 }
 
@@ -198,7 +197,7 @@ main,
   position: relative;
   overflow: hidden;
   background:
-    radial-gradient(circle at 75% 30%, var(--teal-soft), transparent 55%),
+    radial-gradient(circle at 75% 30%, var(--accent-soft), transparent 55%),
     radial-gradient(var(--grid-dot) 1.2px, transparent 1.6px) 0 0 / 18px 18px,
     var(--hero-bg);
 }
@@ -219,15 +218,15 @@ main,
 
 .hero::before {
   box-shadow:
-    8vw 60px 0 var(--teal), 22vw 140px 0 var(--teal-ink), 41vw 46px 0 var(--teal),
-    58vw 380px 0 var(--teal-ink), 88vw 90px 0 var(--teal), 94vw 330px 0 var(--teal-ink);
+    8vw 60px 0 var(--accent), 22vw 140px 0 var(--accent-ink), 41vw 46px 0 var(--accent),
+    58vw 380px 0 var(--accent-ink), 88vw 90px 0 var(--accent), 94vw 330px 0 var(--accent-ink);
   opacity: 0;
 }
 
 .hero::after {
   box-shadow:
-    4vw 300px 0 var(--teal-ink), 33vw 420px 0 var(--teal), 50vw 120px 0 var(--teal-ink),
-    70vw 40px 0 var(--teal), 80vw 460px 0 var(--teal-ink);
+    4vw 300px 0 var(--accent-ink), 33vw 420px 0 var(--accent), 50vw 120px 0 var(--accent-ink),
+    70vw 40px 0 var(--accent), 80vw 460px 0 var(--accent-ink);
   opacity: 0;
   animation-delay: 1.6s;
 }
@@ -252,10 +251,10 @@ main,
   padding-bottom: 72px;
 }
 
+/* Copy on top, then the demo cell across the full width */
 @media (min-width: 980px) {
   .hero-inner {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
-    gap: 56px;
+    gap: 48px;
     padding-top: 72px;
     padding-bottom: 96px;
   }
@@ -282,14 +281,14 @@ main,
   font-size: 0.9375rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--teal-ink);
+  color: var(--accent-ink);
 }
 
 .pixel-dot {
   width: 10px;
   height: 10px;
-  background: var(--teal);
-  box-shadow: 14px 0 0 var(--teal-ink);
+  background: var(--accent);
+  box-shadow: 14px 0 0 var(--accent-ink);
   margin-right: 14px;
   animation: blink 1.2s steps(2, jump-none) infinite;
 }
@@ -334,9 +333,9 @@ main,
 }
 
 .button-primary {
-  background: var(--teal);
-  color: var(--on-teal);
-  box-shadow: 0 5px 0 var(--teal-shadow);
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: 0 5px 0 var(--accent-shadow);
 }
 
 .button-secondary {
@@ -351,7 +350,7 @@ main,
 }
 
 .button-primary:hover {
-  box-shadow: 0 7px 0 var(--teal-shadow);
+  box-shadow: 0 7px 0 var(--accent-shadow);
 }
 
 .button-secondary:hover {
@@ -360,7 +359,7 @@ main,
 
 .button:active {
   transform: translateY(4px);
-  box-shadow: 0 1px 0 var(--teal-shadow);
+  box-shadow: 0 1px 0 var(--accent-shadow);
 }
 
 .button-secondary:active {
@@ -394,7 +393,7 @@ main,
   flex: none;
   font-family: var(--font-mono);
   font-weight: 600;
-  color: var(--teal-ink);
+  color: var(--accent-ink);
 }
 
 .cell-input code {
@@ -407,12 +406,34 @@ main,
 }
 
 .tok-fn {
-  color: var(--teal-ink);
+  color: var(--accent-ink);
   font-weight: 700;
 }
 
 .tok-str {
-  color: var(--teal-ink);
+  color: var(--accent-ink);
+}
+
+/* Step header: Cel shows the state as the step plays */
+.cell-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.cell-op {
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.cell-op-target {
+  color: var(--ink-muted);
 }
 
 /* The result goes below the input with a down arrow, or beside it with a right arrow
@@ -425,7 +446,7 @@ main,
 }
 
 .cell-arrow {
-  color: var(--teal);
+  color: var(--accent);
   font-family: var(--font-sans);
   font-size: 1.75rem;
   line-height: 1;
@@ -435,8 +456,24 @@ main,
 @container (min-width: 580px) {
   .cell-tables {
     flex-direction: row;
+    align-items: flex-start;
     justify-content: center;
     gap: 20px;
+  }
+
+  /* Wide cell: the two tables share the row, left to right */
+  .cell-tables > .scan,
+  .cell-tables > .mini {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .scan .mini {
+    width: 100%;
+  }
+
+  .cell-arrow {
+    align-self: center;
   }
 
   .cell-arrow {
@@ -452,6 +489,21 @@ main,
   font-family: var(--font-mono);
   font-size: 0.8125rem;
   min-height: 2.6em;
+}
+
+/* Cel walks a gutter beside the source table, level with the row being checked */
+.scan {
+  position: relative;
+  padding-left: 2.6rem;
+}
+
+.scan-cel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 1.7rem;
+  transition: transform 560ms cubic-bezier(0.3, 0.9, 0.3, 1.15);
+  will-change: transform;
 }
 
 .mini {
@@ -492,7 +544,7 @@ main,
 .cell-tables:not(.is-animated) tr[data-keep='true'] td,
 .mini tr.kept td,
 .result tbody td {
-  background: var(--teal-soft);
+  background: var(--accent-soft);
 }
 
 .cell-tables:not(.is-animated) tr[data-keep='false'] td,
@@ -503,7 +555,7 @@ main,
 
 .mini tr.checking td {
   background: var(--scan);
-  box-shadow: inset 0 2px 0 var(--teal), inset 0 -2px 0 var(--teal);
+  box-shadow: inset 0 2px 0 var(--accent), inset 0 -2px 0 var(--accent);
 }
 
 .is-animated .result tbody tr {
@@ -571,8 +623,8 @@ main {
 
 a.tutor:hover,
 a.tutor:focus-visible {
-  border-color: var(--teal);
-  box-shadow: 0 10px 0 var(--teal-shadow);
+  border-color: var(--accent);
+  box-shadow: 0 10px 0 var(--accent-shadow);
 }
 
 .tutor-banner {
@@ -635,7 +687,7 @@ a.tutor:focus-visible {
   font-size: 0.8125rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--teal-ink);
+  color: var(--accent-ink);
 }
 
 .tutor-name {
@@ -675,9 +727,9 @@ a.tutor:focus-visible {
 }
 
 .pill-live {
-  background: var(--teal);
-  color: var(--on-teal);
-  box-shadow: 0 3px 0 var(--teal-shadow);
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: 0 3px 0 var(--accent-shadow);
 }
 
 .pill-live::after {
@@ -723,7 +775,7 @@ a.tutor:focus-visible {
   flex: none;
   width: 10px;
   height: 10px;
-  background: var(--teal);
+  background: var(--accent);
   transform: translateY(-1px);
 }
 

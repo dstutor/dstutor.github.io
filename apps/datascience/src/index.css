@@ -1,0 +1,230 @@
+/* ------------------------------------------------------------------
+   Design tokens
+   Two palettes share one component system:
+   - jupyter (default) JupyterLab's light theme: white, greys, Jupyter orange
+   - berkeley           deep blue with California gold, always dark
+   ------------------------------------------------------------------ */
+
+:root {
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --font-mono: Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+
+  --radius-control: 8px;
+  --radius-card: 12px;
+  --radius-panel: 16px;
+  --control-height: 36px;
+
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'pnum' on, 'lnum' on, 'liga' on;
+
+  /* Jupyter: light (default) */
+  color-scheme: light;
+  --bg-app: #ffffff;
+  --bg-header: #ffffff;
+  --bg-panel: #ffffff;
+  --bg-panel-muted: #f5f5f5;
+  --bg-card: #ffffff;
+  --bg-sunken: #eeeeee;
+  --bg-button: #ffffff;
+  --bg-table-header: #f5f5f5;
+  --editor-bg: #f7f7f7;
+  --panel-elevated: #ffffff;
+  --panel-muted: #f5f5f5;
+
+  --border-subtle: #e0e0e0;
+  --border-strong: #bdbdbd;
+
+  --text-primary: #212121;
+  --text-secondary: #616161;
+  --text-tertiary: #757575;
+
+  --accent: #f37726;
+  --accent-hover: #d9631a;
+  --accent-muted: rgba(243, 119, 38, 0.14);
+  --accent-soft: rgba(243, 119, 38, 0.09);
+  --accent-button-text: #ffffff;
+
+  --primary-bg: #f37726;
+  --primary-fg: #ffffff;
+  --primary-hover: #d9631a;
+
+  --button-text: var(--text-primary);
+  --danger: #d32f2f;
+  --danger-bg: rgba(211, 47, 47, 0.08);
+  --success: #388e3c;
+
+  --shadow-panel: none;
+  --shadow-card: none;
+  --outline-focus: #d9631a;
+
+  /* Step-visualization highlights */
+  --hl-col: rgba(243, 119, 38, 0.1);
+  --hl-row: rgba(56, 142, 60, 0.16);
+  --hl-remove: rgba(211, 47, 47, 0.1);
+  --hl-remove-text: #c62828;
+  --hl-cell: rgba(243, 119, 38, 0.3);
+
+  /* Notebook prompts, as JupyterLab colors them */
+  --prompt-in: #307fc1;
+  --prompt-out: #bf5b3d;
+
+  color: var(--text-primary);
+  background: var(--bg-app);
+}
+
+/* Berkeley: always dark */
+[data-theme='berkeley'] {
+  color-scheme: dark;
+  --bg-app: radial-gradient(circle at top left, rgba(0, 50, 98, 0.92) 0%, rgba(0, 20, 45, 0.96) 55%, #000a1a 100%);
+  --bg-header: rgba(0, 20, 45, 0.85);
+  --bg-panel: rgba(0, 24, 58, 0.88);
+  --bg-panel-muted: rgba(18, 56, 92, 0.74);
+  --bg-card: rgba(0, 36, 72, 0.6);
+  --bg-sunken: rgba(0, 16, 38, 0.55);
+  --bg-button: rgba(0, 41, 84, 0.75);
+  --bg-table-header: #04234a;
+  --editor-bg: #04070f;
+  --panel-elevated: rgba(0, 24, 58, 0.88);
+  --panel-muted: rgba(18, 56, 92, 0.74);
+
+  --border-subtle: rgba(59, 126, 161, 0.45);
+  --border-strong: rgba(255, 198, 70, 0.55);
+
+  --text-primary: #f7f9fd;
+  --text-secondary: #dbe4f3;
+  --text-tertiary: #bac4d4;
+
+  --accent: #ffc646;
+  --accent-hover: #ffd374;
+  --accent-muted: rgba(255, 198, 70, 0.28);
+  --accent-soft: rgba(255, 198, 70, 0.14);
+  --accent-button-text: #1d1a10;
+
+  --primary-bg: #ffc646;
+  --primary-fg: #1d1a10;
+  --primary-hover: #ffd374;
+
+  --danger: #f08a8a;
+  --danger-bg: rgba(147, 35, 35, 0.32);
+  --success: #7fd3a3;
+
+  --shadow-panel: 0 20px 40px rgba(0, 16, 38, 0.45);
+  --shadow-card: 0 12px 24px rgba(0, 14, 32, 0.55);
+  --outline-focus: rgba(253, 181, 21, 0.8);
+
+  --hl-col: rgba(255, 198, 70, 0.16);
+  --hl-row: rgba(80, 200, 120, 0.24);
+  --hl-remove: rgba(220, 82, 82, 0.28);
+  --hl-remove-text: #ffcbc1;
+  --hl-cell: rgba(255, 198, 70, 0.4);
+
+  --prompt-in: var(--text-tertiary);
+  --prompt-out: var(--accent-hover);
+}
+
+/* ------------------------------------------------------------------
+   Base
+   ------------------------------------------------------------------ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--bg-app);
+  color: var(--text-primary);
+}
+
+#root {
+  width: 100%;
+  height: 100vh;
+}
+
+::selection {
+  background: var(--accent-muted);
+}
+
+/* Controls: 36px, 8px radius, no shadows. Primary/secondary variants set below. */
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: var(--control-height);
+  padding: 0 0.85rem;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border-strong);
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+  line-height: 1;
+  background: var(--bg-button);
+  color: var(--button-text);
+  cursor: pointer;
+  transition: color 0.1s ease-in-out, background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+button:hover:not(:disabled) {
+  background: var(--bg-sunken);
+  border-color: var(--text-tertiary);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--outline-focus);
+  outline-offset: 3px;
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ------------------------------------------------------------------
+   Motion: one fade for content that arrives, one rise for popovers.
+   Disabled below for users who prefer reduced motion.
+   ------------------------------------------------------------------ */
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.fade-in {
+  animation: fade-in 200ms ease-out both;
+}
+
+.rise-in {
+  animation: rise-in 180ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

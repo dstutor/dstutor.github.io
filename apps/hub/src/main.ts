@@ -1,4 +1,6 @@
 // Hub interactions: the theme toggle and the animated where() step. No runtime loads here.
+import '@dstutor/brand/cel.css';
+import type { CelState } from '@dstutor/brand';
 
 const THEME_KEY = 'dstutor-theme';
 
@@ -28,7 +30,22 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 function setupWhereDemo(): void {
   const demo = document.getElementById('where-demo');
   const status = document.getElementById('cell-status');
-  if (!demo || !status) return;
+  const cel = document.getElementById('demo-cel');
+  if (!demo || !status || !cel) return;
+  // Cel walks down beside the rows: running while one is checked, removed when it is
+  // dropped, then back up to the header, done.
+  const setCel = (state: CelState) => cel.setAttribute('data-state', state);
+  const header = demo.querySelector<HTMLTableRowElement>('table:not(.result) thead tr');
+  const moveCelTo = (row: HTMLTableRowElement | null) => {
+    const scan = cel.parentElement;
+    if (!row || !scan) return;
+    const r = row.getBoundingClientRect();
+    const box = cel.getBoundingClientRect();
+    const y = r.top - scan.getBoundingClientRect().top + (r.height - box.height) / 2;
+    cel.style.transform = `translateY(${Math.round(y)}px)`;
+  };
+  moveCelTo(header);
+  window.addEventListener('resize', () => moveCelTo(header));
   const source = [...demo.querySelectorAll<HTMLTableRowElement>('table:not(.result) tbody tr')];
   const result = [...demo.querySelectorAll<HTMLTableRowElement>('table.result tbody tr')];
   const finalStatus = status.innerHTML;
@@ -37,6 +54,8 @@ function setupWhereDemo(): void {
     source.forEach((row) => row.classList.add(row.dataset.keep === 'true' ? 'kept' : 'dropped'));
     result.forEach((row) => row.classList.add('shown'));
     status.innerHTML = finalStatus;
+    setCel('done');
+    moveCelTo(header);
   };
 
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -51,28 +70,35 @@ function setupWhereDemo(): void {
     while (id === run) {
       source.forEach((row) => row.classList.remove('checking', 'kept', 'dropped'));
       result.forEach((row) => row.classList.remove('shown'));
+      setCel('running');
       status.textContent = 'Checking each row: is Flavor chocolate?';
-      await sleep(900);
+      await sleep(1300);
 
       for (const [i, row] of source.entries()) {
         if (id !== run) return;
         const flavor = row.cells[0].textContent;
         const keep = row.dataset.keep === 'true';
+        setCel('running');
+        moveCelTo(row);
         row.classList.add('checking');
         status.textContent = `Row ${i + 1} of ${source.length}: ${flavor} ${keep ? '= chocolate, keep' : '≠ chocolate, drop'}`;
-        await sleep(650);
+        await sleep(1000);
         row.classList.remove('checking');
         row.classList.add(keep ? 'kept' : 'dropped');
-        await sleep(150);
+        if (!keep) setCel('removed');
+        // Hold the crossed-out face long enough to read before moving on
+        await sleep(keep ? 300 : 900);
       }
 
       for (const row of result) {
         if (id !== run) return;
         row.classList.add('shown');
-        await sleep(280);
+        await sleep(420);
       }
+      setCel('done');
+      moveCelTo(header);
       status.textContent = `${result.length} of ${source.length} rows kept.`;
-      await sleep(3200);
+      await sleep(4000);
     }
   };
 

@@ -1,0 +1,1414 @@
+{
+ "error": null,
+ "trace": [
+  {
+   "args": [
+    "name",
+    [
+     "One World Trade Center",
+     "Willis Tower",
+     "Empire State Building",
+     "Salesforce Tower",
+     "Aon Center",
+     "Transamerica Pyramid",
+     "30 Hudson Yards"
+    ],
+    "material",
+    [
+     "composite",
+     "steel",
+     "steel",
+     "composite",
+     "steel",
+     "concrete",
+     "composite"
+    ],
+    "city",
+    [
+     "New York City",
+     "Chicago",
+     "New York City",
+     "San Francisco",
+     "Chicago",
+     "San Francisco",
+     "New York City"
+    ],
+    "height",
+    [
+     541,
+     442,
+     381,
+     326,
+     346,
+     260,
+     387
+    ],
+    "completed",
+    [
+     2014,
+     1974,
+     1931,
+     2018,
+     1973,
+     1972,
+     2019
+    ]
+   ],
+   "explanation": "Created table with 5 columns and 7 rows",
+   "input": {
+    "columns": [],
+    "num_columns": 0,
+    "num_rows": 0,
+    "preview": []
+   },
+   "kwargs": {},
+   "operation": "with_columns",
+   "output": {
+    "columns": [
+     "name",
+     "material",
+     "city",
+     "height",
+     "completed"
+    ],
+    "num_columns": 5,
+    "num_rows": 7,
+    "preview": [
+     [
+      "One World Trade Center",
+      "composite",
+      "New York City",
+      541,
+      2014
+     ],
+     [
+      "Willis Tower",
+      "steel",
+      "Chicago",
+      442,
+      1974
+     ],
+     [
+      "Empire State Building",
+      "steel",
+      "New York City",
+      381,
+      1931
+     ],
+     [
+      "Salesforce Tower",
+      "composite",
+      "San Francisco",
+      326,
+      2018
+     ],
+     [
+      "Aon Center",
+      "steel",
+      "Chicago",
+      346,
+      1973
+     ],
+     [
+      "Transamerica Pyramid",
+      "concrete",
+      "San Francisco",
+      260,
+      1972
+     ],
+     [
+      "30 Hudson Yards",
+      "composite",
+      "New York City",
+      387,
+      2019
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 8,
+    "stmt_start": 2,
+    "target": "skyscrapers"
+   },
+   "step_id": 1
+  },
+  {
+   "args": [
+    "to_feet",
+    "height"
+   ],
+   "explanation": "Called to_feet on the 'height' value of each of the 7 rows and collected the results in an array.",
+   "input": {
+    "columns": [
+     "name",
+     "material",
+     "city",
+     "height",
+     "completed"
+    ],
+    "num_columns": 5,
+    "num_rows": 7,
+    "preview": [
+     [
+      "One World Trade Center",
+      "composite",
+      "New York City",
+      541,
+      2014
+     ],
+     [
+      "Willis Tower",
+      "steel",
+      "Chicago",
+      442,
+      1974
+     ],
+     [
+      "Empire State Building",
+      "steel",
+      "New York City",
+      381,
+      1931
+     ],
+     [
+      "Salesforce Tower",
+      "composite",
+      "San Francisco",
+      326,
+      2018
+     ],
+     [
+      "Aon Center",
+      "steel",
+      "Chicago",
+      346,
+      1973
+     ],
+     [
+      "Transamerica Pyramid",
+      "concrete",
+      "San Francisco",
+      260,
+      1972
+     ],
+     [
+      "30 Hudson Yards",
+      "composite",
+      "New York City",
+      387,
+      2019
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "apply",
+   "output": {
+    "columns": [
+     "to_feet(height)"
+    ],
+    "kind": "array",
+    "num_columns": 1,
+    "num_rows": 7,
+    "preview": [
+     [
+      1775
+     ],
+     [
+      1450
+     ],
+     [
+      1250
+     ],
+     [
+      1070
+     ],
+     [
+      1135
+     ],
+     [
+      853
+     ],
+     [
+      1270
+     ]
+    ]
+   },
+   "site": {
+    "line": 5,
+    "stmt_end": 5,
+    "stmt_start": 5,
+    "target": "feet"
+   },
+   "step_id": 2,
+   "sub_steps": [
+    {
+     "input_highlights": {
+      "columns": [
+       "height"
+      ]
+     },
+     "message": "apply calls to_feet once per row, passing in the 'height' value. The 7 results are collected into an array, in row order.",
+     "output_label": "Result array",
+     "output_state": {
+      "columns": [
+       "to_feet(height)"
+      ],
+      "num_columns": 1,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "detail": "to_feet(541) = 1775",
+     "input_highlights": {
+      "columns": [
+       "height"
+      ],
+      "rows": [
+       0
+      ]
+     },
+     "message": "Row 0: to_feet is called with 541 and returns 1775.",
+     "output_highlights": {
+      "cells": [
+       [
+        0,
+        "to_feet(height)"
+       ]
+      ]
+     },
+     "output_label": "Result array (building)",
+     "output_state": {
+      "columns": [
+       "to_feet(height)"
+      ],
+      "num_columns": 1,
+      "num_rows": 1,
+      "preview": [
+       [
+        1775
+       ]
+      ]
+     }
+    },
+    {
+     "detail": "to_feet(442) = 1450",
+     "input_highlights": {
+      "columns": [
+       "height"
+      ],
+      "rows": [
+       1
+      ]
+     },
+     "message": "Row 1: to_feet is called with 442 and returns 1450.",
+     "output_highlights": {
+      "cells": [
+       [
+        1,
+        "to_feet(height)"
+       ]
+      ]
+     },
+     "output_label": "Result array (building)",
+     "output_state": {
+      "columns": [
+       "to_feet(height)"
+      ],
+      "num_columns": 1,
+      "num_rows": 2,
+      "preview": [
+       [
+        1775
+       ],
+       [
+        1450
+       ]
+      ]
+     }
+    },
+    {
+     "detail": "to_feet(381) = 1250",
+     "input_highlights": {
+      "columns": [
+       "height"
+      ],
+      "rows": [
+       2
+      ]
+     },
+     "message": "Row 2: to_feet is called with 381 and returns 1250.",
+     "output_highlights": {
+      "cells": [
+       [
+        2,
+        "to_feet(height)"
+       ]
+      ]
+     },
+     "output_label": "Result array (building)",
+     "output_state": {
+      "columns": [
+       "to_feet(height)"
+      ],
+      "num_columns": 1,
+      "num_rows": 3,
+      "preview": [
+       [
+        1775
+       ],
+       [
+        1450
+       ],
+       [
+        1250
+       ]
+      ]
+     }
+    },
+    {
+     "detail": "to_feet(326) = 1070",
+     "input_highlights": {
+      "columns": [
+       "height"
+      ],
+      "rows": [
+       3
+      ]
+     },
+     "message": "Row 3: to_feet is called with 326 and returns 1070.",
+     "output_highlights": {
+      "cells": [
+       [
+        3,
+        "to_feet(height)"
+       ]
+      ]
+     },
+     "output_label": "Result array (building)",
+     "output_state": {
+      "columns": [
+       "to_feet(height)"
+      ],
+      "num_columns": 1,
+      "num_rows": 4,
+      "preview": [
+       [
+        1775
+       ],
+       [
+        1450
+       ],
+       [
+        1250
+       ],
+       [
+        1070
+       ]
+      ]
+     }
+    },
+    {
+     "detail": "to_feet(346) = 1135",
+     "input_highlights": {
+      "columns": [
+       "height"
+      ],
+      "rows": [
+       4
+      ]
+     },
+     "message": "Row 4: to_feet is called with 346 and returns 1135.",
+     "output_highlights": {
+      "cells": [
+       [
+        4,
+        "to_feet(height)"
+       ]
+      ]
+     },
+     "output_label": "Result array (building)",
+     "output_state": {
+      "columns": [
+       "to_feet(height)"
+      ],
+      "num_columns": 1,
+      "num_rows": 5,
+      "preview": [
+       [
+        1775
+       ],
+       [
+        1450
+       ],
+       [
+        1250
+       ],
+       [
+        1070
+       ],
+       [
+        1135
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "height"
+      ],
+      "rows": [
+       5,
+       6
+      ]
+     },
+     "message": "The same happens for the remaining 2 rows.",
+     "output_highlights": {
+      "rows": [
+       5,
+       6
+      ]
+     },
+     "output_label": "Result array (building)",
+     "output_state": {
+      "columns": [
+       "to_feet(height)"
+      ],
+      "num_columns": 1,
+      "num_rows": 7,
+      "preview": [
+       [
+        1775
+       ],
+       [
+        1450
+       ],
+       [
+        1250
+       ],
+       [
+        1070
+       ],
+       [
+        1135
+       ],
+       [
+        853
+       ],
+       [
+        1270
+       ]
+      ]
+     }
+    },
+    {
+     "message": "The result is an array of 7 values, one per row. It is not a table: to keep it, assign it to a name or pass it to with_column.",
+     "output_label": "Result array"
+    }
+   ]
+  },
+  {
+   "args": [
+    "height (ft)",
+    [
+     1775,
+     1450,
+     1250,
+     1070,
+     1135,
+     853,
+     1270
+    ]
+   ],
+   "explanation": "Added column 'height (ft)'. Now 6 columns.",
+   "input": {
+    "columns": [
+     "name",
+     "material",
+     "city",
+     "height",
+     "completed"
+    ],
+    "num_columns": 5,
+    "num_rows": 7,
+    "preview": [
+     [
+      "One World Trade Center",
+      "composite",
+      "New York City",
+      541,
+      2014
+     ],
+     [
+      "Willis Tower",
+      "steel",
+      "Chicago",
+      442,
+      1974
+     ],
+     [
+      "Empire State Building",
+      "steel",
+      "New York City",
+      381,
+      1931
+     ],
+     [
+      "Salesforce Tower",
+      "composite",
+      "San Francisco",
+      326,
+      2018
+     ],
+     [
+      "Aon Center",
+      "steel",
+      "Chicago",
+      346,
+      1973
+     ],
+     [
+      "Transamerica Pyramid",
+      "concrete",
+      "San Francisco",
+      260,
+      1972
+     ],
+     [
+      "30 Hudson Yards",
+      "composite",
+      "New York City",
+      387,
+      2019
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "with_column",
+   "output": {
+    "columns": [
+     "name",
+     "material",
+     "city",
+     "height",
+     "completed",
+     "height (ft)"
+    ],
+    "num_columns": 6,
+    "num_rows": 7,
+    "preview": [
+     [
+      "One World Trade Center",
+      "composite",
+      "New York City",
+      541,
+      2014,
+      1775
+     ],
+     [
+      "Willis Tower",
+      "steel",
+      "Chicago",
+      442,
+      1974,
+      1450
+     ],
+     [
+      "Empire State Building",
+      "steel",
+      "New York City",
+      381,
+      1931,
+      1250
+     ],
+     [
+      "Salesforce Tower",
+      "composite",
+      "San Francisco",
+      326,
+      2018,
+      1070
+     ],
+     [
+      "Aon Center",
+      "steel",
+      "Chicago",
+      346,
+      1973,
+      1135
+     ],
+     [
+      "Transamerica Pyramid",
+      "concrete",
+      "San Francisco",
+      260,
+      1972,
+      853
+     ],
+     [
+      "30 Hudson Yards",
+      "composite",
+      "New York City",
+      387,
+      2019,
+      1270
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": null
+   },
+   "step_id": 3
+  },
+  {
+   "args": [
+    "describe",
+    "name",
+    "city"
+   ],
+   "explanation": "Called describe on the values in 'name', 'city' of each of the 7 rows and collected the results in an array.",
+   "input": {
+    "columns": [
+     "name",
+     "material",
+     "city",
+     "height",
+     "completed"
+    ],
+    "num_columns": 5,
+    "num_rows": 7,
+    "preview": [
+     [
+      "One World Trade Center",
+      "composite",
+      "New York City",
+      541,
+      2014
+     ],
+     [
+      "Willis Tower",
+      "steel",
+      "Chicago",
+      442,
+      1974
+     ],
+     [
+      "Empire State Building",
+      "steel",
+      "New York City",
+      381,
+      1931
+     ],
+     [
+      "Salesforce Tower",
+      "composite",
+      "San Francisco",
+      326,
+      2018
+     ],
+     [
+      "Aon Center",
+      "steel",
+      "Chicago",
+      346,
+      1973
+     ],
+     [
+      "Transamerica Pyramid",
+      "concrete",
+      "San Francisco",
+      260,
+      1972
+     ],
+     [
+      "30 Hudson Yards",
+      "composite",
+      "New York City",
+      387,
+      2019
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "apply",
+   "output": {
+    "columns": [
+     "describe(name, city)"
+    ],
+    "kind": "array",
+    "num_columns": 1,
+    "num_rows": 7,
+    "preview": [
+     [
+      "One World Trade Center in New York City"
+     ],
+     [
+      "Willis Tower in Chicago"
+     ],
+     [
+      "Empire State Building in New York City"
+     ],
+     [
+      "Salesforce Tower in San Francisco"
+     ],
+     [
+      "Aon Center in Chicago"
+     ],
+     [
+      "Transamerica Pyramid in San Francisco"
+     ],
+     [
+      "30 Hudson Yards in New York City"
+     ]
+    ]
+   },
+   "site": {
+    "line": 5,
+    "stmt_end": 5,
+    "stmt_start": 5,
+    "target": null
+   },
+   "step_id": 4,
+   "sub_steps": [
+    {
+     "input_highlights": {
+      "columns": [
+       "name",
+       "city"
+      ]
+     },
+     "message": "apply calls describe once per row, passing in the 'name', 'city' values. The 7 results are collected into an array, in row order.",
+     "output_label": "Result array",
+     "output_state": {
+      "columns": [
+       "describe(name, city)"
+      ],
+      "num_columns": 1,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "detail": "describe('One World Trade Center', 'New York City') = 'One World Trade Center in New York City'",
+     "input_highlights": {
+      "columns": [
+       "name",
+       "city"
+      ],
+      "rows": [
+       0
+      ]
+     },
+     "message": "Row 0: describe is called with 'One World Trade Center', 'New York City' and returns 'One World Trade Center in New York City'.",
+     "output_highlights": {
+      "cells": [
+       [
+        0,
+        "describe(name, city)"
+       ]
+      ]
+     },
+     "output_label": "Result array (building)",
+     "output_state": {
+      "columns": [
+       "describe(name, city)"
+      ],
+      "num_columns": 1,
+      "num_rows": 1,
+      "preview": [
+       [
+        "One World Trade Center in New York City"
+       ]
+      ]
+     }
+    },
+    {
+     "detail": "describe('Willis Tower', 'Chicago') = 'Willis Tower in Chicago'",
+     "input_highlights": {
+      "columns": [
+       "name",
+       "city"
+      ],
+      "rows": [
+       1
+      ]
+     },
+     "message": "Row 1: describe is called with 'Willis Tower', 'Chicago' and returns 'Willis Tower in Chicago'.",
+     "output_highlights": {
+      "cells": [
+       [
+        1,
+        "describe(name, city)"
+       ]
+      ]
+     },
+     "output_label": "Result array (building)",
+     "output_state": {
+      "columns": [
+       "describe(name, city)"
+      ],
+      "num_columns": 1,
+      "num_rows": 2,
+      "preview": [
+       [
+        "One World Trade Center in New York City"
+       ],
+       [
+        "Willis Tower in Chicago"
+       ]
+      ]
+     }
+    },
+    {
+     "detail": "describe('Empire State Building', 'New York City') = 'Empire State Building in New York City'",
+     "input_highlights": {
+      "columns": [
+       "name",
+       "city"
+      ],
+      "rows": [
+       2
+      ]
+     },
+     "message": "Row 2: describe is called with 'Empire State Building', 'New York City' and returns 'Empire State Building in New York City'.",
+     "output_highlights": {
+      "cells": [
+       [
+        2,
+        "describe(name, city)"
+       ]
+      ]
+     },
+     "output_label": "Result array (building)",
+     "output_state": {
+      "columns": [
+       "describe(name, city)"
+      ],
+      "num_columns": 1,
+      "num_rows": 3,
+      "preview": [
+       [
+        "One World Trade Center in New York City"
+       ],
+       [
+        "Willis Tower in Chicago"
+       ],
+       [
+        "Empire State Building in New York City"
+       ]
+      ]
+     }
+    },
+    {
+     "detail": "describe('Salesforce Tower', 'San Francisco') = 'Salesforce Tower in San Francisco'",
+     "input_highlights": {
+      "columns": [
+       "name",
+       "city"
+      ],
+      "rows": [
+       3
+      ]
+     },
+     "message": "Row 3: describe is called with 'Salesforce Tower', 'San Francisco' and returns 'Salesforce Tower in San Francisco'.",
+     "output_highlights": {
+      "cells": [
+       [
+        3,
+        "describe(name, city)"
+       ]
+      ]
+     },
+     "output_label": "Result array (building)",
+     "output_state": {
+      "columns": [
+       "describe(name, city)"
+      ],
+      "num_columns": 1,
+      "num_rows": 4,
+      "preview": [
+       [
+        "One World Trade Center in New York City"
+       ],
+       [
+        "Willis Tower in Chicago"
+       ],
+       [
+        "Empire State Building in New York City"
+       ],
+       [
+        "Salesforce Tower in San Francisco"
+       ]
+      ]
+     }
+    },
+    {
+     "detail": "describe('Aon Center', 'Chicago') = 'Aon Center in Chicago'",
+     "input_highlights": {
+      "columns": [
+       "name",
+       "city"
+      ],
+      "rows": [
+       4
+      ]
+     },
+     "message": "Row 4: describe is called with 'Aon Center', 'Chicago' and returns 'Aon Center in Chicago'.",
+     "output_highlights": {
+      "cells": [
+       [
+        4,
+        "describe(name, city)"
+       ]
+      ]
+     },
+     "output_label": "Result array (building)",
+     "output_state": {
+      "columns": [
+       "describe(name, city)"
+      ],
+      "num_columns": 1,
+      "num_rows": 5,
+      "preview": [
+       [
+        "One World Trade Center in New York City"
+       ],
+       [
+        "Willis Tower in Chicago"
+       ],
+       [
+        "Empire State Building in New York City"
+       ],
+       [
+        "Salesforce Tower in San Francisco"
+       ],
+       [
+        "Aon Center in Chicago"
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "name",
+       "city"
+      ],
+      "rows": [
+       5,
+       6
+      ]
+     },
+     "message": "The same happens for the remaining 2 rows.",
+     "output_highlights": {
+      "rows": [
+       5,
+       6
+      ]
+     },
+     "output_label": "Result array (building)",
+     "output_state": {
+      "columns": [
+       "describe(name, city)"
+      ],
+      "num_columns": 1,
+      "num_rows": 7,
+      "preview": [
+       [
+        "One World Trade Center in New York City"
+       ],
+       [
+        "Willis Tower in Chicago"
+       ],
+       [
+        "Empire State Building in New York City"
+       ],
+       [
+        "Salesforce Tower in San Francisco"
+       ],
+       [
+        "Aon Center in Chicago"
+       ],
+       [
+        "Transamerica Pyramid in San Francisco"
+       ],
+       [
+        "30 Hudson Yards in New York City"
+       ]
+      ]
+     }
+    },
+    {
+     "message": "The result is an array of 7 values, one per row. It is not a table: to keep it, assign it to a name or pass it to with_column.",
+     "output_label": "Result array"
+    }
+   ]
+  },
+  {
+   "args": [
+    "is_recent"
+   ],
+   "explanation": "Called is_recent on the whole row of each of the 7 rows and collected the results in an array.",
+   "input": {
+    "columns": [
+     "name",
+     "material",
+     "city",
+     "height",
+     "completed"
+    ],
+    "num_columns": 5,
+    "num_rows": 7,
+    "preview": [
+     [
+      "One World Trade Center",
+      "composite",
+      "New York City",
+      541,
+      2014
+     ],
+     [
+      "Willis Tower",
+      "steel",
+      "Chicago",
+      442,
+      1974
+     ],
+     [
+      "Empire State Building",
+      "steel",
+      "New York City",
+      381,
+      1931
+     ],
+     [
+      "Salesforce Tower",
+      "composite",
+      "San Francisco",
+      326,
+      2018
+     ],
+     [
+      "Aon Center",
+      "steel",
+      "Chicago",
+      346,
+      1973
+     ],
+     [
+      "Transamerica Pyramid",
+      "concrete",
+      "San Francisco",
+      260,
+      1972
+     ],
+     [
+      "30 Hudson Yards",
+      "composite",
+      "New York City",
+      387,
+      2019
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "apply",
+   "output": {
+    "columns": [
+     "is_recent(row)"
+    ],
+    "kind": "array",
+    "num_columns": 1,
+    "num_rows": 7,
+    "preview": [
+     [
+      true
+     ],
+     [
+      false
+     ],
+     [
+      false
+     ],
+     [
+      true
+     ],
+     [
+      false
+     ],
+     [
+      false
+     ],
+     [
+      true
+     ]
+    ]
+   },
+   "site": {
+    "line": 5,
+    "stmt_end": 5,
+    "stmt_start": 5,
+    "target": null
+   },
+   "step_id": 5,
+   "sub_steps": [
+    {
+     "input_highlights": {
+      "columns": []
+     },
+     "message": "apply calls is_recent once per row, passing in the whole row. The 7 results are collected into an array, in row order.",
+     "output_label": "Result array",
+     "output_state": {
+      "columns": [
+       "is_recent(row)"
+      ],
+      "num_columns": 1,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "detail": "is_recent(row 0) = True",
+     "input_highlights": {
+      "columns": [],
+      "rows": [
+       0
+      ]
+     },
+     "message": "Row 0: is_recent is called with the whole row (name='One World Trade Center', material='composite', city='New York City', height=541, completed=2014) and returns True.",
+     "output_highlights": {
+      "cells": [
+       [
+        0,
+        "is_recent(row)"
+       ]
+      ]
+     },
+     "output_label": "Result array (building)",
+     "output_state": {
+      "columns": [
+       "is_recent(row)"
+      ],
+      "num_columns": 1,
+      "num_rows": 1,
+      "preview": [
+       [
+        true
+       ]
+      ]
+     }
+    },
+    {
+     "detail": "is_recent(row 1) = False",
+     "input_highlights": {
+      "columns": [],
+      "rows": [
+       1
+      ]
+     },
+     "message": "Row 1: is_recent is called with the whole row (name='Willis Tower', material='steel', city='Chicago', height=442, completed=1974) and returns False.",
+     "output_highlights": {
+      "cells": [
+       [
+        1,
+        "is_recent(row)"
+       ]
+      ]
+     },
+     "output_label": "Result array (building)",
+     "output_state": {
+      "columns": [
+       "is_recent(row)"
+      ],
+      "num_columns": 1,
+      "num_rows": 2,
+      "preview": [
+       [
+        true
+       ],
+       [
+        false
+       ]
+      ]
+     }
+    },
+    {
+     "detail": "is_recent(row 2) = False",
+     "input_highlights": {
+      "columns": [],
+      "rows": [
+       2
+      ]
+     },
+     "message": "Row 2: is_recent is called with the whole row (name='Empire State Building', material='steel', city='New York City', height=381, completed=1931) and returns False.",
+     "output_highlights": {
+      "cells": [
+       [
+        2,
+        "is_recent(row)"
+       ]
+      ]
+     },
+     "output_label": "Result array (building)",
+     "output_state": {
+      "columns": [
+       "is_recent(row)"
+      ],
+      "num_columns": 1,
+      "num_rows": 3,
+      "preview": [
+       [
+        true
+       ],
+       [
+        false
+       ],
+       [
+        false
+       ]
+      ]
+     }
+    },
+    {
+     "detail": "is_recent(row 3) = True",
+     "input_highlights": {
+      "columns": [],
+      "rows": [
+       3
+      ]
+     },
+     "message": "Row 3: is_recent is called with the whole row (name='Salesforce Tower', material='composite', city='San Francisco', height=326, completed=2018) and returns True.",
+     "output_highlights": {
+      "cells": [
+       [
+        3,
+        "is_recent(row)"
+       ]
+      ]
+     },
+     "output_label": "Result array (building)",
+     "output_state": {
+      "columns": [
+       "is_recent(row)"
+      ],
+      "num_columns": 1,
+      "num_rows": 4,
+      "preview": [
+       [
+        true
+       ],
+       [
+        false
+       ],
+       [
+        false
+       ],
+       [
+        true
+       ]
+      ]
+     }
+    },
+    {
+     "detail": "is_recent(row 4) = False",
+     "input_highlights": {
+      "columns": [],
+      "rows": [
+       4
+      ]
+     },
+     "message": "Row 4: is_recent is called with the whole row (name='Aon Center', material='steel', city='Chicago', height=346, completed=1973) and returns False.",
+     "output_highlights": {
+      "cells": [
+       [
+        4,
+        "is_recent(row)"
+       ]
+      ]
+     },
+     "output_label": "Result array (building)",
+     "output_state": {
+      "columns": [
+       "is_recent(row)"
+      ],
+      "num_columns": 1,
+      "num_rows": 5,
+      "preview": [
+       [
+        true
+       ],
+       [
+        false
+       ],
+       [
+        false
+       ],
+       [
+        true
+       ],
+       [
+        false
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [],
+      "rows": [
+       5,
+       6
+      ]
+     },
+     "message": "The same happens for the remaining 2 rows.",
+     "output_highlights": {
+      "rows": [
+       5,
+       6
+      ]
+     },
+     "output_label": "Result array (building)",
+     "output_state": {
+      "columns": [
+       "is_recent(row)"
+      ],
+      "num_columns": 1,
+      "num_rows": 7,
+      "preview": [
+       [
+        true
+       ],
+       [
+        false
+       ],
+       [
+        false
+       ],
+       [
+        true
+       ],
+       [
+        false
+       ],
+       [
+        false
+       ],
+       [
+        true
+       ]
+      ]
+     }
+    },
+    {
+     "message": "The result is an array of 7 values, one per row. It is not a table: to keep it, assign it to a name or pass it to with_column.",
+     "output_label": "Result array"
+    }
+   ]
+  }
+ ]
+}

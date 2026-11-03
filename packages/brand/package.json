@@ -1,0 +1,13 @@
+{
+  "name": "@dstutor/brand",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./cel.css": "./src/cel.css"
+  },
+  "scripts": {
+    "typecheck": "tsc -p ."
+  }
+}

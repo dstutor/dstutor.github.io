@@ -1,0 +1,141 @@
+{
+ "error": null,
+ "trace": [
+  {
+   "args": [
+    "Birth Weight",
+    [
+     120,
+     113,
+     128,
+     108,
+     136,
+     138,
+     132,
+     120,
+     143,
+     140,
+     144,
+     141
+    ],
+    "Gestational Days",
+    [
+     284,
+     282,
+     279,
+     282,
+     286,
+     244,
+     245,
+     289,
+     299,
+     351,
+     282,
+     279
+    ],
+    "Maternal Smoker",
+    [
+     false,
+     false,
+     true,
+     true,
+     false,
+     false,
+     false,
+     false,
+     false,
+     true,
+     false,
+     false
+    ]
+   ],
+   "explanation": "Created table with 3 columns and 12 rows",
+   "input": {
+    "columns": [],
+    "num_columns": 0,
+    "num_rows": 0,
+    "preview": []
+   },
+   "kwargs": {},
+   "operation": "with_columns",
+   "output": {
+    "columns": [
+     "Birth Weight",
+     "Gestational Days",
+     "Maternal Smoker"
+    ],
+    "num_columns": 3,
+    "num_rows": 12,
+    "preview": [
+     [
+      120,
+      284,
+      false
+     ],
+     [
+      113,
+      282,
+      false
+     ],
+     [
+      128,
+      279,
+      true
+     ],
+     [
+      108,
+      282,
+      true
+     ],
+     [
+      136,
+      286,
+      false
+     ],
+     [
+      138,
+      244,
+      false
+     ],
+     [
+      132,
+      245,
+      false
+     ],
+     [
+      120,
+      289,
+      false
+     ],
+     [
+      143,
+      299,
+      false
+     ],
+     [
+      140,
+      351,
+      true
+     ],
+     [
+      144,
+      282,
+      false
+     ],
+     [
+      141,
+      279,
+      false
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 6,
+    "stmt_start": 2,
+    "target": "baby"
+   },
+   "step_id": 1
+  }
+ ]
+}

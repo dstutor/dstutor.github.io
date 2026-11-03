@@ -1,0 +1,408 @@
+{
+ "error": null,
+ "trace": [
+  {
+   "args": [
+    "PLAYER",
+    [
+     "Stephen Curry",
+     "Klay Thompson",
+     "Draymond Green",
+     "LeBron James",
+     "Anthony Davis",
+     "Kawhi Leonard",
+     "Damian Lillard"
+    ],
+    "POSITION",
+    [
+     "PG",
+     "SG",
+     "PF",
+     "SF",
+     "PF",
+     "SF",
+     "PG"
+    ],
+    "TEAM",
+    [
+     "Golden State Warriors",
+     "Golden State Warriors",
+     "Golden State Warriors",
+     "Los Angeles Lakers",
+     "Los Angeles Lakers",
+     "Los Angeles Clippers",
+     "Portland Trail Blazers"
+    ],
+    "SALARY",
+    [
+     40.2,
+     32.7,
+     18.5,
+     37.4,
+     27.1,
+     32.7,
+     29.8
+    ]
+   ],
+   "explanation": "Created table with 4 columns and 7 rows",
+   "input": {
+    "columns": [],
+    "num_columns": 0,
+    "num_rows": 0,
+    "preview": []
+   },
+   "kwargs": {},
+   "operation": "with_columns",
+   "output": {
+    "columns": [
+     "PLAYER",
+     "POSITION",
+     "TEAM",
+     "SALARY"
+    ],
+    "num_columns": 4,
+    "num_rows": 7,
+    "preview": [
+     [
+      "Stephen Curry",
+      "PG",
+      "Golden State Warriors",
+      40.2
+     ],
+     [
+      "Klay Thompson",
+      "SG",
+      "Golden State Warriors",
+      32.7
+     ],
+     [
+      "Draymond Green",
+      "PF",
+      "Golden State Warriors",
+      18.5
+     ],
+     [
+      "LeBron James",
+      "SF",
+      "Los Angeles Lakers",
+      37.4
+     ],
+     [
+      "Anthony Davis",
+      "PF",
+      "Los Angeles Lakers",
+      27.1
+     ],
+     [
+      "Kawhi Leonard",
+      "SF",
+      "Los Angeles Clippers",
+      32.7
+     ],
+     [
+      "Damian Lillard",
+      "PG",
+      "Portland Trail Blazers",
+      29.8
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 7,
+    "stmt_start": 2,
+    "target": "nba"
+   },
+   "step_id": 1
+  },
+  {
+   "args": [
+    "TEAM",
+    "Golden State Warriors"
+   ],
+   "explanation": "Filtered rows. Kept 3, removed 4.",
+   "input": {
+    "columns": [
+     "PLAYER",
+     "POSITION",
+     "TEAM",
+     "SALARY"
+    ],
+    "num_columns": 4,
+    "num_rows": 7,
+    "preview": [
+     [
+      "Stephen Curry",
+      "PG",
+      "Golden State Warriors",
+      40.2
+     ],
+     [
+      "Klay Thompson",
+      "SG",
+      "Golden State Warriors",
+      32.7
+     ],
+     [
+      "Draymond Green",
+      "PF",
+      "Golden State Warriors",
+      18.5
+     ],
+     [
+      "LeBron James",
+      "SF",
+      "Los Angeles Lakers",
+      37.4
+     ],
+     [
+      "Anthony Davis",
+      "PF",
+      "Los Angeles Lakers",
+      27.1
+     ],
+     [
+      "Kawhi Leonard",
+      "SF",
+      "Los Angeles Clippers",
+      32.7
+     ],
+     [
+      "Damian Lillard",
+      "PG",
+      "Portland Trail Blazers",
+      29.8
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "where",
+   "output": {
+    "columns": [
+     "PLAYER",
+     "POSITION",
+     "TEAM",
+     "SALARY"
+    ],
+    "num_columns": 4,
+    "num_rows": 3,
+    "preview": [
+     [
+      "Stephen Curry",
+      "PG",
+      "Golden State Warriors",
+      40.2
+     ],
+     [
+      "Klay Thompson",
+      "SG",
+      "Golden State Warriors",
+      32.7
+     ],
+     [
+      "Draymond Green",
+      "PF",
+      "Golden State Warriors",
+      18.5
+     ]
+    ]
+   },
+   "site": {
+    "line": 3,
+    "stmt_end": 5,
+    "stmt_start": 2,
+    "target": "warriors"
+   },
+   "step_id": 2,
+   "sub_steps": [
+    {
+     "detail": "Keep rows where value == 'Golden State Warriors'",
+     "input_highlights": {
+      "columns": [
+       "TEAM"
+      ]
+     },
+     "message": "where checks every row's 'TEAM' value against the condition.",
+     "output_state": {
+      "columns": [
+       "PLAYER",
+       "POSITION",
+       "TEAM",
+       "SALARY"
+      ],
+      "num_columns": 4,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "TEAM"
+      ],
+      "rows": [
+       0,
+       1,
+       2
+      ],
+      "rows_removed": [
+       3,
+       4,
+       5,
+       6
+      ]
+     },
+     "message": "Keep the 3 rows that satisfy the condition; the other 4 (struck through) are removed."
+    }
+   ]
+  },
+  {
+   "args": [
+    "PLAYER",
+    "SALARY"
+   ],
+   "explanation": "Selected 2 of 4 columns: PLAYER, SALARY",
+   "input": {
+    "columns": [
+     "PLAYER",
+     "POSITION",
+     "TEAM",
+     "SALARY"
+    ],
+    "num_columns": 4,
+    "num_rows": 3,
+    "preview": [
+     [
+      "Stephen Curry",
+      "PG",
+      "Golden State Warriors",
+      40.2
+     ],
+     [
+      "Klay Thompson",
+      "SG",
+      "Golden State Warriors",
+      32.7
+     ],
+     [
+      "Draymond Green",
+      "PF",
+      "Golden State Warriors",
+      18.5
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "select",
+   "output": {
+    "columns": [
+     "PLAYER",
+     "SALARY"
+    ],
+    "num_columns": 2,
+    "num_rows": 3,
+    "preview": [
+     [
+      "Stephen Curry",
+      40.2
+     ],
+     [
+      "Klay Thompson",
+      32.7
+     ],
+     [
+      "Draymond Green",
+      18.5
+     ]
+    ]
+   },
+   "site": {
+    "line": 4,
+    "stmt_end": 5,
+    "stmt_start": 2,
+    "target": "warriors"
+   },
+   "step_id": 3
+  },
+  {
+   "args": [
+    "SALARY"
+   ],
+   "explanation": "Sorted by 'SALARY'.",
+   "input": {
+    "columns": [
+     "PLAYER",
+     "SALARY"
+    ],
+    "num_columns": 2,
+    "num_rows": 3,
+    "preview": [
+     [
+      "Stephen Curry",
+      40.2
+     ],
+     [
+      "Klay Thompson",
+      32.7
+     ],
+     [
+      "Draymond Green",
+      18.5
+     ]
+    ]
+   },
+   "kwargs": {
+    "descending": true
+   },
+   "operation": "sort",
+   "output": {
+    "columns": [
+     "PLAYER",
+     "SALARY"
+    ],
+    "num_columns": 2,
+    "num_rows": 3,
+    "preview": [
+     [
+      "Stephen Curry",
+      40.2
+     ],
+     [
+      "Klay Thompson",
+      32.7
+     ],
+     [
+      "Draymond Green",
+      18.5
+     ]
+    ]
+   },
+   "site": {
+    "line": 5,
+    "stmt_end": 5,
+    "stmt_start": 2,
+    "target": "warriors"
+   },
+   "step_id": 4,
+   "sub_steps": [
+    {
+     "input_highlights": {
+      "columns": [
+       "SALARY"
+      ]
+     },
+     "message": "sort reorders all rows by their 'SALARY' value, largest first. No rows are added or removed."
+    },
+    {
+     "detail": "New order of original row positions (starting at 0): [0, 1, 2]",
+     "message": "Rows keep all their values. Only their order changes.",
+     "output_highlights": {
+      "columns": [
+       "SALARY"
+      ]
+     }
+    }
+   ]
+  }
+ ]
+}

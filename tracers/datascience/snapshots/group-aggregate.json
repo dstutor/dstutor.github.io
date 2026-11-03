@@ -1,0 +1,358 @@
+{
+ "error": null,
+ "trace": [
+  {
+   "args": [
+    "Flavor",
+    [
+     "strawberry",
+     "chocolate",
+     "vanilla",
+     "chocolate",
+     "strawberry",
+     "mint"
+    ],
+    "Color",
+    [
+     "pink",
+     "light brown",
+     "white",
+     "dark brown",
+     "pink",
+     "green"
+    ],
+    "Price",
+    [
+     3.55,
+     4.75,
+     4.25,
+     5.25,
+     3.95,
+     4.5
+    ]
+   ],
+   "explanation": "Created table with 3 columns and 6 rows",
+   "input": {
+    "columns": [],
+    "num_columns": 0,
+    "num_rows": 0,
+    "preview": []
+   },
+   "kwargs": {},
+   "operation": "with_columns",
+   "output": {
+    "columns": [
+     "Flavor",
+     "Color",
+     "Price"
+    ],
+    "num_columns": 3,
+    "num_rows": 6,
+    "preview": [
+     [
+      "strawberry",
+      "pink",
+      3.55
+     ],
+     [
+      "chocolate",
+      "light brown",
+      4.75
+     ],
+     [
+      "vanilla",
+      "white",
+      4.25
+     ],
+     [
+      "chocolate",
+      "dark brown",
+      5.25
+     ],
+     [
+      "strawberry",
+      "pink",
+      3.95
+     ],
+     [
+      "mint",
+      "green",
+      4.5
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 6,
+    "stmt_start": 2,
+    "target": "cones"
+   },
+   "step_id": 1
+  },
+  {
+   "args": [
+    "Flavor"
+   ],
+   "explanation": "Grouped by 'Flavor'. Created 4 groups.",
+   "input": {
+    "columns": [
+     "Flavor",
+     "Color",
+     "Price"
+    ],
+    "num_columns": 3,
+    "num_rows": 6,
+    "preview": [
+     [
+      "strawberry",
+      "pink",
+      3.55
+     ],
+     [
+      "chocolate",
+      "light brown",
+      4.75
+     ],
+     [
+      "vanilla",
+      "white",
+      4.25
+     ],
+     [
+      "chocolate",
+      "dark brown",
+      5.25
+     ],
+     [
+      "strawberry",
+      "pink",
+      3.95
+     ],
+     [
+      "mint",
+      "green",
+      4.5
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "group",
+   "output": {
+    "columns": [
+     "Flavor",
+     "count"
+    ],
+    "num_columns": 2,
+    "num_rows": 4,
+    "preview": [
+     [
+      "chocolate",
+      2
+     ],
+     [
+      "mint",
+      1
+     ],
+     [
+      "strawberry",
+      2
+     ],
+     [
+      "vanilla",
+      1
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": null
+   },
+   "step_id": 2,
+   "sub_steps": [
+    {
+     "input_highlights": {
+      "columns": [
+       "Flavor"
+      ]
+     },
+     "message": "group('Flavor') collapses rows that share the same value in 'Flavor'. With no function given, it counts the rows in each group.",
+     "output_state": {
+      "columns": [
+       "Flavor",
+       "count"
+      ],
+      "num_columns": 2,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "detail": "Unique values (sorted): ['chocolate', 'mint', 'strawberry', 'vanilla']",
+     "input_highlights": {
+      "columns": [
+       "Flavor"
+      ]
+     },
+     "message": "Find the unique values in 'Flavor'. Each one becomes exactly one row of the result.",
+     "output_state": {
+      "columns": [
+       "Flavor",
+       "count"
+      ],
+      "num_columns": 2,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Flavor"
+      ],
+      "rows": [
+       1,
+       3
+      ]
+     },
+     "message": "'chocolate': 2 matching rows \u2192 count = 2.",
+     "output_highlights": {
+      "rows": [
+       0
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Flavor",
+       "count"
+      ],
+      "num_columns": 2,
+      "num_rows": 1,
+      "preview": [
+       [
+        "chocolate",
+        2
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Flavor"
+      ],
+      "rows": [
+       5
+      ]
+     },
+     "message": "'mint': 1 matching row \u2192 count = 1.",
+     "output_highlights": {
+      "rows": [
+       1
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Flavor",
+       "count"
+      ],
+      "num_columns": 2,
+      "num_rows": 2,
+      "preview": [
+       [
+        "chocolate",
+        2
+       ],
+       [
+        "mint",
+        1
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Flavor"
+      ],
+      "rows": [
+       0,
+       4
+      ]
+     },
+     "message": "'strawberry': 2 matching rows \u2192 count = 2.",
+     "output_highlights": {
+      "rows": [
+       2
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Flavor",
+       "count"
+      ],
+      "num_columns": 2,
+      "num_rows": 3,
+      "preview": [
+       [
+        "chocolate",
+        2
+       ],
+       [
+        "mint",
+        1
+       ],
+       [
+        "strawberry",
+        2
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Flavor"
+      ],
+      "rows": [
+       2
+      ]
+     },
+     "message": "'vanilla': 1 matching row \u2192 count = 1.",
+     "output_highlights": {
+      "rows": [
+       3
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Flavor",
+       "count"
+      ],
+      "num_columns": 2,
+      "num_rows": 4,
+      "preview": [
+       [
+        "chocolate",
+        2
+       ],
+       [
+        "mint",
+        1
+       ],
+       [
+        "strawberry",
+        2
+       ],
+       [
+        "vanilla",
+        1
+       ]
+      ]
+     }
+    }
+   ]
+  }
+ ]
+}

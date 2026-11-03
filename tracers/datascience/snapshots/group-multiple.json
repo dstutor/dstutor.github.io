@@ -1,0 +1,931 @@
+{
+ "error": null,
+ "trace": [
+  {
+   "args": [
+    "PLAYER",
+    [
+     "Stephen Curry",
+     "Klay Thompson",
+     "Draymond Green",
+     "LeBron James",
+     "Anthony Davis",
+     "Kawhi Leonard",
+     "Damian Lillard"
+    ],
+    "POSITION",
+    [
+     "PG",
+     "SG",
+     "PF",
+     "SF",
+     "PF",
+     "SF",
+     "PG"
+    ],
+    "TEAM",
+    [
+     "Golden State Warriors",
+     "Golden State Warriors",
+     "Golden State Warriors",
+     "Los Angeles Lakers",
+     "Los Angeles Lakers",
+     "Los Angeles Clippers",
+     "Portland Trail Blazers"
+    ],
+    "SALARY",
+    [
+     40.2,
+     32.7,
+     18.5,
+     37.4,
+     27.1,
+     32.7,
+     29.8
+    ]
+   ],
+   "explanation": "Created table with 4 columns and 7 rows",
+   "input": {
+    "columns": [],
+    "num_columns": 0,
+    "num_rows": 0,
+    "preview": []
+   },
+   "kwargs": {},
+   "operation": "with_columns",
+   "output": {
+    "columns": [
+     "PLAYER",
+     "POSITION",
+     "TEAM",
+     "SALARY"
+    ],
+    "num_columns": 4,
+    "num_rows": 7,
+    "preview": [
+     [
+      "Stephen Curry",
+      "PG",
+      "Golden State Warriors",
+      40.2
+     ],
+     [
+      "Klay Thompson",
+      "SG",
+      "Golden State Warriors",
+      32.7
+     ],
+     [
+      "Draymond Green",
+      "PF",
+      "Golden State Warriors",
+      18.5
+     ],
+     [
+      "LeBron James",
+      "SF",
+      "Los Angeles Lakers",
+      37.4
+     ],
+     [
+      "Anthony Davis",
+      "PF",
+      "Los Angeles Lakers",
+      27.1
+     ],
+     [
+      "Kawhi Leonard",
+      "SF",
+      "Los Angeles Clippers",
+      32.7
+     ],
+     [
+      "Damian Lillard",
+      "PG",
+      "Portland Trail Blazers",
+      29.8
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 7,
+    "stmt_start": 2,
+    "target": "nba"
+   },
+   "step_id": 1
+  },
+  {
+   "args": [
+    "TEAM",
+    "SALARY"
+   ],
+   "explanation": "Selected 2 of 4 columns: TEAM, SALARY",
+   "input": {
+    "columns": [
+     "PLAYER",
+     "POSITION",
+     "TEAM",
+     "SALARY"
+    ],
+    "num_columns": 4,
+    "num_rows": 7,
+    "preview": [
+     [
+      "Stephen Curry",
+      "PG",
+      "Golden State Warriors",
+      40.2
+     ],
+     [
+      "Klay Thompson",
+      "SG",
+      "Golden State Warriors",
+      32.7
+     ],
+     [
+      "Draymond Green",
+      "PF",
+      "Golden State Warriors",
+      18.5
+     ],
+     [
+      "LeBron James",
+      "SF",
+      "Los Angeles Lakers",
+      37.4
+     ],
+     [
+      "Anthony Davis",
+      "PF",
+      "Los Angeles Lakers",
+      27.1
+     ],
+     [
+      "Kawhi Leonard",
+      "SF",
+      "Los Angeles Clippers",
+      32.7
+     ],
+     [
+      "Damian Lillard",
+      "PG",
+      "Portland Trail Blazers",
+      29.8
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "select",
+   "output": {
+    "columns": [
+     "TEAM",
+     "SALARY"
+    ],
+    "num_columns": 2,
+    "num_rows": 7,
+    "preview": [
+     [
+      "Golden State Warriors",
+      40.2
+     ],
+     [
+      "Golden State Warriors",
+      32.7
+     ],
+     [
+      "Golden State Warriors",
+      18.5
+     ],
+     [
+      "Los Angeles Lakers",
+      37.4
+     ],
+     [
+      "Los Angeles Lakers",
+      27.1
+     ],
+     [
+      "Los Angeles Clippers",
+      32.7
+     ],
+     [
+      "Portland Trail Blazers",
+      29.8
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": null
+   },
+   "step_id": 2
+  },
+  {
+   "args": [
+    "TEAM",
+    "average"
+   ],
+   "explanation": "Grouped by 'TEAM'. Created 4 groups.",
+   "input": {
+    "columns": [
+     "TEAM",
+     "SALARY"
+    ],
+    "num_columns": 2,
+    "num_rows": 7,
+    "preview": [
+     [
+      "Golden State Warriors",
+      40.2
+     ],
+     [
+      "Golden State Warriors",
+      32.7
+     ],
+     [
+      "Golden State Warriors",
+      18.5
+     ],
+     [
+      "Los Angeles Lakers",
+      37.4
+     ],
+     [
+      "Los Angeles Lakers",
+      27.1
+     ],
+     [
+      "Los Angeles Clippers",
+      32.7
+     ],
+     [
+      "Portland Trail Blazers",
+      29.8
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "group",
+   "output": {
+    "columns": [
+     "TEAM",
+     "SALARY average"
+    ],
+    "num_columns": 2,
+    "num_rows": 4,
+    "preview": [
+     [
+      "Golden State Warriors",
+      30.46666666666667
+     ],
+     [
+      "Los Angeles Clippers",
+      32.7
+     ],
+     [
+      "Los Angeles Lakers",
+      32.25
+     ],
+     [
+      "Portland Trail Blazers",
+      29.8
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": null
+   },
+   "step_id": 3,
+   "sub_steps": [
+    {
+     "input_highlights": {
+      "columns": [
+       "TEAM"
+      ]
+     },
+     "message": "group('TEAM', average) collapses rows that share the same value in 'TEAM', then applies average to the other columns. Each result column is named after its source column and the function.",
+     "output_state": {
+      "columns": [
+       "TEAM",
+       "SALARY average"
+      ],
+      "num_columns": 2,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "detail": "Unique values (sorted): ['Golden State Warriors', 'Los Angeles Clippers', 'Los Angeles Lakers', 'Portland Trail Blazers']",
+     "input_highlights": {
+      "columns": [
+       "TEAM"
+      ]
+     },
+     "message": "Find the unique values in 'TEAM'. Each one becomes exactly one row of the result.",
+     "output_state": {
+      "columns": [
+       "TEAM",
+       "SALARY average"
+      ],
+      "num_columns": 2,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "TEAM"
+      ],
+      "rows": [
+       0,
+       1,
+       2
+      ]
+     },
+     "message": "'Golden State Warriors': collect the values from each matching row into an array, one array per column.",
+     "output_highlights": {
+      "rows": [
+       0
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "TEAM",
+       "SALARY average"
+      ],
+      "num_columns": 2,
+      "num_rows": 1,
+      "preview": [
+       [
+        "Golden State Warriors",
+        [
+         40.2,
+         32.7,
+         18.5
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "TEAM"
+      ],
+      "rows": [
+       5
+      ]
+     },
+     "message": "'Los Angeles Clippers': collect the values from each matching row into an array, one array per column.",
+     "output_highlights": {
+      "rows": [
+       1
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "TEAM",
+       "SALARY average"
+      ],
+      "num_columns": 2,
+      "num_rows": 2,
+      "preview": [
+       [
+        "Golden State Warriors",
+        [
+         40.2,
+         32.7,
+         18.5
+        ]
+       ],
+       [
+        "Los Angeles Clippers",
+        [
+         32.7
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "TEAM"
+      ],
+      "rows": [
+       3,
+       4
+      ]
+     },
+     "message": "'Los Angeles Lakers': collect the values from each matching row into an array, one array per column.",
+     "output_highlights": {
+      "rows": [
+       2
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "TEAM",
+       "SALARY average"
+      ],
+      "num_columns": 2,
+      "num_rows": 3,
+      "preview": [
+       [
+        "Golden State Warriors",
+        [
+         40.2,
+         32.7,
+         18.5
+        ]
+       ],
+       [
+        "Los Angeles Clippers",
+        [
+         32.7
+        ]
+       ],
+       [
+        "Los Angeles Lakers",
+        [
+         37.4,
+         27.1
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "TEAM"
+      ],
+      "rows": [
+       6
+      ]
+     },
+     "message": "'Portland Trail Blazers': collect the values from each matching row into an array, one array per column.",
+     "output_highlights": {
+      "rows": [
+       3
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "TEAM",
+       "SALARY average"
+      ],
+      "num_columns": 2,
+      "num_rows": 4,
+      "preview": [
+       [
+        "Golden State Warriors",
+        [
+         40.2,
+         32.7,
+         18.5
+        ]
+       ],
+       [
+        "Los Angeles Clippers",
+        [
+         32.7
+        ]
+       ],
+       [
+        "Los Angeles Lakers",
+        [
+         37.4,
+         27.1
+        ]
+       ],
+       [
+        "Portland Trail Blazers",
+        [
+         29.8
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "detail": "average([40.2, 32.7, 18.5]) = 30.4667",
+     "message": "Finally, apply average to each array. Every array collapses to a single value."
+    }
+   ]
+  },
+  {
+   "args": [
+    "TEAM",
+    "SALARY"
+   ],
+   "explanation": "Selected 2 of 4 columns: TEAM, SALARY",
+   "input": {
+    "columns": [
+     "PLAYER",
+     "POSITION",
+     "TEAM",
+     "SALARY"
+    ],
+    "num_columns": 4,
+    "num_rows": 7,
+    "preview": [
+     [
+      "Stephen Curry",
+      "PG",
+      "Golden State Warriors",
+      40.2
+     ],
+     [
+      "Klay Thompson",
+      "SG",
+      "Golden State Warriors",
+      32.7
+     ],
+     [
+      "Draymond Green",
+      "PF",
+      "Golden State Warriors",
+      18.5
+     ],
+     [
+      "LeBron James",
+      "SF",
+      "Los Angeles Lakers",
+      37.4
+     ],
+     [
+      "Anthony Davis",
+      "PF",
+      "Los Angeles Lakers",
+      27.1
+     ],
+     [
+      "Kawhi Leonard",
+      "SF",
+      "Los Angeles Clippers",
+      32.7
+     ],
+     [
+      "Damian Lillard",
+      "PG",
+      "Portland Trail Blazers",
+      29.8
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "select",
+   "output": {
+    "columns": [
+     "TEAM",
+     "SALARY"
+    ],
+    "num_columns": 2,
+    "num_rows": 7,
+    "preview": [
+     [
+      "Golden State Warriors",
+      40.2
+     ],
+     [
+      "Golden State Warriors",
+      32.7
+     ],
+     [
+      "Golden State Warriors",
+      18.5
+     ],
+     [
+      "Los Angeles Lakers",
+      37.4
+     ],
+     [
+      "Los Angeles Lakers",
+      27.1
+     ],
+     [
+      "Los Angeles Clippers",
+      32.7
+     ],
+     [
+      "Portland Trail Blazers",
+      29.8
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": null
+   },
+   "step_id": 4
+  },
+  {
+   "args": [
+    "TEAM",
+    "max"
+   ],
+   "explanation": "Grouped by 'TEAM'. Created 4 groups.",
+   "input": {
+    "columns": [
+     "TEAM",
+     "SALARY"
+    ],
+    "num_columns": 2,
+    "num_rows": 7,
+    "preview": [
+     [
+      "Golden State Warriors",
+      40.2
+     ],
+     [
+      "Golden State Warriors",
+      32.7
+     ],
+     [
+      "Golden State Warriors",
+      18.5
+     ],
+     [
+      "Los Angeles Lakers",
+      37.4
+     ],
+     [
+      "Los Angeles Lakers",
+      27.1
+     ],
+     [
+      "Los Angeles Clippers",
+      32.7
+     ],
+     [
+      "Portland Trail Blazers",
+      29.8
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "group",
+   "output": {
+    "columns": [
+     "TEAM",
+     "SALARY max"
+    ],
+    "num_columns": 2,
+    "num_rows": 4,
+    "preview": [
+     [
+      "Golden State Warriors",
+      40.2
+     ],
+     [
+      "Los Angeles Clippers",
+      32.7
+     ],
+     [
+      "Los Angeles Lakers",
+      37.4
+     ],
+     [
+      "Portland Trail Blazers",
+      29.8
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": null
+   },
+   "step_id": 5,
+   "sub_steps": [
+    {
+     "input_highlights": {
+      "columns": [
+       "TEAM"
+      ]
+     },
+     "message": "group('TEAM', max) collapses rows that share the same value in 'TEAM', then applies max to the other columns. Each result column is named after its source column and the function.",
+     "output_state": {
+      "columns": [
+       "TEAM",
+       "SALARY max"
+      ],
+      "num_columns": 2,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "detail": "Unique values (sorted): ['Golden State Warriors', 'Los Angeles Clippers', 'Los Angeles Lakers', 'Portland Trail Blazers']",
+     "input_highlights": {
+      "columns": [
+       "TEAM"
+      ]
+     },
+     "message": "Find the unique values in 'TEAM'. Each one becomes exactly one row of the result.",
+     "output_state": {
+      "columns": [
+       "TEAM",
+       "SALARY max"
+      ],
+      "num_columns": 2,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "TEAM"
+      ],
+      "rows": [
+       0,
+       1,
+       2
+      ]
+     },
+     "message": "'Golden State Warriors': collect the values from each matching row into an array, one array per column.",
+     "output_highlights": {
+      "rows": [
+       0
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "TEAM",
+       "SALARY max"
+      ],
+      "num_columns": 2,
+      "num_rows": 1,
+      "preview": [
+       [
+        "Golden State Warriors",
+        [
+         40.2,
+         32.7,
+         18.5
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "TEAM"
+      ],
+      "rows": [
+       5
+      ]
+     },
+     "message": "'Los Angeles Clippers': collect the values from each matching row into an array, one array per column.",
+     "output_highlights": {
+      "rows": [
+       1
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "TEAM",
+       "SALARY max"
+      ],
+      "num_columns": 2,
+      "num_rows": 2,
+      "preview": [
+       [
+        "Golden State Warriors",
+        [
+         40.2,
+         32.7,
+         18.5
+        ]
+       ],
+       [
+        "Los Angeles Clippers",
+        [
+         32.7
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "TEAM"
+      ],
+      "rows": [
+       3,
+       4
+      ]
+     },
+     "message": "'Los Angeles Lakers': collect the values from each matching row into an array, one array per column.",
+     "output_highlights": {
+      "rows": [
+       2
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "TEAM",
+       "SALARY max"
+      ],
+      "num_columns": 2,
+      "num_rows": 3,
+      "preview": [
+       [
+        "Golden State Warriors",
+        [
+         40.2,
+         32.7,
+         18.5
+        ]
+       ],
+       [
+        "Los Angeles Clippers",
+        [
+         32.7
+        ]
+       ],
+       [
+        "Los Angeles Lakers",
+        [
+         37.4,
+         27.1
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "TEAM"
+      ],
+      "rows": [
+       6
+      ]
+     },
+     "message": "'Portland Trail Blazers': collect the values from each matching row into an array, one array per column.",
+     "output_highlights": {
+      "rows": [
+       3
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "TEAM",
+       "SALARY max"
+      ],
+      "num_columns": 2,
+      "num_rows": 4,
+      "preview": [
+       [
+        "Golden State Warriors",
+        [
+         40.2,
+         32.7,
+         18.5
+        ]
+       ],
+       [
+        "Los Angeles Clippers",
+        [
+         32.7
+        ]
+       ],
+       [
+        "Los Angeles Lakers",
+        [
+         37.4,
+         27.1
+        ]
+       ],
+       [
+        "Portland Trail Blazers",
+        [
+         29.8
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "detail": "max([40.2, 32.7, 18.5]) = 40.2",
+     "message": "Finally, apply max to each array. Every array collapses to a single value."
+    }
+   ]
+  }
+ ]
+}

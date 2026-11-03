@@ -1,0 +1,965 @@
+.app {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: var(--text-primary);
+  background: var(--bg-app);
+}
+
+/* ------------------------------------------------------------------
+   Toolbar
+   ------------------------------------------------------------------ */
+
+.header {
+  min-height: 56px;
+  padding: 0.6rem 1.25rem;
+  background: var(--bg-header);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.brand-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.brand-cel {
+  font-size: 1.6rem;
+}
+
+.brand-code {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--accent-hover);
+  background: var(--accent-soft);
+  padding: 0.15rem 0.4rem;
+  border-radius: 5px;
+}
+
+.brand-name {
+  font-family: var(--font-sans);
+  font-size: 1.35rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.current-example {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-left: 1rem;
+  border-left: 1px solid var(--border-subtle);
+}
+
+.header-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* Theme: segmented control */
+.theme-switcher {
+  display: flex;
+  padding: 3px;
+  gap: 2px;
+  border-radius: var(--radius-control);
+  background: var(--bg-sunken);
+  border: 1px solid var(--border-subtle);
+}
+
+.theme-switcher .theme-option {
+  min-height: 28px;
+  padding: 0 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-tertiary);
+}
+
+.theme-switcher .theme-option:hover:not(.active) {
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.theme-switcher .theme-option.active {
+  background: var(--bg-panel);
+  color: var(--accent-hover);
+  box-shadow: 0 0 0 1px var(--border-subtle);
+}
+
+/* Status: quiet text with a state dot */
+/* Kernel status: sits in the notebook header, like Jupyter's "Python 3 | Idle" */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status .cel {
+  font-size: 1.15rem;
+}
+
+.status.ready {
+  color: var(--text-secondary);
+}
+
+.status.error {
+  color: var(--danger);
+}
+
+/* Export dropdown */
+.export-menu {
+  position: relative;
+}
+
+.export-button .caret {
+  margin-left: -0.15rem;
+  color: var(--text-tertiary);
+}
+
+.export-menu-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  min-width: 16.5rem;
+  white-space: nowrap;
+  padding: 0.3rem;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  box-shadow: 0 8px 24px rgba(20, 20, 19, 0.12);
+}
+
+.export-menu-item {
+  width: 100%;
+  justify-content: space-between;
+  gap: 1.25rem;
+  min-height: 32px;
+  padding: 0 0.6rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font-weight: 500;
+  text-align: left;
+}
+
+.export-menu-item:hover:not(:disabled) {
+  background: var(--bg-sunken);
+  border: none;
+}
+
+.export-menu-separator {
+  height: 1px;
+  margin: 0.3rem 0.4rem;
+  background: var(--border-subtle);
+}
+
+.export-menu-hint {
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+}
+
+/* Share popover */
+.share-menu {
+  position: relative;
+}
+
+.share-button.is-copied {
+  color: var(--success);
+  border-color: var(--success);
+}
+
+.share-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 30;
+  width: 22rem;
+  max-width: calc(100vw - 2rem);
+  padding: 0.85rem 0.9rem 0.9rem;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  box-shadow: 0 8px 24px rgba(20, 20, 19, 0.12);
+  text-align: left;
+}
+
+.share-popover-title {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  margin-bottom: 0.55rem;
+}
+
+.share-url-row {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.share-url {
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+  padding: 0 0.55rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  background: var(--bg-panel-muted);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  outline: none;
+}
+
+.share-url:focus {
+  border-color: var(--outline-focus);
+}
+
+.share-copy-again {
+  min-height: 30px;
+  padding: 0 0.6rem;
+  font-size: 0.8rem;
+}
+
+.share-popover-body {
+  margin: 0.6rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--text-tertiary);
+}
+
+/* Notebook toolbar (kernel controls), like JupyterLab's */
+.notebook-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.notebook-header .status {
+  flex: 1 1 auto;
+  justify-content: flex-end;
+}
+
+.status-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notebook-toolbar button {
+  min-height: 30px;
+  padding: 0 0.6rem;
+  font-size: 0.8rem;
+  gap: 0.35rem;
+}
+
+.icon-button {
+  width: 32px;
+  padding: 0;
+  justify-content: center;
+}
+
+.icon-button .btn-icon {
+  font-size: 0.85em;
+  opacity: 1;
+}
+
+.btn-icon {
+  font-size: 0.7em;
+  letter-spacing: -0.1em;
+  opacity: 0.85;
+}
+
+.toolbar-button {
+  color: var(--text-secondary);
+}
+
+.run-button {
+  background: var(--primary-bg);
+  color: var(--primary-fg);
+  border-color: var(--primary-bg);
+  font-weight: 600;
+}
+
+.run-button:hover:not(:disabled) {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+  color: var(--primary-fg);
+}
+
+.stop-button {
+  color: var(--danger);
+}
+
+.stop-button:hover:not(:disabled) {
+  background: var(--danger-bg);
+  border-color: var(--danger);
+}
+
+.export-button,
+.share-button,
+.examples-button {
+  color: var(--text-primary);
+}
+
+/* ------------------------------------------------------------------
+   Workspace: notebook sidebar | resizer | visualization
+   ------------------------------------------------------------------ */
+
+.main-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.main-content.jupyter-style {
+  display: flex;
+  flex-direction: row;
+}
+
+.main-content.jupyter-style .notebook-panel {
+  width: var(--notebook-width, 45%);
+  min-width: 280px;
+  flex-shrink: 0;
+}
+
+.main-content.jupyter-style .trace-panel {
+  flex: 1;
+  min-width: 0;
+}
+
+.panel-resizer {
+  width: 9px;
+  margin: 0 -4px;
+  z-index: 2;
+  flex-shrink: 0;
+  cursor: col-resize;
+  background: transparent;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.panel-resizer::before {
+  content: '';
+  width: 1px;
+  height: 100%;
+  background: var(--border-subtle);
+  transition: background 0.15s ease, width 0.15s ease;
+}
+
+.panel-resizer:hover::before,
+.panel-resizer:active::before,
+.panel-resizer:focus-visible::before {
+  width: 3px;
+  background: var(--accent);
+}
+
+.panel-resizer:focus-visible {
+  outline: none;
+}
+
+.notebook-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-panel-muted);
+  overflow: hidden;
+}
+
+.notebook-cells-wrapper {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.notebook-header,
+.panel-tabs {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 44px;
+  padding: 0.4rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.notebook-header {
+  background: var(--bg-panel-muted);
+}
+
+.notebook-info {
+  display: flex;
+  align-items: stretch;
+  align-self: stretch;
+  gap: 0.75rem;
+}
+
+.notebook-name,
+.tab {
+  display: inline-flex;
+  align-items: center;
+  align-self: stretch;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--accent);
+  margin-bottom: -1px; /* sit on the header's hairline */
+}
+
+.trace-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-panel);
+  overflow: hidden;
+}
+
+.panel-tabs {
+  background: var(--bg-panel);
+}
+
+.tab {
+  cursor: default;
+}
+
+.panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+.trace-view {
+  min-height: 100%;
+}
+
+/* ------------------------------------------------------------------
+   Empty state
+   ------------------------------------------------------------------ */
+
+.empty-state {
+  max-width: 34rem;
+  margin: 3rem auto 0;
+  text-align: left;
+}
+
+.empty-state h3 {
+  font-family: var(--font-sans);
+  font-size: 2rem;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.empty-state p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  max-width: 30rem;
+}
+
+.trace-note {
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--accent);
+  background: var(--bg-panel-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.trace-note strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.trace-note code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  color: var(--text-primary);
+}
+
+.example-hint {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--bg-panel-muted);
+  overflow: hidden;
+}
+
+.example-hint strong {
+  display: block;
+  padding: 0.6rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent-hover);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.example-hint pre {
+  margin: 0;
+  padding: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+  overflow-x: auto;
+}
+
+.notebook-panel .monaco-editor,
+.notebook-panel .monaco-editor-background,
+.notebook-panel .monaco-editor .margin {
+  background-color: var(--editor-bg) !important;
+}
+
+/* ------------------------------------------------------------------
+   Phone-only panel switcher
+   ------------------------------------------------------------------ */
+
+.mobile-view-switcher {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: 0.5rem 1rem;
+  gap: 2px;
+  background: var(--bg-header);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.mobile-view-tab {
+  flex: 1;
+  gap: 0.45rem;
+  min-height: 2.4rem;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-tertiary);
+}
+
+.mobile-view-tab.active {
+  background: var(--bg-panel);
+  color: var(--accent-hover);
+  font-weight: 600;
+  box-shadow: 0 0 0 1px var(--border-subtle);
+}
+
+.mobile-view-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.4em;
+  height: 1.4em;
+  padding: 0 0.35em;
+  border-radius: 999px;
+  font-size: 0.75em;
+  font-weight: 600;
+  background: var(--accent);
+  color: var(--accent-button-text);
+}
+
+/* ------------------------------------------------------------------
+   Responsive
+   ------------------------------------------------------------------ */
+
+@media (max-width: 1024px) {
+  .main-content.jupyter-style {
+    flex-direction: column;
+  }
+
+  .main-content.jupyter-style .notebook-panel {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .panel-resizer {
+    display: none;
+  }
+
+  .notebook-panel {
+    border-bottom: 1px solid var(--border-subtle);
+  }
+}
+
+@media (max-width: 768px) {
+  /* Brand + theme on one row, status, then two rows of actions.
+     `display: contents` lifts both groups' children into the header's own flex flow. */
+  .header {
+    padding: 0.75rem 1rem;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .header-left,
+  .header-controls {
+    display: contents;
+  }
+
+  .brand {
+    flex: 1 1 auto;
+    min-width: 0;
+    order: 0;
+  }
+
+  .brand-name {
+    font-size: 1.2rem;
+  }
+
+  .theme-switcher {
+    order: 1;
+    flex: 0 0 auto;
+  }
+
+  .theme-switcher .theme-option {
+    padding: 0 0.55rem;
+    font-size: 0.75rem;
+  }
+
+  .current-example {
+    order: 2;
+    flex: 1 1 100%;
+    padding-left: 0;
+    border-left: none;
+    font-size: 0.75rem;
+  }
+
+  .examples-button,
+  .share-button,
+  .export-menu {
+    order: 4;
+    flex: 1 1 30%;
+    min-width: 0;
+  }
+
+  .export-menu .export-button,
+  .examples-button,
+  .share-button {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0 0.6rem;
+  }
+
+  .export-menu-list,
+  .share-popover {
+    left: 0;
+    right: auto;
+  }
+
+  .notebook-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.4rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .notebook-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .notebook-toolbar button {
+    flex: 1 1 auto;
+    min-height: 2.5rem;
+  }
+
+  .notebook-header .status {
+    justify-content: flex-start;
+  }
+
+  .mobile-view-switcher {
+    display: flex;
+  }
+
+  .main-content.jupyter-style.mobile-view-notebook .trace-panel,
+  .main-content.jupyter-style.mobile-view-visualization .notebook-panel {
+    display: none;
+  }
+
+  /* A panel coming back from display: none restarts its animation, so tab switches fade */
+  .notebook-panel,
+  .trace-panel {
+    animation: fade-in 180ms ease-out both;
+  }
+
+  .notebook-panel {
+    border-bottom: none;
+  }
+
+  .notebook-header {
+    padding: 0 1rem;
+  }
+
+  .panel-tabs {
+    display: none; /* the sticky switcher already labels the panel */
+  }
+
+  .panel-content {
+    padding: 1rem 0.75rem;
+  }
+
+  .empty-state {
+    margin-top: 1rem;
+  }
+
+  .empty-state h3 {
+    font-size: 1.6rem;
+  }
+}
+
+/* ------------------------------------------------------------------
+   PDF export: expand scroll containers so html2canvas captures everything
+   ------------------------------------------------------------------ */
+
+.export-pdf-container .data-table-wrapper {
+  overflow: visible;
+  max-height: none;
+}
+
+.export-pdf-container .data-table.compact th {
+  position: static;
+}
+
+.export-pdf-container .table-more-button {
+  display: none;
+}
+
+/* ------------------------------------------------------------------
+   Presentation mode: the visualization alone, full window, larger type
+   ------------------------------------------------------------------ */
+
+.panel-actions {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+/* Every step / Results only: same segmented idiom as the theme control */
+.detail-toggle {
+  display: flex;
+  padding: 2px;
+  gap: 2px;
+  border-radius: var(--radius-control);
+  background: var(--bg-sunken);
+  border: 1px solid var(--border-subtle);
+}
+
+.detail-toggle button {
+  min-height: 24px;
+  padding: 0 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-tertiary);
+}
+
+.detail-toggle button:hover:not(.active) {
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.detail-toggle button.active {
+  background: var(--bg-panel);
+  color: var(--accent-hover);
+  box-shadow: 0 0 0 1px var(--border-subtle);
+}
+
+.present-button {
+  min-height: 30px;
+  padding: 0 0.6rem;
+  font-size: 0.8rem;
+  gap: 0.35rem;
+  color: var(--text-secondary);
+}
+
+.presentation {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-panel);
+  outline: none;
+}
+
+.presentation-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.presentation-title {
+  font-family: var(--font-sans);
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+}
+
+.presentation-exit {
+  min-height: 30px;
+  font-size: 0.8rem;
+}
+
+.presentation-body {
+  flex: 1;
+  overflow: auto;
+  padding: 2rem 4vw 3rem;
+  font-size: 1.15rem;
+}
+
+.presentation .step-slideshow {
+  max-width: 96rem;
+}
+
+.presentation .explanation-text {
+  font-size: 2.4rem;
+  line-height: 1.25;
+}
+
+.presentation .explanation-detail {
+  font-size: 1.15rem;
+}
+
+.presentation .step-badge,
+.presentation .step-operation-title code {
+  font-size: 1.1rem;
+}
+
+.presentation .data-table.compact {
+  font-size: 1.15rem;
+}
+
+.presentation .data-table.compact th {
+  font-size: 1rem;
+}
+
+.presentation .data-table.compact th,
+.presentation .data-table.compact td {
+  padding: 0.6rem 1rem;
+}
+
+.presentation .data-table-wrapper {
+  max-height: 60vh;
+}
+
+.presentation .section-title {
+  font-size: 1.1rem;
+}
+
+.presentation .transform-arrow-label {
+  font-size: 1rem;
+}
+
+.presentation .transform-arrow {
+  font-size: 2.5rem;
+}
+
+.presentation .array-value {
+  font-size: 1.1rem;
+  padding: 0.45rem 0.8rem;
+}
+
+.presentation .nav-button {
+  min-height: 44px;
+  font-size: 1.05rem;
+  min-width: 10rem;
+}
+
+.presentation .keyboard-hint {
+  font-size: 0.9rem;
+}
+
+/* ------------------------------------------------------------------
+   Embed mode (?embed=1): no chrome, read-only cells
+   ------------------------------------------------------------------ */
+
+.embed-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.45rem 1rem;
+  background: var(--bg-header);
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.85rem;
+}
+
+.embed-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.embed-open {
+  color: var(--accent-hover);
+  text-decoration: none;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.embed-open:hover {
+  text-decoration: underline;
+}
+
+.is-embed .mobile-view-switcher {
+  display: none;
+}
+
+.is-embed .notebook-toolbar .toolbar-button:not(.stop-button) {
+  display: none;
+}
+
+.is-readonly .cell-insert,
+.is-readonly .gutter-btn-delete,
+.is-readonly .notebook-hint {
+  display: none;
+}

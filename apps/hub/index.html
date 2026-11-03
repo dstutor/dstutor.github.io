@@ -56,7 +56,7 @@
             before-and-after tables. Python runs right in your browser.
           </p>
           <div class="hero-actions">
-            <a class="button button-primary" href="https://data-8.github.io/table-function-visualizer/">Try the datascience tutor</a>
+            <a class="button button-primary" href="/datascience/">Try the datascience tutor</a>
             <a class="button button-secondary" href="#tutors">See all tutors</a>
           </div>
         </div>
@@ -66,19 +66,36 @@
             <span class="cell-prompt" aria-hidden="true">In [3]:</span>
             <code><span class="tok-var">chocolate</span> = cones.<span class="tok-fn">where</span>(<span class="tok-str">'Flavor'</span>, <span class="tok-str">'chocolate'</span>)</code>
           </div>
+          <div class="cell-step">
+            <span class="cell-op"><span class="cell-op-target">chocolate =</span> where()</span>
+          </div>
           <div class="cell-tables" id="where-demo">
-            <table class="mini">
-              <caption>cones</caption>
-              <thead><tr><th>Flavor</th><th>Color</th><th>Price</th></tr></thead>
-              <tbody>
-                <tr data-keep="false"><td>strawberry</td><td>pink</td><td>3.55</td></tr>
-                <tr data-keep="true"><td>chocolate</td><td>light brown</td><td>4.75</td></tr>
-                <tr data-keep="false"><td>vanilla</td><td>white</td><td>4.25</td></tr>
-                <tr data-keep="true"><td>chocolate</td><td>dark brown</td><td>5.25</td></tr>
-                <tr data-keep="false"><td>strawberry</td><td>pink</td><td>3.95</td></tr>
-                <tr data-keep="false"><td>mint</td><td>green</td><td>4.50</td></tr>
-              </tbody>
-            </table>
+            <div class="scan">
+              <!-- Cel (markup from CEL_SVG in @dstutor/brand) walks down the rows as they are checked -->
+              <svg class="cel scan-cel" id="demo-cel" data-state="done" viewBox="0 0 120 100" aria-hidden="true" focusable="false">
+                <path class="cel-bracket" d="M40 12 H22 V88 H40" /><path class="cel-bracket" d="M80 12 H98 V88 H80" />
+                <g class="cel-eyes"><circle cx="48" cy="52" r="7.5" /><circle cx="72" cy="52" r="7.5" /></g>
+                <g class="cel-glints"><circle cx="50.5" cy="49.5" r="2" /><circle cx="74.5" cy="49.5" r="2" /></g>
+                <path class="cel-face cel-dashes" d="M42 52 H54 M66 52 H78" />
+                <path class="cel-face cel-crosses" d="M42 44 L54 60 M54 44 L42 60 M66 44 L78 60 M78 44 L66 60" />
+                <path class="cel-face cel-smile" d="M50 68 Q60 76 70 68" />
+                <path class="cel-face cel-frown" d="M50 72 Q60 64 70 72" />
+                <path class="cel-spark" d="M60 20 V30 M51 25 H69 M53.5 19 L66.5 31 M66.5 19 L53.5 31" />
+                <g class="cel-stack"><rect x="78" y="66" width="20" height="18" rx="5" /><rect x="83" y="71" width="20" height="18" rx="5" /></g>
+              </svg>
+              <table class="mini">
+                <caption>cones</caption>
+                <thead><tr><th>Flavor</th><th>Color</th><th>Price</th></tr></thead>
+                <tbody>
+                  <tr data-keep="false"><td>strawberry</td><td>pink</td><td>3.55</td></tr>
+                  <tr data-keep="true"><td>chocolate</td><td>light brown</td><td>4.75</td></tr>
+                  <tr data-keep="false"><td>vanilla</td><td>white</td><td>4.25</td></tr>
+                  <tr data-keep="true"><td>chocolate</td><td>dark brown</td><td>5.25</td></tr>
+                  <tr data-keep="false"><td>strawberry</td><td>pink</td><td>3.95</td></tr>
+                  <tr data-keep="false"><td>mint</td><td>green</td><td>4.50</td></tr>
+                </tbody>
+              </table>
+            </div>
             <div class="cell-arrow" aria-hidden="true">→</div>
             <table class="mini result">
               <caption>chocolate</caption>
@@ -103,7 +120,7 @@
         <p class="section-note">Each tutor runs the same notebook, with its own library. Here's the same filter in all four.</p>
         <ul class="tutor-grid">
           <li>
-            <a class="tutor" href="https://data-8.github.io/table-function-visualizer/">
+            <a class="tutor" href="/datascience/">
               <div class="tutor-banner banner-data8">
                 <img src="./src/logos/data8.png" alt="" height="64" />
               </div>
@@ -169,7 +186,6 @@ WHERE Flavor = 'chocolate'</code>
         <ul class="feature-grid">
           <li><strong>Cells share state</strong><span>Load a table in one cell and reshape it over the next five, like Jupyter.</span></li>
           <li><strong>Step through it</strong><span>Each operation becomes before-and-after tables you can play frame by frame.</span></li>
-          <li><strong>Predict mode</strong><span>Hide each result until you guess its size.</span></li>
           <li><strong>Present mode</strong><span>Fill the screen for lecture.</span></li>
           <li><strong>Share and save</strong><span>Send a link that carries the notebook, or open and save <code>.ipynb</code>.</span></li>
         </ul>

@@ -1,0 +1,261 @@
+{
+ "error": null,
+ "trace": [
+  {
+   "args": [
+    "name",
+    [
+     "One World Trade Center",
+     "Willis Tower",
+     "Empire State Building",
+     "Salesforce Tower",
+     "Aon Center",
+     "Transamerica Pyramid",
+     "30 Hudson Yards"
+    ],
+    "material",
+    [
+     "composite",
+     "steel",
+     "steel",
+     "composite",
+     "steel",
+     "concrete",
+     "composite"
+    ],
+    "city",
+    [
+     "New York City",
+     "Chicago",
+     "New York City",
+     "San Francisco",
+     "Chicago",
+     "San Francisco",
+     "New York City"
+    ],
+    "height",
+    [
+     541,
+     442,
+     381,
+     326,
+     346,
+     260,
+     387
+    ],
+    "completed",
+    [
+     2014,
+     1974,
+     1931,
+     2018,
+     1973,
+     1972,
+     2019
+    ]
+   ],
+   "explanation": "Created table with 5 columns and 7 rows",
+   "input": {
+    "columns": [],
+    "num_columns": 0,
+    "num_rows": 0,
+    "preview": []
+   },
+   "kwargs": {},
+   "operation": "with_columns",
+   "output": {
+    "columns": [
+     "name",
+     "material",
+     "city",
+     "height",
+     "completed"
+    ],
+    "num_columns": 5,
+    "num_rows": 7,
+    "preview": [
+     [
+      "One World Trade Center",
+      "composite",
+      "New York City",
+      541,
+      2014
+     ],
+     [
+      "Willis Tower",
+      "steel",
+      "Chicago",
+      442,
+      1974
+     ],
+     [
+      "Empire State Building",
+      "steel",
+      "New York City",
+      381,
+      1931
+     ],
+     [
+      "Salesforce Tower",
+      "composite",
+      "San Francisco",
+      326,
+      2018
+     ],
+     [
+      "Aon Center",
+      "steel",
+      "Chicago",
+      346,
+      1973
+     ],
+     [
+      "Transamerica Pyramid",
+      "concrete",
+      "San Francisco",
+      260,
+      1972
+     ],
+     [
+      "30 Hudson Yards",
+      "composite",
+      "New York City",
+      387,
+      2019
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 8,
+    "stmt_start": 2,
+    "target": "skyscrapers"
+   },
+   "step_id": 1
+  },
+  {
+   "args": [
+    "material",
+    "completed"
+   ],
+   "explanation": "Dropped 2 columns. 3 remain.",
+   "input": {
+    "columns": [
+     "name",
+     "material",
+     "city",
+     "height",
+     "completed"
+    ],
+    "num_columns": 5,
+    "num_rows": 7,
+    "preview": [
+     [
+      "One World Trade Center",
+      "composite",
+      "New York City",
+      541,
+      2014
+     ],
+     [
+      "Willis Tower",
+      "steel",
+      "Chicago",
+      442,
+      1974
+     ],
+     [
+      "Empire State Building",
+      "steel",
+      "New York City",
+      381,
+      1931
+     ],
+     [
+      "Salesforce Tower",
+      "composite",
+      "San Francisco",
+      326,
+      2018
+     ],
+     [
+      "Aon Center",
+      "steel",
+      "Chicago",
+      346,
+      1973
+     ],
+     [
+      "Transamerica Pyramid",
+      "concrete",
+      "San Francisco",
+      260,
+      1972
+     ],
+     [
+      "30 Hudson Yards",
+      "composite",
+      "New York City",
+      387,
+      2019
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "drop",
+   "output": {
+    "columns": [
+     "name",
+     "city",
+     "height"
+    ],
+    "num_columns": 3,
+    "num_rows": 7,
+    "preview": [
+     [
+      "One World Trade Center",
+      "New York City",
+      541
+     ],
+     [
+      "Willis Tower",
+      "Chicago",
+      442
+     ],
+     [
+      "Empire State Building",
+      "New York City",
+      381
+     ],
+     [
+      "Salesforce Tower",
+      "San Francisco",
+      326
+     ],
+     [
+      "Aon Center",
+      "Chicago",
+      346
+     ],
+     [
+      "Transamerica Pyramid",
+      "San Francisco",
+      260
+     ],
+     [
+      "30 Hudson Yards",
+      "New York City",
+      387
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": null
+   },
+   "step_id": 2
+  }
+ ]
+}

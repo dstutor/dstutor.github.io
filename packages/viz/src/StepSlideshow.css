@@ -1,0 +1,317 @@
+.step-slideshow {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  max-width: 64rem;
+  margin: 0 auto;
+}
+
+.step-frame {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Nested StepCard inside the slideshow shares the same column. It must not use the outer
+   auto margins: as a flex item those shrink it to its content, and the visualization
+   (a size container) has no intrinsic width. */
+.step-slideshow .step-card {
+  gap: 1rem;
+  margin: 0;
+  width: 100%;
+  max-width: none;
+}
+
+/* Header: step counter on the left, operation name on the right */
+.slideshow-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.step-indicator {
+  display: flex;
+  align-items: center;
+}
+
+.step-badge {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  letter-spacing: 0.01em;
+}
+
+.sub-progress {
+  color: var(--text-tertiary);
+}
+
+.step-operation-title code {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--accent-hover);
+  background: var(--accent-soft);
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+}
+
+/* Explanation: the one large moment on the page */
+.slideshow-explanation {
+  padding: 0.25rem 0 0.5rem;
+}
+
+.explanation-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.explanation-text {
+  font-family: var(--font-sans);
+  font-size: 1.55rem;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+  color: var(--text-primary);
+  max-width: 36em;
+  text-wrap: pretty;
+}
+
+.explanation-detail {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  background: var(--bg-panel-muted);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 0.4rem 0.7rem;
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.slideshow-visualization {
+  margin: 0;
+  width: 100%;
+}
+
+/* Navigation */
+.slideshow-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.nav-group {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.nav-button {
+  min-width: 7.5rem;
+  gap: 0.4rem;
+}
+
+/* Jump to an operation's start or result */
+.skip-button {
+  width: 34px;
+  padding: 0;
+  color: var(--text-tertiary);
+}
+
+.skip-button .arrow {
+  font-size: 1.1rem;
+  line-height: 1;
+  color: inherit;
+}
+
+.skip-button:hover:not(:disabled) {
+  color: var(--accent-hover);
+}
+
+/* Autoplay (presentation) */
+.autoplay-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.autoplay-toggle {
+  min-width: 5rem;
+}
+
+.autoplay-toggle.is-playing {
+  background: var(--primary-bg);
+  color: var(--primary-fg);
+  border-color: var(--primary-bg);
+}
+
+.autoplay-speed {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+}
+
+.autoplay-speed select {
+  height: 30px;
+  padding: 0 0.4rem;
+  font: inherit;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+}
+
+.nav-button .arrow {
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--text-tertiary);
+  margin-top: -2px;
+}
+
+.nav-button:hover:not(:disabled) .arrow {
+  color: var(--accent);
+}
+
+.nav-button.prev {
+  justify-content: flex-start;
+}
+
+.nav-button.next {
+  justify-content: flex-end;
+}
+
+.step-dots {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  min-height: 0;
+  border-radius: 50%;
+  background: var(--border-strong);
+  border: none;
+  padding: 0;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.dot:hover:not(.active) {
+  background: var(--text-tertiary);
+  border: none;
+}
+
+.dot.active {
+  background: var(--accent);
+  transform: scale(1.25);
+}
+
+/* Active dot stretches into a pill when the operation has sub-steps */
+.dot.active:has(.dot-sub-label) {
+  width: auto;
+  height: 18px;
+  border-radius: 999px;
+  padding: 0 0.5rem;
+  transform: none;
+}
+
+.dot-sub-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-button-text);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.keyboard-hint {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .step-slideshow {
+    gap: 1rem;
+  }
+
+  .slideshow-header {
+    padding-bottom: 0.75rem;
+  }
+
+  .explanation-text {
+    font-size: 1.3rem;
+  }
+
+  .explanation-detail {
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 0.8rem;
+  }
+
+  /* Dots on top, Previous/Next side by side underneath; stays reachable while scrolling tables */
+  .slideshow-controls {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    position: sticky;
+    bottom: 0.5rem;
+    z-index: 5;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-card);
+  }
+
+  .step-dots {
+    order: -1;
+    flex: 1 1 100%;
+  }
+
+  .dot {
+    width: 11px;
+    height: 11px;
+  }
+
+  .nav-group {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .nav-button {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 2.75rem;
+    justify-content: center;
+  }
+
+  .skip-button {
+    min-height: 2.75rem;
+  }
+
+  .keyboard-hint {
+    display: none;
+  }
+}
+
+/* Variable receiving the step's result, e.g. "cs_students = where()" */
+.step-assigns {
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+

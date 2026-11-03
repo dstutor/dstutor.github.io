@@ -1,0 +1,446 @@
+.data-transformation {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 1.25rem;
+  padding: 1.25rem;
+  background: var(--bg-panel-muted);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.data-transformation.animated {
+  opacity: 1;
+}
+
+/* Before / After sections */
+.transform-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.section-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.15rem 0.75rem;
+  padding: 0 0.15rem;
+  min-width: 0;
+}
+
+.section-title {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.section-info {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Data table */
+.data-table-wrapper {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+  overflow: auto;
+  max-height: 380px;
+  min-height: 100px;
+}
+
+.data-table-wrapper.centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.empty-table-placeholder {
+  text-align: center;
+  padding: 1.5rem;
+  color: var(--text-tertiary);
+}
+
+.empty-icon {
+  display: none;
+}
+
+.empty-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 0.15rem;
+}
+
+.empty-subtext {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.data-table.compact {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+}
+
+.data-table.compact th {
+  background: var(--bg-table-header);
+  padding: 0.45rem 0.7rem;
+  text-align: left;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  border-bottom: 2px solid var(--accent);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  white-space: nowrap;
+}
+
+.data-table.compact td {
+  padding: 0.4rem 0.7rem;
+  border-bottom: 1px solid var(--border-subtle);
+  white-space: nowrap;
+}
+
+.data-table.compact tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table.compact th.num,
+.data-table.compact td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Arrays: a vertical stack of item blocks, each showing its 0-based position and value.
+   No header row, so it reads as a list of values rather than a table. */
+.array-view {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+  padding: 0.6rem 0.75rem 0.7rem;
+  min-height: 100px;
+  min-width: 0;
+  max-width: 100%;
+  max-height: 380px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.array-caption {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.array-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  align-items: flex-start;
+}
+
+.array-item {
+  display: flex;
+  align-items: stretch;
+  min-width: 6rem;
+  max-width: 100%;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--bg-card);
+  overflow: hidden;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.array-index {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-tertiary);
+  background: var(--bg-table-header);
+  border-right: 1px solid var(--border-subtle);
+  padding: 0 0.3rem;
+}
+
+.array-value {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+  padding: 0.3rem 0.6rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+}
+
+.array-item.hl {
+  background: var(--hl-cell);
+  border-color: var(--accent);
+}
+
+.array-item.hl .array-value {
+  font-weight: 600;
+}
+
+.array-view.is-lit .array-item {
+  background: var(--hl-col);
+}
+
+.array-more {
+  border-style: dashed;
+  background: transparent;
+}
+
+.array-more .array-value {
+  color: var(--text-tertiary);
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+}
+
+.array-empty {
+  min-height: 2rem;
+  justify-content: center;
+}
+
+.array-placeholder {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+}
+
+/* Sub-step highlights */
+.data-table.compact th.hl-col-header {
+  background: var(--hl-cell);
+  color: var(--text-primary);
+  border-bottom-color: var(--accent);
+}
+
+.data-table.compact td.hl-col {
+  background: var(--hl-col);
+}
+
+.data-table.compact tr.hl-row td {
+  background: var(--hl-row);
+}
+
+.data-table.compact tr.hl-row td.hl-col {
+  background: var(--hl-row);
+  box-shadow: inset 0 0 0 9999px var(--hl-col);
+}
+
+.data-table.compact tr.hl-row-removed td {
+  background: var(--hl-remove);
+  color: var(--hl-remove-text);
+  text-decoration: line-through;
+}
+
+.data-table.compact td.hl-cell {
+  background: var(--hl-cell);
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+  font-weight: 600;
+}
+
+.aux-header {
+  margin-top: 0.5rem;
+}
+
+/* Legacy column diff (select / drop / with_column) */
+.removed-column {
+  background: var(--hl-remove) !important;
+  color: var(--hl-remove-text) !important;
+  text-decoration: line-through;
+}
+
+.removed-cell {
+  background: var(--hl-remove) !important;
+  color: var(--text-tertiary) !important;
+  opacity: 0.7;
+}
+
+.added-column {
+  background: var(--hl-cell) !important;
+  color: var(--text-primary) !important;
+  border-bottom-color: var(--accent) !important;
+}
+
+.added-cell {
+  background: var(--hl-col) !important;
+}
+
+.table-more {
+  padding: 0.45rem;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  background: var(--bg-table-header);
+  border-top: 1px solid var(--border-subtle);
+}
+
+button.table-more-button {
+  display: block;
+  width: 100%;
+  min-height: 0;
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  border-radius: 0;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+button.table-more-button:hover {
+  color: var(--text-primary);
+  background: var(--bg-sunken);
+}
+
+/* Transform arrow */
+.transform-arrow-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 6rem;
+  padding-top: 1.75rem;
+}
+
+.transform-arrow-label {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--accent-hover);
+  background: var(--accent-soft);
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--accent-muted);
+  white-space: nowrap;
+}
+
+.transform-arrow {
+  font-size: 1.75rem;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.transform-changes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.change-badge {
+  font-size: 0.7rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  text-align: center;
+  background: var(--bg-panel);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+.change-badge.removed {
+  background: var(--hl-remove);
+  border-color: transparent;
+  color: var(--hl-remove-text);
+}
+
+.change-badge.added {
+  background: var(--hl-cell);
+  border-color: transparent;
+  color: var(--text-primary);
+}
+
+/* Responsive: the panel can be narrow on a wide screen (resizer dragged right), so the
+   Before/After layout follows the panel's width via a container query, not the viewport's */
+.slideshow-visualization {
+  container-type: inline-size;
+}
+
+@container (max-width: 640px) {
+  .data-transformation {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Stacked layout: keep the label/badges upright and only turn the arrow downward */
+  .transform-arrow-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    min-width: 0;
+    padding-top: 0;
+  }
+
+  .transform-arrow {
+    rotate: 90deg;
+  }
+
+  .transform-changes {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.35rem;
+  }
+}
+
+/* Same stacking for narrow viewports where the container query would not apply */
+@media (max-width: 1024px) {
+  .data-transformation {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .transform-arrow-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    min-width: 0;
+    padding-top: 0;
+  }
+
+  .transform-arrow {
+    rotate: 90deg;
+  }
+
+  .transform-changes {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.35rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .data-transformation {
+    padding: 0.9rem;
+    gap: 0.9rem;
+  }
+
+  .data-table-wrapper {
+    max-height: 300px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .data-table.compact th,
+  .data-table.compact td {
+    padding: 0.35rem 0.55rem;
+  }
+}

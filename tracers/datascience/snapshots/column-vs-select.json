@@ -1,0 +1,285 @@
+{
+ "error": null,
+ "trace": [
+  {
+   "args": [
+    "Flavor",
+    [
+     "strawberry",
+     "chocolate",
+     "vanilla",
+     "chocolate",
+     "strawberry",
+     "mint"
+    ],
+    "Color",
+    [
+     "pink",
+     "light brown",
+     "white",
+     "dark brown",
+     "pink",
+     "green"
+    ],
+    "Price",
+    [
+     3.55,
+     4.75,
+     4.25,
+     5.25,
+     3.95,
+     4.5
+    ]
+   ],
+   "explanation": "Created table with 3 columns and 6 rows",
+   "input": {
+    "columns": [],
+    "num_columns": 0,
+    "num_rows": 0,
+    "preview": []
+   },
+   "kwargs": {},
+   "operation": "with_columns",
+   "output": {
+    "columns": [
+     "Flavor",
+     "Color",
+     "Price"
+    ],
+    "num_columns": 3,
+    "num_rows": 6,
+    "preview": [
+     [
+      "strawberry",
+      "pink",
+      3.55
+     ],
+     [
+      "chocolate",
+      "light brown",
+      4.75
+     ],
+     [
+      "vanilla",
+      "white",
+      4.25
+     ],
+     [
+      "chocolate",
+      "dark brown",
+      5.25
+     ],
+     [
+      "strawberry",
+      "pink",
+      3.95
+     ],
+     [
+      "mint",
+      "green",
+      4.5
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 6,
+    "stmt_start": 2,
+    "target": "cones"
+   },
+   "step_id": 1
+  },
+  {
+   "args": [
+    "Price"
+   ],
+   "explanation": "Selected 1 of 3 columns: Price",
+   "input": {
+    "columns": [
+     "Flavor",
+     "Color",
+     "Price"
+    ],
+    "num_columns": 3,
+    "num_rows": 6,
+    "preview": [
+     [
+      "strawberry",
+      "pink",
+      3.55
+     ],
+     [
+      "chocolate",
+      "light brown",
+      4.75
+     ],
+     [
+      "vanilla",
+      "white",
+      4.25
+     ],
+     [
+      "chocolate",
+      "dark brown",
+      5.25
+     ],
+     [
+      "strawberry",
+      "pink",
+      3.95
+     ],
+     [
+      "mint",
+      "green",
+      4.5
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "select",
+   "output": {
+    "columns": [
+     "Price"
+    ],
+    "num_columns": 1,
+    "num_rows": 6,
+    "preview": [
+     [
+      3.55
+     ],
+     [
+      4.75
+     ],
+     [
+      4.25
+     ],
+     [
+      5.25
+     ],
+     [
+      3.95
+     ],
+     [
+      4.5
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": "price_table"
+   },
+   "step_id": 2
+  },
+  {
+   "args": [
+    "Price"
+   ],
+   "explanation": "Took the 6 values of column 'Price' as an array.",
+   "input": {
+    "columns": [
+     "Flavor",
+     "Color",
+     "Price"
+    ],
+    "num_columns": 3,
+    "num_rows": 6,
+    "preview": [
+     [
+      "strawberry",
+      "pink",
+      3.55
+     ],
+     [
+      "chocolate",
+      "light brown",
+      4.75
+     ],
+     [
+      "vanilla",
+      "white",
+      4.25
+     ],
+     [
+      "chocolate",
+      "dark brown",
+      5.25
+     ],
+     [
+      "strawberry",
+      "pink",
+      3.95
+     ],
+     [
+      "mint",
+      "green",
+      4.5
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "column",
+   "output": {
+    "columns": [
+     "Price"
+    ],
+    "kind": "array",
+    "num_columns": 1,
+    "num_rows": 6,
+    "preview": [
+     [
+      3.55
+     ],
+     [
+      4.75
+     ],
+     [
+      4.25
+     ],
+     [
+      5.25
+     ],
+     [
+      3.95
+     ],
+     [
+      4.5
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": "prices"
+   },
+   "step_id": 3,
+   "sub_steps": [
+    {
+     "input_highlights": {
+      "columns": [
+       "Price"
+      ]
+     },
+     "message": "column('Price') reads the 'Price' column top to bottom and returns its 6 values as an array.",
+     "output_label": "Result array"
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Price"
+      ]
+     },
+     "message": "The values keep their row order. The result is an array, not a table.",
+     "output_highlights": {
+      "columns": [
+       "Price"
+      ]
+     },
+     "output_label": "Result array"
+    }
+   ]
+  }
+ ]
+}

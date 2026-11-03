@@ -1,0 +1,314 @@
+{
+ "error": null,
+ "trace": [
+  {
+   "args": [
+    "Flavor",
+    [
+     "strawberry",
+     "chocolate",
+     "vanilla",
+     "chocolate",
+     "strawberry",
+     "mint"
+    ],
+    "Color",
+    [
+     "pink",
+     "light brown",
+     "white",
+     "dark brown",
+     "pink",
+     "green"
+    ],
+    "Price",
+    [
+     3.55,
+     4.75,
+     4.25,
+     5.25,
+     3.95,
+     4.5
+    ]
+   ],
+   "explanation": "Created table with 3 columns and 6 rows",
+   "input": {
+    "columns": [],
+    "num_columns": 0,
+    "num_rows": 0,
+    "preview": []
+   },
+   "kwargs": {},
+   "operation": "with_columns",
+   "output": {
+    "columns": [
+     "Flavor",
+     "Color",
+     "Price"
+    ],
+    "num_columns": 3,
+    "num_rows": 6,
+    "preview": [
+     [
+      "strawberry",
+      "pink",
+      3.55
+     ],
+     [
+      "chocolate",
+      "light brown",
+      4.75
+     ],
+     [
+      "vanilla",
+      "white",
+      4.25
+     ],
+     [
+      "chocolate",
+      "dark brown",
+      5.25
+     ],
+     [
+      "strawberry",
+      "pink",
+      3.95
+     ],
+     [
+      "mint",
+      "green",
+      4.5
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 6,
+    "stmt_start": 2,
+    "target": "cones"
+   },
+   "step_id": 1
+  },
+  {
+   "args": [
+    "Price"
+   ],
+   "explanation": "Took the 6 values of column 'Price' as an array.",
+   "input": {
+    "columns": [
+     "Flavor",
+     "Color",
+     "Price"
+    ],
+    "num_columns": 3,
+    "num_rows": 6,
+    "preview": [
+     [
+      "strawberry",
+      "pink",
+      3.55
+     ],
+     [
+      "chocolate",
+      "light brown",
+      4.75
+     ],
+     [
+      "vanilla",
+      "white",
+      4.25
+     ],
+     [
+      "chocolate",
+      "dark brown",
+      5.25
+     ],
+     [
+      "strawberry",
+      "pink",
+      3.95
+     ],
+     [
+      "mint",
+      "green",
+      4.5
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "column",
+   "output": {
+    "columns": [
+     "Price"
+    ],
+    "kind": "array",
+    "num_columns": 1,
+    "num_rows": 6,
+    "preview": [
+     [
+      3.55
+     ],
+     [
+      4.75
+     ],
+     [
+      4.25
+     ],
+     [
+      5.25
+     ],
+     [
+      3.95
+     ],
+     [
+      4.5
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": "with_tax"
+   },
+   "step_id": 2,
+   "sub_steps": [
+    {
+     "input_highlights": {
+      "columns": [
+       "Price"
+      ]
+     },
+     "message": "column('Price') reads the 'Price' column top to bottom and returns its 6 values as an array.",
+     "output_label": "Result array"
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Price"
+      ]
+     },
+     "message": "The values keep their row order. The result is an array, not a table.",
+     "output_highlights": {
+      "columns": [
+       "Price"
+      ]
+     },
+     "output_label": "Result array"
+    }
+   ]
+  },
+  {
+   "args": [
+    "Price with Tax",
+    [
+     3.8695,
+     5.1775,
+     4.6325,
+     5.7225,
+     4.3055,
+     4.905
+    ]
+   ],
+   "explanation": "Added column 'Price with Tax'. Now 4 columns.",
+   "input": {
+    "columns": [
+     "Flavor",
+     "Color",
+     "Price"
+    ],
+    "num_columns": 3,
+    "num_rows": 6,
+    "preview": [
+     [
+      "strawberry",
+      "pink",
+      3.55
+     ],
+     [
+      "chocolate",
+      "light brown",
+      4.75
+     ],
+     [
+      "vanilla",
+      "white",
+      4.25
+     ],
+     [
+      "chocolate",
+      "dark brown",
+      5.25
+     ],
+     [
+      "strawberry",
+      "pink",
+      3.95
+     ],
+     [
+      "mint",
+      "green",
+      4.5
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "with_column",
+   "output": {
+    "columns": [
+     "Flavor",
+     "Color",
+     "Price",
+     "Price with Tax"
+    ],
+    "num_columns": 4,
+    "num_rows": 6,
+    "preview": [
+     [
+      "strawberry",
+      "pink",
+      3.55,
+      3.8695
+     ],
+     [
+      "chocolate",
+      "light brown",
+      4.75,
+      5.1775
+     ],
+     [
+      "vanilla",
+      "white",
+      4.25,
+      4.6325
+     ],
+     [
+      "chocolate",
+      "dark brown",
+      5.25,
+      5.7225
+     ],
+     [
+      "strawberry",
+      "pink",
+      3.95,
+      4.3055
+     ],
+     [
+      "mint",
+      "green",
+      4.5,
+      4.905
+     ]
+    ]
+   },
+   "site": {
+    "line": 3,
+    "stmt_end": 3,
+    "stmt_start": 3,
+    "target": null
+   },
+   "step_id": 3
+  }
+ ]
+}

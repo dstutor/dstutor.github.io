@@ -1,0 +1,740 @@
+{
+ "error": null,
+ "trace": [
+  {
+   "args": [
+    "Birth Weight",
+    [
+     120,
+     113,
+     128,
+     108,
+     136,
+     138,
+     132,
+     120,
+     143,
+     140,
+     144,
+     141
+    ],
+    "Gestational Days",
+    [
+     284,
+     282,
+     279,
+     282,
+     286,
+     244,
+     245,
+     289,
+     299,
+     351,
+     282,
+     279
+    ],
+    "Maternal Smoker",
+    [
+     false,
+     false,
+     true,
+     true,
+     false,
+     false,
+     false,
+     false,
+     false,
+     true,
+     false,
+     false
+    ]
+   ],
+   "explanation": "Created table with 3 columns and 12 rows",
+   "input": {
+    "columns": [],
+    "num_columns": 0,
+    "num_rows": 0,
+    "preview": []
+   },
+   "kwargs": {},
+   "operation": "with_columns",
+   "output": {
+    "columns": [
+     "Birth Weight",
+     "Gestational Days",
+     "Maternal Smoker"
+    ],
+    "num_columns": 3,
+    "num_rows": 12,
+    "preview": [
+     [
+      120,
+      284,
+      false
+     ],
+     [
+      113,
+      282,
+      false
+     ],
+     [
+      128,
+      279,
+      true
+     ],
+     [
+      108,
+      282,
+      true
+     ],
+     [
+      136,
+      286,
+      false
+     ],
+     [
+      138,
+      244,
+      false
+     ],
+     [
+      132,
+      245,
+      false
+     ],
+     [
+      120,
+      289,
+      false
+     ],
+     [
+      143,
+      299,
+      false
+     ],
+     [
+      140,
+      351,
+      true
+     ],
+     [
+      144,
+      282,
+      false
+     ],
+     [
+      141,
+      279,
+      false
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 6,
+    "stmt_start": 2,
+    "target": "baby"
+   },
+   "step_id": 1
+  },
+  {
+   "args": [
+    "Maternal Smoker",
+    false
+   ],
+   "explanation": "Filtered rows. Kept 9, removed 3.",
+   "input": {
+    "columns": [
+     "Birth Weight",
+     "Gestational Days",
+     "Maternal Smoker"
+    ],
+    "num_columns": 3,
+    "num_rows": 12,
+    "preview": [
+     [
+      120,
+      284,
+      false
+     ],
+     [
+      113,
+      282,
+      false
+     ],
+     [
+      128,
+      279,
+      true
+     ],
+     [
+      108,
+      282,
+      true
+     ],
+     [
+      136,
+      286,
+      false
+     ],
+     [
+      138,
+      244,
+      false
+     ],
+     [
+      132,
+      245,
+      false
+     ],
+     [
+      120,
+      289,
+      false
+     ],
+     [
+      143,
+      299,
+      false
+     ],
+     [
+      140,
+      351,
+      true
+     ],
+     [
+      144,
+      282,
+      false
+     ],
+     [
+      141,
+      279,
+      false
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "where",
+   "output": {
+    "columns": [
+     "Birth Weight",
+     "Gestational Days",
+     "Maternal Smoker"
+    ],
+    "num_columns": 3,
+    "num_rows": 9,
+    "preview": [
+     [
+      120,
+      284,
+      false
+     ],
+     [
+      113,
+      282,
+      false
+     ],
+     [
+      136,
+      286,
+      false
+     ],
+     [
+      138,
+      244,
+      false
+     ],
+     [
+      132,
+      245,
+      false
+     ],
+     [
+      120,
+      289,
+      false
+     ],
+     [
+      143,
+      299,
+      false
+     ],
+     [
+      144,
+      282,
+      false
+     ],
+     [
+      141,
+      279,
+      false
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": "non_smokers"
+   },
+   "step_id": 2,
+   "sub_steps": [
+    {
+     "detail": "Keep rows where value == False",
+     "input_highlights": {
+      "columns": [
+       "Maternal Smoker"
+      ]
+     },
+     "message": "where checks every row's 'Maternal Smoker' value against the condition.",
+     "output_state": {
+      "columns": [
+       "Birth Weight",
+       "Gestational Days",
+       "Maternal Smoker"
+      ],
+      "num_columns": 3,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Maternal Smoker"
+      ],
+      "rows": [
+       0,
+       1,
+       4,
+       5,
+       6,
+       7,
+       8,
+       10,
+       11
+      ],
+      "rows_removed": [
+       2,
+       3,
+       9
+      ]
+     },
+     "message": "Keep the 9 rows that satisfy the condition; the other 3 (struck through) are removed."
+    }
+   ]
+  },
+  {
+   "args": [
+    "Maternal Smoker",
+    "average"
+   ],
+   "explanation": "Grouped by 'Maternal Smoker'. Created 2 groups.",
+   "input": {
+    "columns": [
+     "Birth Weight",
+     "Gestational Days",
+     "Maternal Smoker"
+    ],
+    "num_columns": 3,
+    "num_rows": 12,
+    "preview": [
+     [
+      120,
+      284,
+      false
+     ],
+     [
+      113,
+      282,
+      false
+     ],
+     [
+      128,
+      279,
+      true
+     ],
+     [
+      108,
+      282,
+      true
+     ],
+     [
+      136,
+      286,
+      false
+     ],
+     [
+      138,
+      244,
+      false
+     ],
+     [
+      132,
+      245,
+      false
+     ],
+     [
+      120,
+      289,
+      false
+     ],
+     [
+      143,
+      299,
+      false
+     ],
+     [
+      140,
+      351,
+      true
+     ],
+     [
+      144,
+      282,
+      false
+     ],
+     [
+      141,
+      279,
+      false
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "group",
+   "output": {
+    "columns": [
+     "Maternal Smoker",
+     "Birth Weight average",
+     "Gestational Days average"
+    ],
+    "num_columns": 3,
+    "num_rows": 2,
+    "preview": [
+     [
+      false,
+      131.88888888888889,
+      276.6666666666667
+     ],
+     [
+      true,
+      125.33333333333333,
+      304.0
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": "averages"
+   },
+   "step_id": 3,
+   "sub_steps": [
+    {
+     "input_highlights": {
+      "columns": [
+       "Maternal Smoker"
+      ]
+     },
+     "message": "group('Maternal Smoker', average) collapses rows that share the same value in 'Maternal Smoker', then applies average to the other columns. Each result column is named after its source column and the function.",
+     "output_state": {
+      "columns": [
+       "Maternal Smoker",
+       "Birth Weight average",
+       "Gestational Days average"
+      ],
+      "num_columns": 3,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "detail": "Unique values (sorted): [False, True]",
+     "input_highlights": {
+      "columns": [
+       "Maternal Smoker"
+      ]
+     },
+     "message": "Find the unique values in 'Maternal Smoker'. Each one becomes exactly one row of the result.",
+     "output_state": {
+      "columns": [
+       "Maternal Smoker",
+       "Birth Weight average",
+       "Gestational Days average"
+      ],
+      "num_columns": 3,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Maternal Smoker"
+      ],
+      "rows": [
+       0,
+       1,
+       4,
+       5,
+       6,
+       7,
+       8,
+       10,
+       11
+      ]
+     },
+     "message": "False: collect the values from each matching row into an array, one array per column.",
+     "output_highlights": {
+      "rows": [
+       0
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Maternal Smoker",
+       "Birth Weight average",
+       "Gestational Days average"
+      ],
+      "num_columns": 3,
+      "num_rows": 1,
+      "preview": [
+       [
+        false,
+        [
+         120,
+         113,
+         136,
+         138,
+         132,
+         120,
+         143,
+         144,
+         141
+        ],
+        [
+         284,
+         282,
+         286,
+         244,
+         245,
+         289,
+         299,
+         282,
+         279
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Maternal Smoker"
+      ],
+      "rows": [
+       2,
+       3,
+       9
+      ]
+     },
+     "message": "True: collect the values from each matching row into an array, one array per column.",
+     "output_highlights": {
+      "rows": [
+       1
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Maternal Smoker",
+       "Birth Weight average",
+       "Gestational Days average"
+      ],
+      "num_columns": 3,
+      "num_rows": 2,
+      "preview": [
+       [
+        false,
+        [
+         120,
+         113,
+         136,
+         138,
+         132,
+         120,
+         143,
+         144,
+         141
+        ],
+        [
+         284,
+         282,
+         286,
+         244,
+         245,
+         289,
+         299,
+         282,
+         279
+        ]
+       ],
+       [
+        true,
+        [
+         128,
+         108,
+         140
+        ],
+        [
+         279,
+         282,
+         351
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "detail": "average([120, 113, 136, 138, 132, 120, 143, 144, 141]) = 131.8889",
+     "message": "Finally, apply average to each array. Every array collapses to a single value."
+    }
+   ]
+  },
+  {
+   "args": [
+    "Birth Weight average"
+   ],
+   "explanation": "Sorted by 'Birth Weight average'.",
+   "input": {
+    "columns": [
+     "Maternal Smoker",
+     "Birth Weight average",
+     "Gestational Days average"
+    ],
+    "num_columns": 3,
+    "num_rows": 2,
+    "preview": [
+     [
+      false,
+      131.88888888888889,
+      276.6666666666667
+     ],
+     [
+      true,
+      125.33333333333333,
+      304.0
+     ]
+    ]
+   },
+   "kwargs": {
+    "descending": true
+   },
+   "operation": "sort",
+   "output": {
+    "columns": [
+     "Maternal Smoker",
+     "Birth Weight average",
+     "Gestational Days average"
+    ],
+    "num_columns": 3,
+    "num_rows": 2,
+    "preview": [
+     [
+      false,
+      131.88888888888889,
+      276.6666666666667
+     ],
+     [
+      true,
+      125.33333333333333,
+      304.0
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": "by_weight"
+   },
+   "step_id": 4,
+   "sub_steps": [
+    {
+     "input_highlights": {
+      "columns": [
+       "Birth Weight average"
+      ]
+     },
+     "message": "sort reorders all rows by their 'Birth Weight average' value, largest first. No rows are added or removed."
+    },
+    {
+     "detail": "New order of original row positions (starting at 0): [0, 1]",
+     "message": "Rows keep all their values. Only their order changes.",
+     "output_highlights": {
+      "columns": [
+       "Birth Weight average"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "args": [
+    "Maternal Smoker",
+    "Birth Weight average"
+   ],
+   "explanation": "Selected 2 of 3 columns: Maternal Smoker, Birth Weight average",
+   "input": {
+    "columns": [
+     "Maternal Smoker",
+     "Birth Weight average",
+     "Gestational Days average"
+    ],
+    "num_columns": 3,
+    "num_rows": 2,
+    "preview": [
+     [
+      false,
+      131.88888888888889,
+      276.6666666666667
+     ],
+     [
+      true,
+      125.33333333333333,
+      304.0
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "select",
+   "output": {
+    "columns": [
+     "Maternal Smoker",
+     "Birth Weight average"
+    ],
+    "num_columns": 2,
+    "num_rows": 2,
+    "preview": [
+     [
+      false,
+      131.88888888888889
+     ],
+     [
+      true,
+      125.33333333333333
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": null
+   },
+   "step_id": 5
+  }
+ ]
+}

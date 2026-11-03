@@ -1,0 +1,486 @@
+{
+ "error": null,
+ "trace": [
+  {
+   "args": [
+    "Title",
+    [
+     "Star Wars",
+     "E.T.",
+     "Titanic",
+     "Jurassic Park",
+     "The Lion King",
+     "Avatar",
+     "Jaws"
+    ],
+    "Studio",
+    [
+     "Fox",
+     "Universal",
+     "Paramount",
+     "Universal",
+     "Buena Vista",
+     "Fox",
+     "Universal"
+    ],
+    "Gross",
+    [
+     461,
+     435,
+     659,
+     402,
+     423,
+     761,
+     260
+    ],
+    "Year",
+    [
+     1977,
+     1982,
+     1997,
+     1993,
+     1994,
+     2009,
+     1975
+    ]
+   ],
+   "explanation": "Created table with 4 columns and 7 rows",
+   "input": {
+    "columns": [],
+    "num_columns": 0,
+    "num_rows": 0,
+    "preview": []
+   },
+   "kwargs": {},
+   "operation": "with_columns",
+   "output": {
+    "columns": [
+     "Title",
+     "Studio",
+     "Gross",
+     "Year"
+    ],
+    "num_columns": 4,
+    "num_rows": 7,
+    "preview": [
+     [
+      "Star Wars",
+      "Fox",
+      461,
+      1977
+     ],
+     [
+      "E.T.",
+      "Universal",
+      435,
+      1982
+     ],
+     [
+      "Titanic",
+      "Paramount",
+      659,
+      1997
+     ],
+     [
+      "Jurassic Park",
+      "Universal",
+      402,
+      1993
+     ],
+     [
+      "The Lion King",
+      "Buena Vista",
+      423,
+      1994
+     ],
+     [
+      "Avatar",
+      "Fox",
+      761,
+      2009
+     ],
+     [
+      "Jaws",
+      "Universal",
+      260,
+      1975
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 7,
+    "stmt_start": 2,
+    "target": "top"
+   },
+   "step_id": 1
+  },
+  {
+   "args": [
+    "Studio"
+   ],
+   "explanation": "Grouped by 'Studio'. Created 4 groups.",
+   "input": {
+    "columns": [
+     "Title",
+     "Studio",
+     "Gross",
+     "Year"
+    ],
+    "num_columns": 4,
+    "num_rows": 7,
+    "preview": [
+     [
+      "Star Wars",
+      "Fox",
+      461,
+      1977
+     ],
+     [
+      "E.T.",
+      "Universal",
+      435,
+      1982
+     ],
+     [
+      "Titanic",
+      "Paramount",
+      659,
+      1997
+     ],
+     [
+      "Jurassic Park",
+      "Universal",
+      402,
+      1993
+     ],
+     [
+      "The Lion King",
+      "Buena Vista",
+      423,
+      1994
+     ],
+     [
+      "Avatar",
+      "Fox",
+      761,
+      2009
+     ],
+     [
+      "Jaws",
+      "Universal",
+      260,
+      1975
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "group",
+   "output": {
+    "columns": [
+     "Studio",
+     "count"
+    ],
+    "num_columns": 2,
+    "num_rows": 4,
+    "preview": [
+     [
+      "Buena Vista",
+      1
+     ],
+     [
+      "Fox",
+      2
+     ],
+     [
+      "Paramount",
+      1
+     ],
+     [
+      "Universal",
+      3
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": "by_studio"
+   },
+   "step_id": 2,
+   "sub_steps": [
+    {
+     "input_highlights": {
+      "columns": [
+       "Studio"
+      ]
+     },
+     "message": "group('Studio') collapses rows that share the same value in 'Studio'. With no function given, it counts the rows in each group.",
+     "output_state": {
+      "columns": [
+       "Studio",
+       "count"
+      ],
+      "num_columns": 2,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "detail": "Unique values (sorted): ['Buena Vista', 'Fox', 'Paramount', 'Universal']",
+     "input_highlights": {
+      "columns": [
+       "Studio"
+      ]
+     },
+     "message": "Find the unique values in 'Studio'. Each one becomes exactly one row of the result.",
+     "output_state": {
+      "columns": [
+       "Studio",
+       "count"
+      ],
+      "num_columns": 2,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Studio"
+      ],
+      "rows": [
+       4
+      ]
+     },
+     "message": "'Buena Vista': 1 matching row \u2192 count = 1.",
+     "output_highlights": {
+      "rows": [
+       0
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Studio",
+       "count"
+      ],
+      "num_columns": 2,
+      "num_rows": 1,
+      "preview": [
+       [
+        "Buena Vista",
+        1
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Studio"
+      ],
+      "rows": [
+       0,
+       5
+      ]
+     },
+     "message": "'Fox': 2 matching rows \u2192 count = 2.",
+     "output_highlights": {
+      "rows": [
+       1
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Studio",
+       "count"
+      ],
+      "num_columns": 2,
+      "num_rows": 2,
+      "preview": [
+       [
+        "Buena Vista",
+        1
+       ],
+       [
+        "Fox",
+        2
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Studio"
+      ],
+      "rows": [
+       2
+      ]
+     },
+     "message": "'Paramount': 1 matching row \u2192 count = 1.",
+     "output_highlights": {
+      "rows": [
+       2
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Studio",
+       "count"
+      ],
+      "num_columns": 2,
+      "num_rows": 3,
+      "preview": [
+       [
+        "Buena Vista",
+        1
+       ],
+       [
+        "Fox",
+        2
+       ],
+       [
+        "Paramount",
+        1
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Studio"
+      ],
+      "rows": [
+       1,
+       3,
+       6
+      ]
+     },
+     "message": "'Universal': 3 matching rows \u2192 count = 3.",
+     "output_highlights": {
+      "rows": [
+       3
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Studio",
+       "count"
+      ],
+      "num_columns": 2,
+      "num_rows": 4,
+      "preview": [
+       [
+        "Buena Vista",
+        1
+       ],
+       [
+        "Fox",
+        2
+       ],
+       [
+        "Paramount",
+        1
+       ],
+       [
+        "Universal",
+        3
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "args": [
+    "count"
+   ],
+   "explanation": "Sorted by 'count'.",
+   "input": {
+    "columns": [
+     "Studio",
+     "count"
+    ],
+    "num_columns": 2,
+    "num_rows": 4,
+    "preview": [
+     [
+      "Buena Vista",
+      1
+     ],
+     [
+      "Fox",
+      2
+     ],
+     [
+      "Paramount",
+      1
+     ],
+     [
+      "Universal",
+      3
+     ]
+    ]
+   },
+   "kwargs": {
+    "descending": true
+   },
+   "operation": "sort",
+   "output": {
+    "columns": [
+     "Studio",
+     "count"
+    ],
+    "num_columns": 2,
+    "num_rows": 4,
+    "preview": [
+     [
+      "Universal",
+      3
+     ],
+     [
+      "Fox",
+      2
+     ],
+     [
+      "Buena Vista",
+      1
+     ],
+     [
+      "Paramount",
+      1
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": null
+   },
+   "step_id": 3,
+   "sub_steps": [
+    {
+     "input_highlights": {
+      "columns": [
+       "count"
+      ]
+     },
+     "message": "sort reorders all rows by their 'count' value, largest first. No rows are added or removed."
+    },
+    {
+     "detail": "New order of original row positions (starting at 0): [3, 1, 2, 0]",
+     "message": "Rows keep all their values. Only their order changes.",
+     "output_highlights": {
+      "columns": [
+       "count"
+      ]
+     }
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,126 @@
+/* Cel, the bracket mascot. One SVG (see CEL_SVG in index.ts) carries the parts for every
+   state; data-state picks which show. Colors are the --cel-* custom properties below, with lighter eyes on dark palettes.
+
+   brand    orange brackets, open eyes (the logo)
+   idle     grey, dashes for eyes          running  amber, eyes up, a spark
+   done     teal, a smile                  error    coral, a frown
+   removed  coral, crossed-out eyes        grouped  amber, a stack of rows */
+
+:root {
+  --cel-brand: #f37726;
+  --cel-idle: #b9b5ad;
+  --cel-running: #f2b33d;
+  --cel-done: #0f9d94;
+  --cel-error: #f0634f;
+  --cel-ink: #1e2a38;
+  --cel-ink-muted: #6b6a66;
+  --cel-glint: #ffffff;
+}
+
+/* Dark palettes: light eyes so Cel stays readable */
+[data-theme='berkeley'],
+[data-theme='dark'] {
+  --cel-idle: #7d8da3;
+  --cel-ink: #f7f9fd;
+  --cel-ink-muted: #bac4d4;
+  --cel-glint: #00183a;
+}
+
+.cel {
+  --cel-bracket: var(--cel-brand);
+  display: inline-block;
+  flex: none;
+  width: 1.2em;
+  height: 1em;
+  overflow: visible;
+  vertical-align: -0.15em;
+}
+
+.cel-bracket {
+  fill: none;
+  stroke: var(--cel-bracket);
+  stroke-width: 11;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 200ms ease;
+}
+
+.cel-eyes {
+  fill: var(--cel-ink);
+  transition: transform 200ms ease;
+}
+
+.cel-glints {
+  fill: var(--cel-glint);
+}
+
+.cel-face {
+  fill: none;
+  stroke: var(--cel-ink);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+}
+
+.cel-dashes {
+  stroke: var(--cel-ink-muted);
+  stroke-width: 4;
+}
+
+.cel-crosses {
+  stroke-opacity: 0.6;
+}
+
+.cel-spark {
+  fill: none;
+  stroke: var(--cel-running);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  transform-origin: 60px 25px;
+}
+
+.cel-stack {
+  fill: var(--cel-ink);
+  fill-opacity: 0.18;
+}
+
+/* Only the brand face shows by default */
+.cel .cel-dashes,
+.cel .cel-crosses,
+.cel .cel-smile,
+.cel .cel-frown,
+.cel .cel-spark,
+.cel .cel-stack {
+  display: none;
+}
+
+.cel[data-state='idle'] { --cel-bracket: var(--cel-idle); }
+.cel[data-state='idle'] .cel-eyes,
+.cel[data-state='idle'] .cel-glints { display: none; }
+.cel[data-state='idle'] .cel-dashes { display: inline; }
+
+.cel[data-state='running'] { --cel-bracket: var(--cel-running); }
+.cel[data-state='running'] .cel-glints { display: none; }
+.cel[data-state='running'] .cel-eyes { transform: translate(2px, -4px); }
+.cel[data-state='running'] .cel-spark { display: inline; animation: cel-spin 1.6s linear infinite; }
+
+.cel[data-state='done'] { --cel-bracket: var(--cel-done); }
+.cel[data-state='done'] .cel-smile { display: inline; }
+
+.cel[data-state='error'] { --cel-bracket: var(--cel-error); }
+.cel[data-state='error'] .cel-frown { display: inline; }
+
+.cel[data-state='removed'] { --cel-bracket: var(--cel-error); }
+.cel[data-state='removed'] .cel-eyes,
+.cel[data-state='removed'] .cel-glints { display: none; }
+.cel[data-state='removed'] .cel-crosses { display: inline; }
+
+.cel[data-state='grouped'] { --cel-bracket: var(--cel-running); }
+.cel[data-state='grouped'] .cel-stack { display: inline; }
+
+@keyframes cel-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cel-spark { animation: none !important; }
+}

@@ -1,0 +1,263 @@
+{
+ "error": null,
+ "trace": [
+  {
+   "args": [
+    "PLAYER",
+    [
+     "Stephen Curry",
+     "Klay Thompson",
+     "Draymond Green",
+     "LeBron James",
+     "Anthony Davis",
+     "Kawhi Leonard",
+     "Damian Lillard"
+    ],
+    "POSITION",
+    [
+     "PG",
+     "SG",
+     "PF",
+     "SF",
+     "PF",
+     "SF",
+     "PG"
+    ],
+    "TEAM",
+    [
+     "Golden State Warriors",
+     "Golden State Warriors",
+     "Golden State Warriors",
+     "Los Angeles Lakers",
+     "Los Angeles Lakers",
+     "Los Angeles Clippers",
+     "Portland Trail Blazers"
+    ],
+    "SALARY",
+    [
+     40.2,
+     32.7,
+     18.5,
+     37.4,
+     27.1,
+     32.7,
+     29.8
+    ]
+   ],
+   "explanation": "Created table with 4 columns and 7 rows",
+   "input": {
+    "columns": [],
+    "num_columns": 0,
+    "num_rows": 0,
+    "preview": []
+   },
+   "kwargs": {},
+   "operation": "with_columns",
+   "output": {
+    "columns": [
+     "PLAYER",
+     "POSITION",
+     "TEAM",
+     "SALARY"
+    ],
+    "num_columns": 4,
+    "num_rows": 7,
+    "preview": [
+     [
+      "Stephen Curry",
+      "PG",
+      "Golden State Warriors",
+      40.2
+     ],
+     [
+      "Klay Thompson",
+      "SG",
+      "Golden State Warriors",
+      32.7
+     ],
+     [
+      "Draymond Green",
+      "PF",
+      "Golden State Warriors",
+      18.5
+     ],
+     [
+      "LeBron James",
+      "SF",
+      "Los Angeles Lakers",
+      37.4
+     ],
+     [
+      "Anthony Davis",
+      "PF",
+      "Los Angeles Lakers",
+      27.1
+     ],
+     [
+      "Kawhi Leonard",
+      "SF",
+      "Los Angeles Clippers",
+      32.7
+     ],
+     [
+      "Damian Lillard",
+      "PG",
+      "Portland Trail Blazers",
+      29.8
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 7,
+    "stmt_start": 2,
+    "target": "nba"
+   },
+   "step_id": 1
+  },
+  {
+   "args": [
+    "SALARY"
+   ],
+   "explanation": "Sorted by 'SALARY'.",
+   "input": {
+    "columns": [
+     "PLAYER",
+     "POSITION",
+     "TEAM",
+     "SALARY"
+    ],
+    "num_columns": 4,
+    "num_rows": 7,
+    "preview": [
+     [
+      "Stephen Curry",
+      "PG",
+      "Golden State Warriors",
+      40.2
+     ],
+     [
+      "Klay Thompson",
+      "SG",
+      "Golden State Warriors",
+      32.7
+     ],
+     [
+      "Draymond Green",
+      "PF",
+      "Golden State Warriors",
+      18.5
+     ],
+     [
+      "LeBron James",
+      "SF",
+      "Los Angeles Lakers",
+      37.4
+     ],
+     [
+      "Anthony Davis",
+      "PF",
+      "Los Angeles Lakers",
+      27.1
+     ],
+     [
+      "Kawhi Leonard",
+      "SF",
+      "Los Angeles Clippers",
+      32.7
+     ],
+     [
+      "Damian Lillard",
+      "PG",
+      "Portland Trail Blazers",
+      29.8
+     ]
+    ]
+   },
+   "kwargs": {
+    "descending": true
+   },
+   "operation": "sort",
+   "output": {
+    "columns": [
+     "PLAYER",
+     "POSITION",
+     "TEAM",
+     "SALARY"
+    ],
+    "num_columns": 4,
+    "num_rows": 7,
+    "preview": [
+     [
+      "Stephen Curry",
+      "PG",
+      "Golden State Warriors",
+      40.2
+     ],
+     [
+      "LeBron James",
+      "SF",
+      "Los Angeles Lakers",
+      37.4
+     ],
+     [
+      "Klay Thompson",
+      "SG",
+      "Golden State Warriors",
+      32.7
+     ],
+     [
+      "Kawhi Leonard",
+      "SF",
+      "Los Angeles Clippers",
+      32.7
+     ],
+     [
+      "Damian Lillard",
+      "PG",
+      "Portland Trail Blazers",
+      29.8
+     ],
+     [
+      "Anthony Davis",
+      "PF",
+      "Los Angeles Lakers",
+      27.1
+     ],
+     [
+      "Draymond Green",
+      "PF",
+      "Golden State Warriors",
+      18.5
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": null
+   },
+   "step_id": 2,
+   "sub_steps": [
+    {
+     "input_highlights": {
+      "columns": [
+       "SALARY"
+      ]
+     },
+     "message": "sort reorders all rows by their 'SALARY' value, largest first. No rows are added or removed."
+    },
+    {
+     "detail": "New order of original row positions (starting at 0): [0, 3, 5, 1, 6, 4, 2]",
+     "message": "Rows keep all their values. Only their order changes.",
+     "output_highlights": {
+      "columns": [
+       "SALARY"
+      ]
+     }
+    }
+   ]
+  }
+ ]
+}

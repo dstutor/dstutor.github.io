@@ -2,16 +2,22 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>datascience Tutor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>datascience Table Tutor</title>
+    <meta name="description" content="A notebook for Data 8's datascience library that shows every Table operation step by step." />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./src/style.css" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/favicon-180.png" />
+    <script>
+      // Apply the stored palette before first paint so there is no flash; Jupyter is the default
+      try {
+        var t = localStorage.getItem('theme');
+        document.documentElement.setAttribute('data-theme', t === 'berkeley' ? 'berkeley' : 'jupyter');
+      } catch (e) {}
+    </script>
   </head>
   <body>
-    <main>
-      <h1>The datascience tutor is moving here</h1>
-      <p>It's being ported from the Data 8 Table Tutor. Until then, use the current version.</p>
-      <p><a href="https://data-8.github.io/table-function-visualizer/">Open the Data 8 Table Tutor</a> · <a href="/">All tutors</a></p>
-    </main>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

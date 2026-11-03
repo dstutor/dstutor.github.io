@@ -2,8 +2,9 @@
 // Run after every app is built (npm run build does both).
 import { cpSync, existsSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const root = new URL('..', import.meta.url).pathname;
+const root = fileURLToPath(new URL('..', import.meta.url));
 const site = join(root, 'site');
 const appsDir = join(root, 'apps');
 

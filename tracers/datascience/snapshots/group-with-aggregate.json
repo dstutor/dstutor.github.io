@@ -1,0 +1,1353 @@
+{
+ "error": null,
+ "trace": [
+  {
+   "args": [
+    "Date",
+    [
+     "6/1/15",
+     "6/1/15",
+     "6/1/15",
+     "6/1/15",
+     "6/2/15",
+     "6/2/15",
+     "6/2/15",
+     "6/3/15"
+    ],
+    "Flight Number",
+    [
+     73,
+     217,
+     237,
+     250,
+     267,
+     273,
+     290,
+     73
+    ],
+    "Destination",
+    [
+     "HNL",
+     "EWR",
+     "STL",
+     "SAN",
+     "PHL",
+     "SEA",
+     "JFK",
+     "HNL"
+    ],
+    "Delay",
+    [
+     257,
+     28,
+     -3,
+     0,
+     64,
+     -6,
+     12,
+     5
+    ]
+   ],
+   "explanation": "Created table with 4 columns and 8 rows",
+   "input": {
+    "columns": [],
+    "num_columns": 0,
+    "num_rows": 0,
+    "preview": []
+   },
+   "kwargs": {},
+   "operation": "with_columns",
+   "output": {
+    "columns": [
+     "Date",
+     "Flight Number",
+     "Destination",
+     "Delay"
+    ],
+    "num_columns": 4,
+    "num_rows": 8,
+    "preview": [
+     [
+      "6/1/15",
+      73,
+      "HNL",
+      257
+     ],
+     [
+      "6/1/15",
+      217,
+      "EWR",
+      28
+     ],
+     [
+      "6/1/15",
+      237,
+      "STL",
+      -3
+     ],
+     [
+      "6/1/15",
+      250,
+      "SAN",
+      0
+     ],
+     [
+      "6/2/15",
+      267,
+      "PHL",
+      64
+     ],
+     [
+      "6/2/15",
+      273,
+      "SEA",
+      -6
+     ],
+     [
+      "6/2/15",
+      290,
+      "JFK",
+      12
+     ],
+     [
+      "6/3/15",
+      73,
+      "HNL",
+      5
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 7,
+    "stmt_start": 2,
+    "target": "united"
+   },
+   "step_id": 1
+  },
+  {
+   "args": [
+    "Destination",
+    "Delay"
+   ],
+   "explanation": "Selected 2 of 4 columns: Destination, Delay",
+   "input": {
+    "columns": [
+     "Date",
+     "Flight Number",
+     "Destination",
+     "Delay"
+    ],
+    "num_columns": 4,
+    "num_rows": 8,
+    "preview": [
+     [
+      "6/1/15",
+      73,
+      "HNL",
+      257
+     ],
+     [
+      "6/1/15",
+      217,
+      "EWR",
+      28
+     ],
+     [
+      "6/1/15",
+      237,
+      "STL",
+      -3
+     ],
+     [
+      "6/1/15",
+      250,
+      "SAN",
+      0
+     ],
+     [
+      "6/2/15",
+      267,
+      "PHL",
+      64
+     ],
+     [
+      "6/2/15",
+      273,
+      "SEA",
+      -6
+     ],
+     [
+      "6/2/15",
+      290,
+      "JFK",
+      12
+     ],
+     [
+      "6/3/15",
+      73,
+      "HNL",
+      5
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "select",
+   "output": {
+    "columns": [
+     "Destination",
+     "Delay"
+    ],
+    "num_columns": 2,
+    "num_rows": 8,
+    "preview": [
+     [
+      "HNL",
+      257
+     ],
+     [
+      "EWR",
+      28
+     ],
+     [
+      "STL",
+      -3
+     ],
+     [
+      "SAN",
+      0
+     ],
+     [
+      "PHL",
+      64
+     ],
+     [
+      "SEA",
+      -6
+     ],
+     [
+      "JFK",
+      12
+     ],
+     [
+      "HNL",
+      5
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": null
+   },
+   "step_id": 2
+  },
+  {
+   "args": [
+    "Destination",
+    "average"
+   ],
+   "explanation": "Grouped by 'Destination'. Created 7 groups.",
+   "input": {
+    "columns": [
+     "Destination",
+     "Delay"
+    ],
+    "num_columns": 2,
+    "num_rows": 8,
+    "preview": [
+     [
+      "HNL",
+      257
+     ],
+     [
+      "EWR",
+      28
+     ],
+     [
+      "STL",
+      -3
+     ],
+     [
+      "SAN",
+      0
+     ],
+     [
+      "PHL",
+      64
+     ],
+     [
+      "SEA",
+      -6
+     ],
+     [
+      "JFK",
+      12
+     ],
+     [
+      "HNL",
+      5
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "group",
+   "output": {
+    "columns": [
+     "Destination",
+     "Delay average"
+    ],
+    "num_columns": 2,
+    "num_rows": 7,
+    "preview": [
+     [
+      "EWR",
+      28.0
+     ],
+     [
+      "HNL",
+      131.0
+     ],
+     [
+      "JFK",
+      12.0
+     ],
+     [
+      "PHL",
+      64.0
+     ],
+     [
+      "SAN",
+      0.0
+     ],
+     [
+      "SEA",
+      -6.0
+     ],
+     [
+      "STL",
+      -3.0
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": null
+   },
+   "step_id": 3,
+   "sub_steps": [
+    {
+     "input_highlights": {
+      "columns": [
+       "Destination"
+      ]
+     },
+     "message": "group('Destination', average) collapses rows that share the same value in 'Destination', then applies average to the other columns. Each result column is named after its source column and the function.",
+     "output_state": {
+      "columns": [
+       "Destination",
+       "Delay average"
+      ],
+      "num_columns": 2,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "detail": "Unique values (sorted): ['EWR', 'HNL', 'JFK', 'PHL', 'SAN', 'SEA', 'STL']",
+     "input_highlights": {
+      "columns": [
+       "Destination"
+      ]
+     },
+     "message": "Find the unique values in 'Destination'. Each one becomes exactly one row of the result.",
+     "output_state": {
+      "columns": [
+       "Destination",
+       "Delay average"
+      ],
+      "num_columns": 2,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Destination"
+      ],
+      "rows": [
+       1
+      ]
+     },
+     "message": "'EWR': collect the values from each matching row into an array, one array per column.",
+     "output_highlights": {
+      "rows": [
+       0
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Destination",
+       "Delay average"
+      ],
+      "num_columns": 2,
+      "num_rows": 1,
+      "preview": [
+       [
+        "EWR",
+        [
+         28
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Destination"
+      ],
+      "rows": [
+       0,
+       7
+      ]
+     },
+     "message": "'HNL': collect the values from each matching row into an array, one array per column.",
+     "output_highlights": {
+      "rows": [
+       1
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Destination",
+       "Delay average"
+      ],
+      "num_columns": 2,
+      "num_rows": 2,
+      "preview": [
+       [
+        "EWR",
+        [
+         28
+        ]
+       ],
+       [
+        "HNL",
+        [
+         257,
+         5
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Destination"
+      ],
+      "rows": [
+       6
+      ]
+     },
+     "message": "'JFK': collect the values from each matching row into an array, one array per column.",
+     "output_highlights": {
+      "rows": [
+       2
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Destination",
+       "Delay average"
+      ],
+      "num_columns": 2,
+      "num_rows": 3,
+      "preview": [
+       [
+        "EWR",
+        [
+         28
+        ]
+       ],
+       [
+        "HNL",
+        [
+         257,
+         5
+        ]
+       ],
+       [
+        "JFK",
+        [
+         12
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Destination"
+      ],
+      "rows": [
+       4
+      ]
+     },
+     "message": "'PHL': collect the values from each matching row into an array, one array per column.",
+     "output_highlights": {
+      "rows": [
+       3
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Destination",
+       "Delay average"
+      ],
+      "num_columns": 2,
+      "num_rows": 4,
+      "preview": [
+       [
+        "EWR",
+        [
+         28
+        ]
+       ],
+       [
+        "HNL",
+        [
+         257,
+         5
+        ]
+       ],
+       [
+        "JFK",
+        [
+         12
+        ]
+       ],
+       [
+        "PHL",
+        [
+         64
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Destination"
+      ],
+      "rows": [
+       3
+      ]
+     },
+     "message": "'SAN': collect the values from each matching row into an array, one array per column.",
+     "output_highlights": {
+      "rows": [
+       4
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Destination",
+       "Delay average"
+      ],
+      "num_columns": 2,
+      "num_rows": 5,
+      "preview": [
+       [
+        "EWR",
+        [
+         28
+        ]
+       ],
+       [
+        "HNL",
+        [
+         257,
+         5
+        ]
+       ],
+       [
+        "JFK",
+        [
+         12
+        ]
+       ],
+       [
+        "PHL",
+        [
+         64
+        ]
+       ],
+       [
+        "SAN",
+        [
+         0
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Destination"
+      ],
+      "rows": [
+       5
+      ]
+     },
+     "message": "'SEA': collect the values from each matching row into an array, one array per column.",
+     "output_highlights": {
+      "rows": [
+       5
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Destination",
+       "Delay average"
+      ],
+      "num_columns": 2,
+      "num_rows": 6,
+      "preview": [
+       [
+        "EWR",
+        [
+         28
+        ]
+       ],
+       [
+        "HNL",
+        [
+         257,
+         5
+        ]
+       ],
+       [
+        "JFK",
+        [
+         12
+        ]
+       ],
+       [
+        "PHL",
+        [
+         64
+        ]
+       ],
+       [
+        "SAN",
+        [
+         0
+        ]
+       ],
+       [
+        "SEA",
+        [
+         -6
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Destination"
+      ],
+      "rows": [
+       2
+      ]
+     },
+     "message": "'STL': collect the values from each matching row into an array, one array per column.",
+     "output_highlights": {
+      "rows": [
+       6
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Destination",
+       "Delay average"
+      ],
+      "num_columns": 2,
+      "num_rows": 7,
+      "preview": [
+       [
+        "EWR",
+        [
+         28
+        ]
+       ],
+       [
+        "HNL",
+        [
+         257,
+         5
+        ]
+       ],
+       [
+        "JFK",
+        [
+         12
+        ]
+       ],
+       [
+        "PHL",
+        [
+         64
+        ]
+       ],
+       [
+        "SAN",
+        [
+         0
+        ]
+       ],
+       [
+        "SEA",
+        [
+         -6
+        ]
+       ],
+       [
+        "STL",
+        [
+         -3
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "detail": "average([28]) = 28",
+     "message": "Finally, apply average to each array. Every array collapses to a single value."
+    }
+   ]
+  },
+  {
+   "args": [
+    "Destination",
+    "Delay"
+   ],
+   "explanation": "Selected 2 of 4 columns: Destination, Delay",
+   "input": {
+    "columns": [
+     "Date",
+     "Flight Number",
+     "Destination",
+     "Delay"
+    ],
+    "num_columns": 4,
+    "num_rows": 8,
+    "preview": [
+     [
+      "6/1/15",
+      73,
+      "HNL",
+      257
+     ],
+     [
+      "6/1/15",
+      217,
+      "EWR",
+      28
+     ],
+     [
+      "6/1/15",
+      237,
+      "STL",
+      -3
+     ],
+     [
+      "6/1/15",
+      250,
+      "SAN",
+      0
+     ],
+     [
+      "6/2/15",
+      267,
+      "PHL",
+      64
+     ],
+     [
+      "6/2/15",
+      273,
+      "SEA",
+      -6
+     ],
+     [
+      "6/2/15",
+      290,
+      "JFK",
+      12
+     ],
+     [
+      "6/3/15",
+      73,
+      "HNL",
+      5
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "select",
+   "output": {
+    "columns": [
+     "Destination",
+     "Delay"
+    ],
+    "num_columns": 2,
+    "num_rows": 8,
+    "preview": [
+     [
+      "HNL",
+      257
+     ],
+     [
+      "EWR",
+      28
+     ],
+     [
+      "STL",
+      -3
+     ],
+     [
+      "SAN",
+      0
+     ],
+     [
+      "PHL",
+      64
+     ],
+     [
+      "SEA",
+      -6
+     ],
+     [
+      "JFK",
+      12
+     ],
+     [
+      "HNL",
+      5
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": null
+   },
+   "step_id": 4
+  },
+  {
+   "args": [
+    "Destination",
+    "max"
+   ],
+   "explanation": "Grouped by 'Destination'. Created 7 groups.",
+   "input": {
+    "columns": [
+     "Destination",
+     "Delay"
+    ],
+    "num_columns": 2,
+    "num_rows": 8,
+    "preview": [
+     [
+      "HNL",
+      257
+     ],
+     [
+      "EWR",
+      28
+     ],
+     [
+      "STL",
+      -3
+     ],
+     [
+      "SAN",
+      0
+     ],
+     [
+      "PHL",
+      64
+     ],
+     [
+      "SEA",
+      -6
+     ],
+     [
+      "JFK",
+      12
+     ],
+     [
+      "HNL",
+      5
+     ]
+    ]
+   },
+   "kwargs": {},
+   "operation": "group",
+   "output": {
+    "columns": [
+     "Destination",
+     "Delay max"
+    ],
+    "num_columns": 2,
+    "num_rows": 7,
+    "preview": [
+     [
+      "EWR",
+      28
+     ],
+     [
+      "HNL",
+      257
+     ],
+     [
+      "JFK",
+      12
+     ],
+     [
+      "PHL",
+      64
+     ],
+     [
+      "SAN",
+      0
+     ],
+     [
+      "SEA",
+      -6
+     ],
+     [
+      "STL",
+      -3
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 2,
+    "stmt_start": 2,
+    "target": null
+   },
+   "step_id": 5,
+   "sub_steps": [
+    {
+     "input_highlights": {
+      "columns": [
+       "Destination"
+      ]
+     },
+     "message": "group('Destination', max) collapses rows that share the same value in 'Destination', then applies max to the other columns. Each result column is named after its source column and the function.",
+     "output_state": {
+      "columns": [
+       "Destination",
+       "Delay max"
+      ],
+      "num_columns": 2,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "detail": "Unique values (sorted): ['EWR', 'HNL', 'JFK', 'PHL', 'SAN', 'SEA', 'STL']",
+     "input_highlights": {
+      "columns": [
+       "Destination"
+      ]
+     },
+     "message": "Find the unique values in 'Destination'. Each one becomes exactly one row of the result.",
+     "output_state": {
+      "columns": [
+       "Destination",
+       "Delay max"
+      ],
+      "num_columns": 2,
+      "num_rows": 0,
+      "preview": []
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Destination"
+      ],
+      "rows": [
+       1
+      ]
+     },
+     "message": "'EWR': collect the values from each matching row into an array, one array per column.",
+     "output_highlights": {
+      "rows": [
+       0
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Destination",
+       "Delay max"
+      ],
+      "num_columns": 2,
+      "num_rows": 1,
+      "preview": [
+       [
+        "EWR",
+        [
+         28
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Destination"
+      ],
+      "rows": [
+       0,
+       7
+      ]
+     },
+     "message": "'HNL': collect the values from each matching row into an array, one array per column.",
+     "output_highlights": {
+      "rows": [
+       1
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Destination",
+       "Delay max"
+      ],
+      "num_columns": 2,
+      "num_rows": 2,
+      "preview": [
+       [
+        "EWR",
+        [
+         28
+        ]
+       ],
+       [
+        "HNL",
+        [
+         257,
+         5
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Destination"
+      ],
+      "rows": [
+       6
+      ]
+     },
+     "message": "'JFK': collect the values from each matching row into an array, one array per column.",
+     "output_highlights": {
+      "rows": [
+       2
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Destination",
+       "Delay max"
+      ],
+      "num_columns": 2,
+      "num_rows": 3,
+      "preview": [
+       [
+        "EWR",
+        [
+         28
+        ]
+       ],
+       [
+        "HNL",
+        [
+         257,
+         5
+        ]
+       ],
+       [
+        "JFK",
+        [
+         12
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Destination"
+      ],
+      "rows": [
+       4
+      ]
+     },
+     "message": "'PHL': collect the values from each matching row into an array, one array per column.",
+     "output_highlights": {
+      "rows": [
+       3
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Destination",
+       "Delay max"
+      ],
+      "num_columns": 2,
+      "num_rows": 4,
+      "preview": [
+       [
+        "EWR",
+        [
+         28
+        ]
+       ],
+       [
+        "HNL",
+        [
+         257,
+         5
+        ]
+       ],
+       [
+        "JFK",
+        [
+         12
+        ]
+       ],
+       [
+        "PHL",
+        [
+         64
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Destination"
+      ],
+      "rows": [
+       3
+      ]
+     },
+     "message": "'SAN': collect the values from each matching row into an array, one array per column.",
+     "output_highlights": {
+      "rows": [
+       4
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Destination",
+       "Delay max"
+      ],
+      "num_columns": 2,
+      "num_rows": 5,
+      "preview": [
+       [
+        "EWR",
+        [
+         28
+        ]
+       ],
+       [
+        "HNL",
+        [
+         257,
+         5
+        ]
+       ],
+       [
+        "JFK",
+        [
+         12
+        ]
+       ],
+       [
+        "PHL",
+        [
+         64
+        ]
+       ],
+       [
+        "SAN",
+        [
+         0
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Destination"
+      ],
+      "rows": [
+       5
+      ]
+     },
+     "message": "'SEA': collect the values from each matching row into an array, one array per column.",
+     "output_highlights": {
+      "rows": [
+       5
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Destination",
+       "Delay max"
+      ],
+      "num_columns": 2,
+      "num_rows": 6,
+      "preview": [
+       [
+        "EWR",
+        [
+         28
+        ]
+       ],
+       [
+        "HNL",
+        [
+         257,
+         5
+        ]
+       ],
+       [
+        "JFK",
+        [
+         12
+        ]
+       ],
+       [
+        "PHL",
+        [
+         64
+        ]
+       ],
+       [
+        "SAN",
+        [
+         0
+        ]
+       ],
+       [
+        "SEA",
+        [
+         -6
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "input_highlights": {
+      "columns": [
+       "Destination"
+      ],
+      "rows": [
+       2
+      ]
+     },
+     "message": "'STL': collect the values from each matching row into an array, one array per column.",
+     "output_highlights": {
+      "rows": [
+       6
+      ]
+     },
+     "output_state": {
+      "columns": [
+       "Destination",
+       "Delay max"
+      ],
+      "num_columns": 2,
+      "num_rows": 7,
+      "preview": [
+       [
+        "EWR",
+        [
+         28
+        ]
+       ],
+       [
+        "HNL",
+        [
+         257,
+         5
+        ]
+       ],
+       [
+        "JFK",
+        [
+         12
+        ]
+       ],
+       [
+        "PHL",
+        [
+         64
+        ]
+       ],
+       [
+        "SAN",
+        [
+         0
+        ]
+       ],
+       [
+        "SEA",
+        [
+         -6
+        ]
+       ],
+       [
+        "STL",
+        [
+         -3
+        ]
+       ]
+      ]
+     }
+    },
+    {
+     "detail": "max([28]) = 28",
+     "message": "Finally, apply max to each array. Every array collapses to a single value."
+    }
+   ]
+  }
+ ]
+}

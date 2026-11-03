@@ -1,0 +1,437 @@
+{
+  "categories": [
+    {
+      "id": "basics",
+      "name": "Basics",
+      "description": "Fundamental table operations"
+    },
+    {
+      "id": "filtering",
+      "name": "Filtering",
+      "description": "Select rows by conditions"
+    },
+    {
+      "id": "sorting",
+      "name": "Sorting",
+      "description": "Order rows by values"
+    },
+    {
+      "id": "grouping",
+      "name": "Grouping",
+      "description": "Aggregate and summarize"
+    },
+    {
+      "id": "joining",
+      "name": "Joining",
+      "description": "Combine multiple tables"
+    },
+    {
+      "id": "transforming",
+      "name": "Transforming",
+      "description": "Modify table structure"
+    },
+    {
+      "id": "plotting",
+      "name": "Plotting",
+      "description": "Draw charts from a table"
+    },
+    {
+      "id": "sampling",
+      "name": "Sampling",
+      "description": "Random rows: sample, shuffle, split"
+    }
+  ],
+  "examples": [
+    {
+      "id": "select-columns",
+      "title": "Selecting Columns",
+      "description": "Choose specific columns from a table",
+      "category": "basics",
+      "operations": [
+        "select"
+      ],
+      "markdown": "## Selecting columns\n\n`select` builds a new table containing only the columns you name, in the order you name them. The original table is left untouched. That is true of every `Table` method.\n\nStep through the visualization and notice that the number of rows never changes; only the columns do.",
+      "cells": [
+        "from datascience import *",
+        "# An ice cream shop's menu\ncones = Table().with_columns(\n    'Flavor', make_array('strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'),\n    'Color', make_array('pink', 'light brown', 'white', 'dark brown', 'pink', 'green'),\n    'Price', make_array(3.55, 4.75, 4.25, 5.25, 3.95, 4.50)\n)\ncones",
+        "# Just the flavor and the price\ncones.select('Flavor', 'Price')"
+      ]
+    },
+    {
+      "id": "filter-rows",
+      "title": "Filtering Rows",
+      "description": "Keep only rows that match a condition",
+      "category": "filtering",
+      "operations": [
+        "where"
+      ],
+      "markdown": "## Filtering rows with `where`\n\n`where(column, value)` keeps only the rows whose value in that column matches. Here we keep the chocolate cones.\n\nAs you step through, watch each row get checked against the condition: kept rows are highlighted, and the ones that don't match are struck through before they disappear from the result.",
+      "cells": [
+        "from datascience import *",
+        "# An ice cream shop's menu\ncones = Table().with_columns(\n    'Flavor', make_array('strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'),\n    'Color', make_array('pink', 'light brown', 'white', 'dark brown', 'pink', 'green'),\n    'Price', make_array(3.55, 4.75, 4.25, 5.25, 3.95, 4.50)\n)\ncones",
+        "# Only the chocolate cones\nchocolate = cones.where('Flavor', 'chocolate')\nchocolate"
+      ]
+    },
+    {
+      "id": "sort-values",
+      "title": "Sorting by Values",
+      "description": "Order rows by a column",
+      "category": "sorting",
+      "operations": [
+        "sort"
+      ],
+      "markdown": "## Sorting rows\n\n`sort(column)` orders the rows by a column, smallest first. Passing `descending=True` flips that, so the highest salary comes out on top.\n\nEvery row survives a sort. Only their order changes. Watch the rows move in the step-through.",
+      "cells": [
+        "from datascience import *",
+        "# Salaries in millions of dollars for a few players\nnba = Table().with_columns(\n    'PLAYER', make_array('Stephen Curry', 'Klay Thompson', 'Draymond Green', 'LeBron James', 'Anthony Davis', 'Kawhi Leonard', 'Damian Lillard'),\n    'POSITION', make_array('PG', 'SG', 'PF', 'SF', 'PF', 'SF', 'PG'),\n    'TEAM', make_array('Golden State Warriors', 'Golden State Warriors', 'Golden State Warriors', 'Los Angeles Lakers', 'Los Angeles Lakers', 'Los Angeles Clippers', 'Portland Trail Blazers'),\n    'SALARY', make_array(40.2, 32.7, 18.5, 37.4, 27.1, 32.7, 29.8)\n)\nnba",
+        "# Highest paid first\nnba.sort('SALARY', descending=True)"
+      ]
+    },
+    {
+      "id": "add-column",
+      "title": "Adding a Column",
+      "description": "Add a new column to the table",
+      "category": "transforming",
+      "operations": [
+        "with_column"
+      ],
+      "markdown": "## Adding a column\n\n`with_column(label, values)` returns a copy of the table with one more column. The array of values must have exactly one entry per row, in row order.\n\nHere the new column is built from an existing one: the price with sales tax. Watch it appear on the right of the result.",
+      "cells": [
+        "from datascience import *",
+        "# An ice cream shop's menu\ncones = Table().with_columns(\n    'Flavor', make_array('strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'),\n    'Color', make_array('pink', 'light brown', 'white', 'dark brown', 'pink', 'green'),\n    'Price', make_array(3.55, 4.75, 4.25, 5.25, 3.95, 4.50)\n)\ncones",
+        "# Price including 9% sales tax, one value per row\nwith_tax = cones.column('Price') * 1.09\ncones.with_column('Price with Tax', with_tax)"
+      ]
+    },
+    {
+      "id": "drop-column",
+      "title": "Dropping Columns",
+      "description": "Remove columns from a table",
+      "category": "basics",
+      "operations": [
+        "drop"
+      ],
+      "markdown": "## Dropping columns\n\n`drop` is the mirror image of `select`: you name the columns you want to get rid of, and everything else stays.\n\nUse it when a table has many columns and it is easier to say what you don't need.",
+      "cells": [
+        "from datascience import *",
+        "# Tall buildings: height in meters and the year they were completed\nskyscrapers = Table().with_columns(\n    'name', make_array('One World Trade Center', 'Willis Tower', 'Empire State Building', 'Salesforce Tower', 'Aon Center', 'Transamerica Pyramid', '30 Hudson Yards'),\n    'material', make_array('composite', 'steel', 'steel', 'composite', 'steel', 'concrete', 'composite'),\n    'city', make_array('New York City', 'Chicago', 'New York City', 'San Francisco', 'Chicago', 'San Francisco', 'New York City'),\n    'height', make_array(541, 442, 381, 326, 346, 260, 387),\n    'completed', make_array(2014, 1974, 1931, 2018, 1973, 1972, 2019)\n)\nskyscrapers",
+        "# Keep everything except the material and the year\nskyscrapers.drop('material', 'completed')"
+      ]
+    },
+    {
+      "id": "group-aggregate",
+      "title": "Grouping and Counting",
+      "description": "Count how many rows share each value",
+      "category": "grouping",
+      "operations": [
+        "group"
+      ],
+      "markdown": "## Grouping and counting\n\n`group(column)` collects the rows that share a value in the column and counts them. Every distinct flavor becomes one row of the result, with a `count` column.\n\nStep through it: first the rows are gathered by flavor, then each group collapses into one row.",
+      "cells": [
+        "from datascience import *",
+        "# An ice cream shop's menu\ncones = Table().with_columns(\n    'Flavor', make_array('strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'),\n    'Color', make_array('pink', 'light brown', 'white', 'dark brown', 'pink', 'green'),\n    'Price', make_array(3.55, 4.75, 4.25, 5.25, 3.95, 4.50)\n)\ncones",
+        "# How many cones of each flavor\ncones.group('Flavor')"
+      ]
+    },
+    {
+      "id": "join-tables",
+      "title": "Joining Tables",
+      "description": "Combine two tables on a common column",
+      "category": "joining",
+      "operations": [
+        "join"
+      ],
+      "markdown": "## Joining two tables\n\n`join(column, other_table)` matches rows from two tables that share a value in the named column and lines them up side by side.\n\nBoth tables have a cafe name. Watch the second table appear under the first, with matching cafes highlighted as each row is paired up. A cafe that appears in only one table is dropped.",
+      "cells": [
+        "from datascience import *",
+        "# Drinks sold at cafes near campus\ndrinks = Table().with_columns(\n    'Drink', make_array('Milk Tea', 'Espresso', 'Latte', 'Espresso'),\n    'Cafe', make_array('Asha', 'Strada', 'Strada', 'FSM'),\n    'Price', make_array(4.00, 2.00, 3.00, 2.00)\n)\ndrinks",
+        "# Coupons that some cafes accept\ndiscounts = Table().with_columns(\n    'Coupon % off', make_array(10, 25, 5),\n    'Location', make_array('Asha', 'Strada', 'Asha')\n)\ndiscounts",
+        "# Pair each drink with every coupon its cafe accepts\ndrinks.join('Cafe', discounts, 'Location')"
+      ]
+    },
+    {
+      "id": "chain-operations",
+      "title": "Chaining Operations",
+      "description": "Combine multiple operations in sequence",
+      "category": "basics",
+      "operations": [
+        "where",
+        "select",
+        "sort"
+      ],
+      "markdown": "## Chaining operations\n\nBecause every `Table` method returns a new table, you can call another method on the result right away. Wrapping the expression in parentheses lets you put each step on its own line.\n\nRead it top to bottom: keep the Warriors, keep only player and salary, then sort. The visualization shows one step per method call.",
+      "cells": [
+        "from datascience import *",
+        "# Salaries in millions of dollars for a few players\nnba = Table().with_columns(\n    'PLAYER', make_array('Stephen Curry', 'Klay Thompson', 'Draymond Green', 'LeBron James', 'Anthony Davis', 'Kawhi Leonard', 'Damian Lillard'),\n    'POSITION', make_array('PG', 'SG', 'PF', 'SF', 'PF', 'SF', 'PG'),\n    'TEAM', make_array('Golden State Warriors', 'Golden State Warriors', 'Golden State Warriors', 'Los Angeles Lakers', 'Los Angeles Lakers', 'Los Angeles Clippers', 'Portland Trail Blazers'),\n    'SALARY', make_array(40.2, 32.7, 18.5, 37.4, 27.1, 32.7, 29.8)\n)\nnba",
+        "# Warriors, highest paid first\nwarriors = (nba\n    .where('TEAM', 'Golden State Warriors')\n    .select('PLAYER', 'SALARY')\n    .sort('SALARY', descending=True))\nwarriors"
+      ]
+    },
+    {
+      "id": "multiple-filters",
+      "title": "Multiple Filters",
+      "description": "Apply multiple where conditions",
+      "category": "filtering",
+      "operations": [
+        "where"
+      ],
+      "markdown": "## Filtering twice\n\nA second `where` on the result of the first narrows things down further. `are.above(30)` is a *predicate*, a reusable condition, from the `are` collection.\n\nCompare the two filter steps: the first checks the Destination column, the second checks the delay against a threshold.",
+      "cells": [
+        "from datascience import *",
+        "# United flights out of SFO: delay in minutes (negative means early)\nunited = Table().with_columns(\n    'Date', make_array('6/1/15', '6/1/15', '6/1/15', '6/1/15', '6/2/15', '6/2/15', '6/2/15', '6/3/15'),\n    'Flight Number', make_array(73, 217, 237, 250, 267, 273, 290, 73),\n    'Destination', make_array('HNL', 'EWR', 'STL', 'SAN', 'PHL', 'SEA', 'JFK', 'HNL'),\n    'Delay', make_array(257, 28, -3, 0, 64, -6, 12, 5)\n)\nunited",
+        "# Flights to Hawaii\nto_hnl = united.where('Destination', 'HNL')\nto_hnl",
+        "# Of those, the ones more than half an hour late\nlate = to_hnl.where('Delay', are.above(30))\nlate"
+      ]
+    },
+    {
+      "id": "pivot-table",
+      "title": "Pivot Tables",
+      "description": "Reshape data with pivot operations",
+      "category": "transforming",
+      "operations": [
+        "pivot"
+      ],
+      "markdown": "## Pivoting\n\n`pivot(columns, rows, values, function)` turns one column's values into column headers and another's into row labels, then fills each cell by aggregating the `values` column.\n\nHere every material becomes a column and every city a row, and each cell is the tallest building of that kind in that city. Step through to see the source rows feed each cell.",
+      "cells": [
+        "from datascience import *",
+        "# Tall buildings: height in meters and the year they were completed\nskyscrapers = Table().with_columns(\n    'name', make_array('One World Trade Center', 'Willis Tower', 'Empire State Building', 'Salesforce Tower', 'Aon Center', 'Transamerica Pyramid', '30 Hudson Yards'),\n    'material', make_array('composite', 'steel', 'steel', 'composite', 'steel', 'concrete', 'composite'),\n    'city', make_array('New York City', 'Chicago', 'New York City', 'San Francisco', 'Chicago', 'San Francisco', 'New York City'),\n    'height', make_array(541, 442, 381, 326, 346, 260, 387),\n    'completed', make_array(2014, 1974, 1931, 2018, 1973, 1972, 2019)\n)\nskyscrapers",
+        "# Tallest building by city and material\nskyscrapers.pivot('material', 'city', 'height', max)"
+      ]
+    },
+    {
+      "id": "group-multiple",
+      "title": "Group with a Function",
+      "description": "Group by column and summarize the others",
+      "category": "grouping",
+      "operations": [
+        "group"
+      ],
+      "markdown": "## Different aggregates on the same groups\n\nThe function you pass to `group` decides what each group collapses to. `np.average` gives the average salary per team; `max` gives the highest.\n\nThe groups are identical in both calls. Only the number in the salary column changes, and so does its name: `SALARY average` versus `SALARY max`.",
+      "cells": [
+        "from datascience import *\nimport numpy as np",
+        "# Salaries in millions of dollars for a few players\nnba = Table().with_columns(\n    'PLAYER', make_array('Stephen Curry', 'Klay Thompson', 'Draymond Green', 'LeBron James', 'Anthony Davis', 'Kawhi Leonard', 'Damian Lillard'),\n    'POSITION', make_array('PG', 'SG', 'PF', 'SF', 'PF', 'SF', 'PG'),\n    'TEAM', make_array('Golden State Warriors', 'Golden State Warriors', 'Golden State Warriors', 'Los Angeles Lakers', 'Los Angeles Lakers', 'Los Angeles Clippers', 'Portland Trail Blazers'),\n    'SALARY', make_array(40.2, 32.7, 18.5, 37.4, 27.1, 32.7, 29.8)\n)\nnba",
+        "# Average salary on each team\nnba.select('TEAM', 'SALARY').group('TEAM', np.average)",
+        "# Highest salary on each team\nnba.select('TEAM', 'SALARY').group('TEAM', max)"
+      ]
+    },
+    {
+      "id": "join-multiple-keys",
+      "title": "Joining Films with Studios",
+      "description": "Add information about each film from a second table",
+      "category": "joining",
+      "operations": [
+        "join"
+      ],
+      "markdown": "## Joining on a studio name\n\n`Studio` is the key that links a film to the company that made it. `join` pairs each film with the row in `studios` that has the same name.\n\nWatch the keys get matched one at a time, and notice the joined table keeps the columns from both.",
+      "cells": [
+        "from datascience import *",
+        "# Highest-grossing films, gross in millions of dollars\ntop = Table().with_columns(\n    'Title', make_array('Star Wars', 'E.T.', 'Titanic', 'Jurassic Park', 'The Lion King', 'Avatar', 'Jaws'),\n    'Studio', make_array('Fox', 'Universal', 'Paramount', 'Universal', 'Buena Vista', 'Fox', 'Universal'),\n    'Gross', make_array(461, 435, 659, 402, 423, 761, 260),\n    'Year', make_array(1977, 1982, 1997, 1993, 1994, 2009, 1975)\n)\ntop",
+        "# Where each studio is based\nstudios = Table().with_columns(\n    'Studio', make_array('Fox', 'Universal', 'Paramount', 'Buena Vista'),\n    'Founded', make_array(1935, 1912, 1912, 1953)\n)\nstudios",
+        "# Each film with its studio's founding year\ntop.join('Studio', studios)"
+      ]
+    },
+    {
+      "id": "complex-workflow",
+      "title": "A Full Pipeline",
+      "description": "Filter, select, group and sort in one expression",
+      "category": "basics",
+      "operations": [
+        "where",
+        "select",
+        "group",
+        "sort"
+      ],
+      "markdown": "## A full pipeline\n\nThis is the shape of most real analyses: filter down to the rows you care about, select the useful columns, group to summarise, and sort to rank.\n\nWatch how the table changes character at each step, from individual buildings to one row per city. The sort uses `height max`, the column that `group` created.",
+      "cells": [
+        "from datascience import *",
+        "# Tall buildings: height in meters and the year they were completed\nskyscrapers = Table().with_columns(\n    'name', make_array('One World Trade Center', 'Willis Tower', 'Empire State Building', 'Salesforce Tower', 'Aon Center', 'Transamerica Pyramid', '30 Hudson Yards'),\n    'material', make_array('composite', 'steel', 'steel', 'composite', 'steel', 'concrete', 'composite'),\n    'city', make_array('New York City', 'Chicago', 'New York City', 'San Francisco', 'Chicago', 'San Francisco', 'New York City'),\n    'height', make_array(541, 442, 381, 326, 346, 260, 387),\n    'completed', make_array(2014, 1974, 1931, 2018, 1973, 1972, 2019)\n)\nskyscrapers",
+        "# Tallest modern building in each city, tallest city first\nresult = (skyscrapers\n    .where('completed', are.above(1970))\n    .select('city', 'height')\n    .group('city', max)\n    .sort('height max', descending=True))\nresult"
+      ]
+    },
+    {
+      "id": "take-sample",
+      "title": "Taking Rows by Position",
+      "description": "Pick rows by their position",
+      "category": "basics",
+      "operations": [
+        "sort",
+        "take"
+      ],
+      "markdown": "## Taking rows by position\n\n`take(n)` returns the row at position `n`, and `take(np.arange(3))` returns positions 0, 1 and 2. Row positions start at 0.\n\nSorting first makes `take` useful: the top three grossing films are the first three rows of the sorted table.",
+      "cells": [
+        "from datascience import *\nimport numpy as np",
+        "# Highest-grossing films, gross in millions of dollars\ntop = Table().with_columns(\n    'Title', make_array('Star Wars', 'E.T.', 'Titanic', 'Jurassic Park', 'The Lion King', 'Avatar', 'Jaws'),\n    'Studio', make_array('Fox', 'Universal', 'Paramount', 'Universal', 'Buena Vista', 'Fox', 'Universal'),\n    'Gross', make_array(461, 435, 659, 402, 423, 761, 260),\n    'Year', make_array(1977, 1982, 1997, 1993, 1994, 2009, 1975)\n)\ntop",
+        "# Top three by gross\ntop.sort('Gross', descending=True).take(np.arange(3))"
+      ]
+    },
+    {
+      "id": "pivot-complex",
+      "title": "Pivot with Sums",
+      "description": "Totals for every pair of categories",
+      "category": "transforming",
+      "operations": [
+        "pivot"
+      ],
+      "markdown": "## Pivoting to totals\n\nEach cell of the pivot is the sum of population over the rows that share that country and year. Because every country appears once per year here, each cell holds exactly one value.\n\nStep through and check that every (country, year) pair from the original table lands in exactly one cell.",
+      "cells": [
+        "from datascience import *",
+        "# Population in millions\npopulation = Table().with_columns(\n    'Country', make_array('Brazil', 'Brazil', 'Kenya', 'Kenya', 'Japan', 'Japan'),\n    'Year', make_array(2000, 2010, 2000, 2010, 2000, 2010),\n    'Population', make_array(175, 196, 31, 42, 127, 128)\n)\npopulation",
+        "# One column per year, one row per country\npopulation.pivot('Year', 'Country', 'Population', sum)"
+      ]
+    },
+    {
+      "id": "group-with-aggregate",
+      "title": "Average versus Maximum",
+      "description": "Summarize groups two different ways",
+      "category": "grouping",
+      "operations": [
+        "group"
+      ],
+      "markdown": "## Average versus maximum delay\n\nGrouping by destination with `np.average` gives the typical delay; grouping with `max` gives the worst one. The groups are the same, the summary differs.\n\nNotice the group step happens first in both calls, and the aggregation happens after.",
+      "cells": [
+        "from datascience import *\nimport numpy as np",
+        "# United flights out of SFO: delay in minutes (negative means early)\nunited = Table().with_columns(\n    'Date', make_array('6/1/15', '6/1/15', '6/1/15', '6/1/15', '6/2/15', '6/2/15', '6/2/15', '6/3/15'),\n    'Flight Number', make_array(73, 217, 237, 250, 267, 273, 290, 73),\n    'Destination', make_array('HNL', 'EWR', 'STL', 'SAN', 'PHL', 'SEA', 'JFK', 'HNL'),\n    'Delay', make_array(257, 28, -3, 0, 64, -6, 12, 5)\n)\nunited",
+        "# Typical delay per destination\nunited.select('Destination', 'Delay').group('Destination', np.average)",
+        "# Worst delay per destination\nunited.select('Destination', 'Delay').group('Destination', max)"
+      ]
+    },
+    {
+      "id": "multi-step-analysis",
+      "title": "Multi-Step Data Analysis",
+      "description": "Complete workflow: filter, group, sort, and select",
+      "category": "basics",
+      "operations": [
+        "where",
+        "group",
+        "sort",
+        "select"
+      ],
+      "markdown": "## Filter, group, sort, select\n\nA four-step analysis, one method at a time. Keep the babies born to non-smokers, average each column, and read off the typical birth weight.\n\nWatch the `Maternal Smoker` column disappear after the group step: once rows are collapsed into groups, only the grouped column and the summaries remain.",
+      "cells": [
+        "from datascience import *\nimport numpy as np",
+        "# Newborns: birth weight in ounces, pregnancy length in days, whether the mother smoked\nbaby = Table().with_columns(\n    'Birth Weight', make_array(120, 113, 128, 108, 136, 138, 132, 120, 143, 140, 144, 141),\n    'Gestational Days', make_array(284, 282, 279, 282, 286, 244, 245, 289, 299, 351, 282, 279),\n    'Maternal Smoker', make_array(False, False, True, True, False, False, False, False, False, True, False, False)\n)\nbaby",
+        "# Babies whose mothers did not smoke\nnon_smokers = baby.where('Maternal Smoker', False)\nnon_smokers",
+        "# Average of every column, for smokers and non-smokers\naverages = baby.group('Maternal Smoker', np.average)\naverages",
+        "# Heaviest group first\nby_weight = averages.sort('Birth Weight average', descending=True)\nby_weight",
+        "# Just the columns worth reporting\nby_weight.select('Maternal Smoker', 'Birth Weight average')"
+      ]
+    },
+    {
+      "id": "scatter-plot",
+      "title": "Scatter Plot",
+      "description": "Plot two numerical columns against each other",
+      "category": "plotting",
+      "operations": [
+        "scatter"
+      ],
+      "markdown": "## Scatter plot\n\n`scatter(x_column, y_column)` draws one point per row. It is the first thing to try when you want to know whether two numerical variables are related.\n\n`fit_line=True` adds the least-squares regression line. Galton's question: do taller parents have taller children? Look at how closely the points follow the line.",
+      "cells": [
+        "from datascience import *\nimport numpy as np\nimport matplotlib.pyplot as plots\nplots.style.use('fivethirtyeight')",
+        "# Galton's families: heights in inches of a parent and their adult child\nheights = Table().with_columns(\n    'Parent Average', make_array(72.7, 70.5, 69.0, 66.5, 65.5, 64.0, 68.0, 71.0),\n    'Child', make_array(73.2, 69.2, 69.0, 66.5, 64.0, 63.5, 68.5, 70.0)\n)\nheights",
+        "# One point per family, plus the line of best fit\nheights.scatter('Parent Average', 'Child', fit_line=True)"
+      ]
+    },
+    {
+      "id": "histogram",
+      "title": "Histogram",
+      "description": "See the distribution of one numerical column",
+      "category": "plotting",
+      "operations": [
+        "hist"
+      ],
+      "markdown": "## Histogram\n\n`hist(column, bins=...)` shows how the values of one column are distributed. Each bar covers a bin, and the bins are half-open: the bin `[120, 130)` contains 120 up to but not including 130.\n\nThe vertical axis is percent per unit, so the *area* of a bar is the percent of rows in that bin. That is why the bars stay comparable even when bins have different widths.",
+      "cells": [
+        "from datascience import *\nimport numpy as np\nimport matplotlib.pyplot as plots\nplots.style.use('fivethirtyeight')",
+        "# Newborns: birth weight in ounces, pregnancy length in days, whether the mother smoked\nbaby = Table().with_columns(\n    'Birth Weight', make_array(120, 113, 128, 108, 136, 138, 132, 120, 143, 140, 144, 141),\n    'Gestational Days', make_array(284, 282, 279, 282, 286, 244, 245, 289, 299, 351, 282, 279),\n    'Maternal Smoker', make_array(False, False, True, True, False, False, False, False, False, True, False, False)\n)\nbaby",
+        "# Birth weights in bins of 10 ounces\nbaby.hist('Birth Weight', bins=np.arange(100, 151, 10))"
+      ]
+    },
+    {
+      "id": "bar-chart",
+      "title": "Bar Chart",
+      "description": "Compare counts across categories",
+      "category": "plotting",
+      "operations": [
+        "group",
+        "sort",
+        "barh"
+      ],
+      "markdown": "## Bar chart\n\nCategorical data is summarised with `group`, which produces one row per category and a `count` column. `barh(category_column)` then draws one horizontal bar per row, using the category column for the labels and the remaining numerical columns for the bar lengths.\n\nSorting the grouped table first makes the chart easier to read. Step through the visualization to watch the rows collapse into groups before the chart is drawn.",
+      "cells": [
+        "from datascience import *\nimport numpy as np\nimport matplotlib.pyplot as plots\nplots.style.use('fivethirtyeight')",
+        "# Highest-grossing films, gross in millions of dollars\ntop = Table().with_columns(\n    'Title', make_array('Star Wars', 'E.T.', 'Titanic', 'Jurassic Park', 'The Lion King', 'Avatar', 'Jaws'),\n    'Studio', make_array('Fox', 'Universal', 'Paramount', 'Universal', 'Buena Vista', 'Fox', 'Universal'),\n    'Gross', make_array(461, 435, 659, 402, 423, 761, 260),\n    'Year', make_array(1977, 1982, 1997, 1993, 1994, 2009, 1975)\n)\ntop",
+        "# How many of the top films each studio made\nby_studio = top.group('Studio')\nby_studio",
+        "# Largest first, then one bar per row\nby_studio.sort('count', descending=True).barh('Studio')"
+      ]
+    },
+    {
+      "id": "apply-function",
+      "title": "Applying a Function",
+      "description": "Call a function on every row: one column, two columns, or the whole row",
+      "category": "transforming",
+      "operations": [
+        "apply",
+        "with_column"
+      ],
+      "markdown": "## Applying a function to every row\n\n`apply(function, column)` calls the function once per row, passing in that row's value from the column, and collects the results in an array. The array is not a table: it has no column label of its own, and it lives outside the table until you put it back in with `with_column`.\n\nThree ways to call it, each shown below:\n\n- **one column**: `apply(to_feet, 'height')` passes one value per row;\n- **two columns**: `apply(describe, 'name', 'city')` passes two values per row, in the order the labels are given, so the function needs two parameters;\n- **the whole row**: `apply(is_recent)` with no column passes the entire row, and the function reads what it needs with `row.item('completed')`.\n\nStep through the visualization and watch the function run on one row at a time.",
+      "cells": [
+        "from datascience import *",
+        "# Tall buildings: height in meters and the year they were completed\nskyscrapers = Table().with_columns(\n    'name', make_array('One World Trade Center', 'Willis Tower', 'Empire State Building', 'Salesforce Tower', 'Aon Center', 'Transamerica Pyramid', '30 Hudson Yards'),\n    'material', make_array('composite', 'steel', 'steel', 'composite', 'steel', 'concrete', 'composite'),\n    'city', make_array('New York City', 'Chicago', 'New York City', 'San Francisco', 'Chicago', 'San Francisco', 'New York City'),\n    'height', make_array(541, 442, 381, 326, 346, 260, 387),\n    'completed', make_array(2014, 1974, 1931, 2018, 1973, 1972, 2019)\n)\nskyscrapers",
+        "# One column: the function gets one value per row\ndef to_feet(meters):\n    return round(meters * 3.281)\n\nfeet = skyscrapers.apply(to_feet, 'height')\nfeet",
+        "# Put the array back into the table as a new column\nskyscrapers.with_column('height (ft)', feet)",
+        "# Two columns: the function gets two values per row, in the order the labels are listed\ndef describe(name, city):\n    return name + ' in ' + city\n\nskyscrapers.apply(describe, 'name', 'city')",
+        "# No column named: the whole row is passed in\ndef is_recent(row):\n    return row.item('completed') >= 2010\n\nskyscrapers.apply(is_recent)"
+      ]
+    },
+    {
+      "id": "random-sample",
+      "title": "Random Sample",
+      "description": "Draw rows at random, with or without replacement",
+      "category": "sampling",
+      "operations": [
+        "sample",
+        "shuffle"
+      ],
+      "markdown": "## Sampling rows\n\n`sample(k)` draws `k` rows at random. By default it draws **with replacement**: after each draw the row goes back in, so the same flight can show up more than once. `sample(k, with_replacement=False)` draws each row at most once. `shuffle()` is a sample of every row without replacement, which just puts the table in a random order.\n\nThe seed makes the random draws repeatable, so the visualization matches what you see when you run it. Step through to watch each draw pick a row and copy it into the result.",
+      "cells": [
+        "from datascience import *\nimport numpy as np\nnp.random.seed(8)",
+        "# United flights out of SFO: delay in minutes (negative means early)\nunited = Table().with_columns(\n    'Date', make_array('6/1/15', '6/1/15', '6/1/15', '6/1/15', '6/2/15', '6/2/15', '6/2/15', '6/3/15'),\n    'Flight Number', make_array(73, 217, 237, 250, 267, 273, 290, 73),\n    'Destination', make_array('HNL', 'EWR', 'STL', 'SAN', 'PHL', 'SEA', 'JFK', 'HNL'),\n    'Delay', make_array(257, 28, -3, 0, 64, -6, 12, 5)\n)\nunited",
+        "# Five draws with replacement: expect some repeats\nunited.sample(5)",
+        "# Three draws without replacement: no repeats possible\nunited.sample(3, with_replacement=False)",
+        "# Every row once, in random order\nunited.shuffle()"
+      ]
+    },
+    {
+      "id": "split-table",
+      "title": "Splitting a Table",
+      "description": "Randomly divide rows into two tables",
+      "category": "sampling",
+      "operations": [
+        "split"
+      ],
+      "markdown": "## Splitting into two tables\n\n`split(k)` shuffles the rows and then divides them: the first `k` go into one table and the rest into another. Every row lands in exactly one of the two, so the row counts add up to the original.\n\nThis is how a dataset gets divided into a training set and a test set. `split` returns two tables, so the cell unpacks them into two names.",
+      "cells": [
+        "from datascience import *\nimport numpy as np\nnp.random.seed(2)",
+        "# Galton's families: heights in inches of a parent and their adult child\nheights = Table().with_columns(\n    'Parent Average', make_array(72.7, 70.5, 69.0, 66.5, 65.5, 64.0, 68.0, 71.0),\n    'Child', make_array(73.2, 69.2, 69.0, 66.5, 64.0, 63.5, 68.5, 70.0)\n)\nheights",
+        "# Five families to fit a line on, the other three to test it\ntrain, test = heights.split(5)\ntrain",
+        "test"
+      ]
+    },
+    {
+      "id": "column-vs-select",
+      "title": "Column vs Select",
+      "description": "A table with one column is not the same as an array of values",
+      "category": "basics",
+      "operations": [
+        "select",
+        "column"
+      ],
+      "markdown": "## `select` gives a table, `column` gives an array\n\nTwo calls that look alike do very different things. `select('Price')` returns a **table** that happens to have one column: it still has a label, rows, and all the table methods. `column('Price')` returns an **array**: just the values, in order, with no label.\n\nArrays are what arithmetic and numpy functions work on. `np.average(prices)` works; `np.average(price_table)` does not. Step through to see the difference in shape on the right.",
+      "cells": [
+        "from datascience import *\nimport numpy as np",
+        "# An ice cream shop's menu\ncones = Table().with_columns(\n    'Flavor', make_array('strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'),\n    'Color', make_array('pink', 'light brown', 'white', 'dark brown', 'pink', 'green'),\n    'Price', make_array(3.55, 4.75, 4.25, 5.25, 3.95, 4.50)\n)\ncones",
+        "# A table with one column\nprice_table = cones.select('Price')\nprice_table",
+        "# An array of values\nprices = cones.column('Price')\nprices",
+        "# Arrays are what arithmetic and numpy work on\nnp.average(prices)"
+      ]
+    }
+  ]
+}

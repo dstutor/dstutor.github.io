@@ -1,0 +1,89 @@
+{
+ "error": null,
+ "trace": [
+  {
+   "args": [
+    "Parent Average",
+    [
+     72.7,
+     70.5,
+     69.0,
+     66.5,
+     65.5,
+     64.0,
+     68.0,
+     71.0
+    ],
+    "Child",
+    [
+     73.2,
+     69.2,
+     69.0,
+     66.5,
+     64.0,
+     63.5,
+     68.5,
+     70.0
+    ]
+   ],
+   "explanation": "Created table with 2 columns and 8 rows",
+   "input": {
+    "columns": [],
+    "num_columns": 0,
+    "num_rows": 0,
+    "preview": []
+   },
+   "kwargs": {},
+   "operation": "with_columns",
+   "output": {
+    "columns": [
+     "Parent Average",
+     "Child"
+    ],
+    "num_columns": 2,
+    "num_rows": 8,
+    "preview": [
+     [
+      72.7,
+      73.2
+     ],
+     [
+      70.5,
+      69.2
+     ],
+     [
+      69.0,
+      69.0
+     ],
+     [
+      66.5,
+      66.5
+     ],
+     [
+      65.5,
+      64.0
+     ],
+     [
+      64.0,
+      63.5
+     ],
+     [
+      68.0,
+      68.5
+     ],
+     [
+      71.0,
+      70.0
+     ]
+    ]
+   },
+   "site": {
+    "line": 2,
+    "stmt_end": 5,
+    "stmt_start": 2,
+    "target": "heights"
+   },
+   "step_id": 1
+  }
+ ]
+}
