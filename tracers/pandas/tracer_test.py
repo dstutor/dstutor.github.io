@@ -114,10 +114,21 @@ class OperationTest(unittest.TestCase):
         self.assertEqual(step['output']['columns'][:3], ['Flavor', 'Color', 'Price'])
         self.assertEqual(step['output']['index_columns'], 2)
 
-    def test_pivot_table(self):
+    def test_pivot_table_fills_the_grid_row_by_row(self):
         [step] = trace("cones.pivot_table(index='Flavor', columns='Color', values='Price', aggfunc='mean')")
         self.assertEqual(step['output']['columns'][0], 'Flavor')
-        self.assertEqual(len(step['sub_steps']), 2)
+        frames = step['sub_steps']
+        # The empty grid, one frame per row, the aggregation, then why some cells are NaN
+        self.assertEqual(len(frames), 1 + 6 + 1 + 1)
+        columns = frames[0]['output_state']['columns']
+        self.assertTrue(all(cell == [] for row in frames[0]['output_state']['preview'] for cell in row[1:]))
+        self.assertEqual(frames[2]['message'], "Row 1: its Price 4.75 goes into cell ('chocolate', 'light brown').")
+        chocolate = frames[2]['output_state']['preview'][0]
+        self.assertEqual(chocolate[columns.index('light brown')], [4.75])
+        self.assertEqual(frames[7]['detail'][:5], 'mean(')
+        self.assertIn('NaN', frames[8]['message'])
+        # pandas prints the empty combinations as NaN, and so does the step
+        self.assertIn({'shown': 'NaN'}, step['output']['preview'][0])
 
     def test_chains_record_each_step_in_order(self):
         steps = trace("(cones[cones['Price'] > 4]\n    .sort_values('Price')\n    .groupby('Flavor')\n    .size())")
@@ -129,9 +140,39 @@ class OperationTest(unittest.TestCase):
         steps = trace("def cheap(t):\n    return t[t['Price'] < 4]\ncheap(cones)")
         self.assertEqual([s['operation'] for s in steps], ['filter'])
 
-    def test_nan_becomes_null(self):
+    def test_missing_values_are_shown_as_pandas_prints_them(self):
         [step] = trace("r = pd.DataFrame({'Flavor': ['mint'], 'Stars': [3]})\ncones.merge(r, on='Flavor', how='left')")
-        self.assertIsNone(step['output']['preview'][0][4])
+        self.assertEqual(step['output']['preview'][0][4], {'shown': 'NaN'})
+
+    def test_groupby_collects_each_group_before_combining(self):
+        [step] = trace("cones.groupby('Flavor')['Price'].mean()")
+        chocolate = next(f for f in step['sub_steps'] if f['message'].startswith("Group 'chocolate'"))
+        self.assertIn([4.75, 5.25], chocolate['output_state']['preview'][0])
+        combine = next(f for f in step['sub_steps'] if f['message'].startswith('Then mean()'))
+        self.assertEqual(combine['detail'], 'mean([4.75, 5.25]) = 5')
+
+    def test_merge_matches_one_key_at_a_time(self):
+        [step] = trace("r = pd.DataFrame({'Flavor': ['chocolate', 'mint', 'cookie dough'], 'Stars': [5, 3, 4]})\n"
+                       "cones.merge(r, on='Flavor')")
+        messages = [f['message'] for f in step['sub_steps']]
+        self.assertIn("Key 'chocolate': 2 left rows × 1 right row → 2 rows, each with the columns of both tables.", messages)
+        dropped = step['sub_steps'][-1]
+        self.assertEqual(dropped['input_highlights']['rows_removed'], [0, 2, 4])
+        self.assertEqual(dropped['aux_table']['highlights']['rows_removed'], [2])
+
+    def test_sort_places_rows_in_order(self):
+        [step] = trace("cones.sort_values('Price')")
+        self.assertEqual(step['sub_steps'][1]['message'], 'Row 0 comes first: Price = 3.55.')
+        self.assertEqual(step['sub_steps'][1]['output_highlights'], {'rows': [0]})
+
+    def test_assign_computes_the_new_column_row_by_row(self):
+        assign, setitem = trace("sale = cones.assign(Sale=cones['Price'] * 0.9)\ncones['Tax'] = cones['Price'] * 0.1")
+        self.assertEqual(assign['sub_steps'][0]['message'], "Sale = cones['Price'] * 0.9")
+        self.assertEqual(assign['sub_steps'][0]['input_highlights'], {'columns': ['Price']})
+        self.assertEqual(assign['sub_steps'][1]['message'], 'Row 0: Sale = 3.195')
+        # df['Tax'] = ... is not a call to assign, so it is not titled assign()
+        self.assertEqual(setitem['label'], "set column 'Tax'")
+        self.assertNotIn('label', assign)
 
 
 class RewritingKeepsMeaningTest(unittest.TestCase):

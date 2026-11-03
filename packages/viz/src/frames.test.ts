@@ -116,3 +116,14 @@ describe('stepTitle', () => {
     expect(stepTitle({ ...record, label: 'keep rows where True' })).toBe('keep rows where True');
   });
 });
+
+describe('shownText and formatValue', () => {
+  it('prints a value JSON cannot carry the way its library spells it', async () => {
+    const { shownText, formatValue, isNumericColumn } = await import('./DataTransformation');
+    expect(shownText({ shown: 'NaN' })).toBe('NaN');
+    expect(shownText(4.5)).toBeNull();
+    expect(formatValue({ shown: 'NaN' })).toBe('NaN');
+    // A NaN in a column of numbers leaves it a column of numbers
+    expect(isNumericColumn([[1.5], [{ shown: 'NaN' }], [2]], 0)).toBe(true);
+  });
+});

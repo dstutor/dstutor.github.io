@@ -55,6 +55,42 @@
   min-height: 100px;
 }
 
+/* A shadow on the edge a wide table continues past, so hidden columns are not a surprise */
+.data-table-frame {
+  position: relative;
+  min-width: 0;
+}
+
+.data-table-frame::before,
+.data-table-frame::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  z-index: 2;
+  width: 20px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.data-table-frame::before {
+  left: 1px;
+  border-radius: var(--radius-control) 0 0 var(--radius-control);
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.16), transparent);
+}
+
+.data-table-frame::after {
+  right: 1px;
+  border-radius: 0 var(--radius-control) var(--radius-control) 0;
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.16), transparent);
+}
+
+.data-table-frame.more-left::before,
+.data-table-frame.more-right::after {
+  opacity: 1;
+}
+
 .data-table-wrapper.centered {
   display: flex;
   align-items: center;
@@ -135,6 +171,12 @@
 .data-table.compact td.index-cell {
   color: var(--text-secondary);
   font-weight: 600;
+}
+
+/* NaN, inf and the like, printed the way their library prints them, set back from real data */
+.data-table.compact td.shown-value {
+  color: var(--text-tertiary);
+  font-style: italic;
 }
 
 /* Arrays: a vertical stack of item blocks, each showing its 0-based position and value.

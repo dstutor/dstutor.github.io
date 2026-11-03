@@ -419,8 +419,10 @@ main,
   }
 }
 
-/* The intro, once a visit: the headline shows as markdown source in an editor, then renders,
-   like Shift+Enter on a markdown cell. Pure CSS, so the text always ends up visible. */
+/* The intro, once a visit: the headline is typed as markdown source in an editor, then renders,
+   like Shift+Enter on a markdown cell. Pure CSS, so the text always ends up visible. Timeline:
+   typing 0.15-1.55s, a pause, the source fades out by 2.6s while the heading renders 2.0-2.9s,
+   then the intro text and buttons follow. */
 .nb-body {
   position: relative;
 }
@@ -444,7 +446,25 @@ main,
   font-family: var(--font-mono);
   font-size: 1rem;
   line-height: 1.55;
-  animation: md-source 1000ms ease both;
+  animation: md-source 2600ms ease both;
+}
+
+/* Typed out a character at a time: 47 characters, a monospace character wide each */
+.intro .md-text {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  vertical-align: bottom;
+  animation: md-type 1400ms steps(47, end) 150ms both;
+}
+
+/* Phones: the line wraps, so it appears whole instead of typing past the edge */
+@media (max-width: 560px) {
+  .intro .md-text {
+    animation: none;
+    white-space: normal;
+  }
 }
 
 .md-source::after {
@@ -455,6 +475,7 @@ main,
   margin-left: 2px;
   vertical-align: -0.2em;
   background: var(--ink);
+  animation: md-caret 900ms steps(1, end) infinite;
 }
 
 .tok-md {
@@ -463,27 +484,36 @@ main,
 }
 
 .intro .nb-markdown h1 {
-  animation: md-render 1150ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: md-render 2900ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .intro .nb-markdown .lede,
 .intro .nb-markdown .hero-actions {
-  animation: md-follow 1300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: md-follow 3300ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes md-source {
   0% { opacity: 0; }
-  10%, 62% { opacity: 1; }
+  4%, 76% { opacity: 1; }
   100% { opacity: 0; visibility: hidden; }
 }
 
+@keyframes md-type {
+  from { width: 0; }
+  to { width: 47ch; }
+}
+
+@keyframes md-caret {
+  50% { opacity: 0; }
+}
+
 @keyframes md-render {
-  0%, 55% { opacity: 0; filter: blur(8px); }
+  0%, 69% { opacity: 0; filter: blur(8px); }
   100% { opacity: 1; filter: blur(0); }
 }
 
 @keyframes md-follow {
-  0%, 68% { opacity: 0; transform: translateY(8px); }
+  0%, 80% { opacity: 0; transform: translateY(8px); }
   100% { opacity: 1; transform: none; }
 }
 

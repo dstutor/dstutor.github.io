@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { TableState, Highlights } from '@dstutor/trace-schema';
 import './DataTransformation.css';
 
@@ -29,7 +29,19 @@ interface DataTransformationProps {
   isSubStep?: boolean;
 }
 
+/**
+ * A value JSON cannot carry (NaN, inf, NaT), sent by a tracer as {shown: text}: the text its
+ * library prints for it. null when value is an ordinary value.
+ */
+export function shownText(value: unknown): string | null {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return null;
+  const shown = (value as { shown?: unknown }).shown;
+  return typeof shown === 'string' ? shown : null;
+}
+
 export function formatValue(value: unknown): string {
+  const shown = shownText(value);
+  if (shown !== null) return shown;
   if (value === null || value === undefined) {
     return '';
   }
@@ -56,7 +68,8 @@ export function isNumericColumn(preview: unknown[][], colIndex: number): boolean
   let sawNumber = false;
   for (const row of preview) {
     const v = row[colIndex];
-    if (v === null || v === undefined) continue;
+    // A missing value (blank, or NaN as its library prints it) does not decide the column's type
+    if (v === null || v === undefined || shownText(v) !== null) continue;
     if (typeof v !== 'number') return false;
     sawNumber = true;
   }
@@ -125,6 +138,38 @@ function TableView({ state, highlights, addedColumns, removedColumns }: TableVie
   const [expanded, setExpanded] = useState(false);
   useEffect(() => setExpanded(false), [state]);
 
+  // Wide tables scroll sideways. Keep the highlighted cell or column in view (it is what the frame
+  // is about), and shade whichever edge has more columns past it.
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [edges, setEdges] = useState({ left: false, right: false });
+  const updateEdges = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const left = el.scrollLeft > 2;
+    const right = el.scrollLeft + el.clientWidth < el.scrollWidth - 2;
+    setEdges(prev => (prev.left === left && prev.right === right ? prev : { left, right }));
+  };
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const target = el.querySelector<HTMLElement>('td.hl-cell, th.added-column, th.hl-col-header');
+    if (target) {
+      // td/th offsets are measured from the table, which starts at the left of the scroll box
+      const left = target.offsetLeft;
+      const right = left + target.offsetWidth;
+      if (right > el.scrollLeft + el.clientWidth) el.scrollLeft = right - el.clientWidth + 12;
+      else if (left < el.scrollLeft) el.scrollLeft = Math.max(0, left - 12);
+    }
+    updateEdges();
+  }, [state, highlights]);
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(updateEdges);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   const { columns, preview, num_rows } = state;
   const highlightRows = highlights?.rows ?? [];
   const highlightRemoved = highlights?.rows_removed ?? [];
@@ -150,6 +195,7 @@ function TableView({ state, highlights, addedColumns, removedColumns }: TableVie
     const col = columns[colIndex];
     const classes: string[] = [];
     if (colIndex < labelColumns) classes.push('index-cell');
+    if (shownText(preview[rowIndex]?.[colIndex]) !== null) classes.push('shown-value');
     if (numericCols[colIndex]) classes.push('num');
     if (highlightCells.some(([r, c]) => r === rowIndex && c === col)) classes.push('hl-cell');
     else if (highlightColumns.includes(col)) classes.push('hl-col');
@@ -159,55 +205,57 @@ function TableView({ state, highlights, addedColumns, removedColumns }: TableVie
   };
 
   return (
-    <div className="data-table-wrapper">
-      <table className="data-table compact">
-        <thead>
-          <tr>
-            {columns.map((col, j) => {
-              const classes: string[] = [];
-              if (j < labelColumns) classes.push('index-cell');
-              if (numericCols[j]) classes.push('num');
-              if (highlightColumns.includes(col)) classes.push('hl-col-header');
-              if (removedColumns?.includes(col)) classes.push('removed-column');
-              if (addedColumns?.includes(col)) classes.push('added-column');
+    <div className={`data-table-frame${edges.left ? ' more-left' : ''}${edges.right ? ' more-right' : ''}`}>
+      <div className="data-table-wrapper" ref={scrollRef} onScroll={updateEdges}>
+        <table className="data-table compact">
+          <thead>
+            <tr>
+              {columns.map((col, j) => {
+                const classes: string[] = [];
+                if (j < labelColumns) classes.push('index-cell');
+                if (numericCols[j]) classes.push('num');
+                if (highlightColumns.includes(col)) classes.push('hl-col-header');
+                if (removedColumns?.includes(col)) classes.push('removed-column');
+                if (addedColumns?.includes(col)) classes.push('added-column');
+                return (
+                  <th key={j} className={classes.join(' ')}>
+                    {col}
+                  </th>
+                );
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {preview.slice(0, visibleCount).map((row, i) => {
+              const rowClasses: string[] = [];
+              if (highlightRows.includes(i)) rowClasses.push('hl-row');
+              if (highlightRemoved.includes(i)) rowClasses.push('hl-row-removed');
               return (
-                <th key={j} className={classes.join(' ')}>
-                  {col}
-                </th>
+                <tr key={i} className={rowClasses.join(' ')}>
+                  {row.map((cell, j) => (
+                    <td key={j} className={cellClass(i, j)}>
+                      {formatValue(cell)}
+                    </td>
+                  ))}
+                </tr>
               );
             })}
-          </tr>
-        </thead>
-        <tbody>
-          {preview.slice(0, visibleCount).map((row, i) => {
-            const rowClasses: string[] = [];
-            if (highlightRows.includes(i)) rowClasses.push('hl-row');
-            if (highlightRemoved.includes(i)) rowClasses.push('hl-row-removed');
-            return (
-              <tr key={i} className={rowClasses.join(' ')}>
-                {row.map((cell, j) => (
-                  <td key={j} className={cellClass(i, j)}>
-                    {formatValue(cell)}
-                  </td>
-                ))}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-      {hiddenInPreview > 0 && (
-        <button className="table-more table-more-button" onClick={() => setExpanded(true)}>
-          Show {hiddenInPreview} more row{hiddenInPreview !== 1 ? 's' : ''}
-        </button>
-      )}
-      {hiddenInPreview <= 0 && beyondPreview > 0 && (
-        <div className="table-more">… {beyondPreview} more row{beyondPreview !== 1 ? 's' : ''} not shown</div>
-      )}
-      {expanded && preview.length > DEFAULT_VISIBLE_ROWS && (
-        <button className="table-more table-more-button" onClick={() => setExpanded(false)}>
-          Show fewer rows
-        </button>
-      )}
+          </tbody>
+        </table>
+        {hiddenInPreview > 0 && (
+          <button className="table-more table-more-button" onClick={() => setExpanded(true)}>
+            Show {hiddenInPreview} more row{hiddenInPreview !== 1 ? 's' : ''}
+          </button>
+        )}
+        {hiddenInPreview <= 0 && beyondPreview > 0 && (
+          <div className="table-more">… {beyondPreview} more row{beyondPreview !== 1 ? 's' : ''} not shown</div>
+        )}
+        {expanded && preview.length > DEFAULT_VISIBLE_ROWS && (
+          <button className="table-more table-more-button" onClick={() => setExpanded(false)}>
+            Show fewer rows
+          </button>
+        )}
+      </div>
     </div>
   );
 }

@@ -41,8 +41,10 @@ intermediate result shown instead of `output`), an `output_label`, and secondary
 **Highlights**: `rows` and `rows_removed` (preview row indices), `columns` (labels) and `cells`
 (`[row, label]` pairs).
 
-**Values** are plain JSON. NaN and infinities are not JSON, so a tracer sends `null` for them.
-Anything else that is not JSON, such as a function, is sent as its string form.
+**Values** are plain JSON. NaN, infinities and the like are not JSON, so a tracer sends `null`
+for them, or, in a table's preview, `{"shown": "NaN"}`: the text its library prints for the
+value, which the table shows as is (pandas sends `NaN`, `inf`, `NaT`, `<NA>` and `None` this
+way). Anything else that is not JSON, such as a function, is sent as its string form.
 
 ## Rules the schema cannot express
 

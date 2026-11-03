@@ -140,7 +140,7 @@
           }
         }
       ],
-      "description": "A value as tracers send it: plain JSON. NaN and infinities are not JSON, so tracers send null for them; anything else that is not JSON (a function, an object) is sent as its string form."
+      "description": "A value as tracers send it: plain JSON. NaN, infinities and similar values are not JSON: a tracer sends null for them, or, in a table's preview, {\"shown\": \"NaN\"}, the text its library prints for that value, which the table shows as is. Anything else that is not JSON (a function, an object) is sent as its string form."
     },
     "TableState": {
       "type": "object",
