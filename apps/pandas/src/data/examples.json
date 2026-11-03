@@ -1,0 +1,248 @@
+{
+  "categories": [
+    {
+      "id": "filtering",
+      "name": "Filtering",
+      "description": "Keep the rows you need"
+    },
+    {
+      "id": "sorting",
+      "name": "Sorting",
+      "description": "Put rows in order"
+    },
+    {
+      "id": "grouping",
+      "name": "Grouping",
+      "description": "Summarize groups of rows"
+    },
+    {
+      "id": "combining",
+      "name": "Combining",
+      "description": "Join tables and chain steps"
+    },
+    {
+      "id": "columns",
+      "name": "Columns",
+      "description": "Add and change columns"
+    }
+  ],
+  "examples": [
+    {
+      "id": "filter-rows",
+      "title": "Filtering Rows",
+      "description": "Keep only the rows that match a condition",
+      "category": "filtering",
+      "operations": [
+        "[ ]"
+      ],
+      "markdown": "## Filtering rows with a boolean mask\n\n`cones['Flavor'] == 'chocolate'` is True or False for each row. Putting it inside `cones[...]` keeps the rows where it is True.\n\nWatch the index on the left: the kept rows keep their original labels, 1 and 3.",
+      "cells": [
+        "import pandas as pd",
+        "# An ice cream shop's menu\ncones = pd.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "# Only the chocolate cones\nchocolate = cones[cones['Flavor'] == 'chocolate']\nchocolate"
+      ]
+    },
+    {
+      "id": "filter-two-conditions",
+      "title": "Two Conditions",
+      "description": "Combine conditions with & and |",
+      "category": "filtering",
+      "operations": [
+        "[ ]",
+        "&"
+      ],
+      "markdown": "## Combining conditions\n\nJoin conditions with `&` (and) or `|` (or). Each condition needs its own parentheses, because `&` binds more tightly than `>`.",
+      "cells": [
+        "import pandas as pd",
+        "# An ice cream shop's menu\ncones = pd.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "# Chocolate cones under $5\ncheap_chocolate = cones[(cones['Flavor'] == 'chocolate') & (cones['Price'] < 5)]\ncheap_chocolate"
+      ]
+    },
+    {
+      "id": "query",
+      "title": "Filtering with query",
+      "description": "Write the condition as a string",
+      "category": "filtering",
+      "operations": [
+        "query"
+      ],
+      "markdown": "## `query`\n\n`query` takes the condition as a string and refers to columns by name, which reads like a sentence.",
+      "cells": [
+        "import pandas as pd",
+        "# An ice cream shop's menu\ncones = pd.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "pricey = cones.query('Price > 4.5')\npricey"
+      ]
+    },
+    {
+      "id": "loc-filter",
+      "title": "Rows and Columns with loc",
+      "description": "Pick rows by condition and columns by name",
+      "category": "filtering",
+      "operations": [
+        "loc"
+      ],
+      "markdown": "## `loc[rows, columns]`\n\n`loc` takes a row selector and a column selector at once. Here the rows come from a condition and the columns from a list.",
+      "cells": [
+        "import pandas as pd",
+        "# An ice cream shop's menu\ncones = pd.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "cheap = cones.loc[cones['Price'] < 4, ['Flavor', 'Price']]\ncheap"
+      ]
+    },
+    {
+      "id": "sort-values",
+      "title": "Sorting Rows",
+      "description": "Order rows by a column",
+      "category": "sorting",
+      "operations": [
+        "sort_values"
+      ],
+      "markdown": "## `sort_values`\n\n`ascending=False` puts the largest first. Rows move as a whole, and each keeps its index label, so you can see where it came from.",
+      "cells": [
+        "import pandas as pd",
+        "# An ice cream shop's menu\ncones = pd.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "by_price = cones.sort_values('Price', ascending=False)\nby_price"
+      ]
+    },
+    {
+      "id": "sort-two-columns",
+      "title": "Sorting by Two Columns",
+      "description": "Break ties with a second column",
+      "category": "sorting",
+      "operations": [
+        "sort_values"
+      ],
+      "markdown": "## Sorting by two columns\n\nRows are ordered by `Flavor` first; rows with the same flavor are then ordered by `Price`.",
+      "cells": [
+        "import pandas as pd",
+        "# An ice cream shop's menu\ncones = pd.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "cones.sort_values(['Flavor', 'Price'])"
+      ]
+    },
+    {
+      "id": "groupby-mean",
+      "title": "Average per Group",
+      "description": "groupby, then an aggregation",
+      "category": "grouping",
+      "operations": [
+        "groupby",
+        "mean"
+      ],
+      "markdown": "## `groupby` and `mean`\n\n`groupby('Flavor')` puts rows with the same flavor together; `['Price'].mean()` then averages each group's prices. The flavors become the result's index.",
+      "cells": [
+        "import pandas as pd",
+        "# An ice cream shop's menu\ncones = pd.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "average_price = cones.groupby('Flavor')['Price'].mean()\naverage_price"
+      ]
+    },
+    {
+      "id": "groupby-size",
+      "title": "Counting per Group",
+      "description": "How many rows fall in each group",
+      "category": "grouping",
+      "operations": [
+        "groupby",
+        "size"
+      ],
+      "markdown": "## Counting with `size`\n\n`size()` counts the rows in each group.",
+      "cells": [
+        "import pandas as pd",
+        "# An ice cream shop's menu\ncones = pd.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "cones.groupby('Color').size()"
+      ]
+    },
+    {
+      "id": "merge-inner",
+      "title": "Merging Tables",
+      "description": "Match rows of two tables on a key",
+      "category": "combining",
+      "operations": [
+        "merge"
+      ],
+      "markdown": "## `merge`\n\n`merge` matches rows whose `Flavor` is equal in both tables. By default (`how='inner'`) rows without a match on the other side are dropped: strawberry has no rating, and nobody sells cookie dough.",
+      "cells": [
+        "import pandas as pd",
+        "# An ice cream shop's menu\ncones = pd.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "ratings = pd.DataFrame({\n    'Flavor': ['chocolate', 'vanilla', 'mint', 'cookie dough'],\n    'Stars': [5, 4, 3, 5],\n})\nratings",
+        "rated = cones.merge(ratings, on='Flavor')\nrated"
+      ]
+    },
+    {
+      "id": "merge-left",
+      "title": "Keeping Every Row",
+      "description": "A left merge keeps unmatched rows",
+      "category": "combining",
+      "operations": [
+        "merge"
+      ],
+      "markdown": "## `how='left'`\n\nA left merge keeps every row of the left table. Where the right table has no match, its columns are NaN, shown blank.",
+      "cells": [
+        "import pandas as pd",
+        "# An ice cream shop's menu\ncones = pd.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "ratings = pd.DataFrame({\n    'Flavor': ['chocolate', 'vanilla', 'mint', 'cookie dough'],\n    'Stars': [5, 4, 3, 5],\n})\nratings",
+        "all_cones = cones.merge(ratings, on='Flavor', how='left')\nall_cones"
+      ]
+    },
+    {
+      "id": "assign",
+      "title": "New Column with assign",
+      "description": "Add a computed column",
+      "category": "columns",
+      "operations": [
+        "assign"
+      ],
+      "markdown": "## `assign`\n\n`assign` returns a new DataFrame with an extra column; `cones` itself is unchanged.",
+      "cells": [
+        "import pandas as pd",
+        "# An ice cream shop's menu\ncones = pd.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "on_sale = cones.assign(Sale=cones['Price'] * 0.9)\non_sale"
+      ]
+    },
+    {
+      "id": "new-column",
+      "title": "New Column in Place",
+      "description": "df['col'] = ... changes the table",
+      "category": "columns",
+      "operations": [
+        "[ ] ="
+      ],
+      "markdown": "## Assigning to a column\n\n`cones['Tax'] = ...` adds the column to `cones` itself. Compare with `assign`, which leaves the original alone.",
+      "cells": [
+        "import pandas as pd",
+        "# An ice cream shop's menu\ncones = pd.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "cones['Tax'] = (cones['Price'] * 0.08).round(2)\ncones"
+      ]
+    },
+    {
+      "id": "pivot-table",
+      "title": "Pivot Table",
+      "description": "Summarize two columns as a grid",
+      "category": "grouping",
+      "operations": [
+        "pivot_table"
+      ],
+      "markdown": "## `pivot_table`\n\nFlavors become the rows, colors the columns, and each cell is the average price of the cones that fall in it. Empty combinations are NaN, shown blank.",
+      "cells": [
+        "import pandas as pd",
+        "# An ice cream shop's menu\ncones = pd.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "grid = cones.pivot_table(index='Flavor', columns='Color', values='Price', aggfunc='mean')\ngrid"
+      ]
+    },
+    {
+      "id": "chain",
+      "title": "Chaining Operations",
+      "description": "Filter, sort and group in one expression",
+      "category": "combining",
+      "operations": [
+        "[ ]",
+        "sort_values",
+        "groupby"
+      ],
+      "markdown": "## A chain\n\nEach method works on the result of the one before. Step through to see the table after each one.",
+      "cells": [
+        "import pandas as pd",
+        "# An ice cream shop's menu\ncones = pd.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "summary = (cones[cones['Price'] > 4]\n    .sort_values('Price')\n    .groupby('Flavor')['Price']\n    .max())\nsummary"
+      ]
+    }
+  ]
+}

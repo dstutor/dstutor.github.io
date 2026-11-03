@@ -38,10 +38,10 @@ export interface Evaluated {
   reasons: string[];
 }
 
-const pyType = (v: Py): string =>
+export const pyType = (v: Py): string =>
   typeof v === 'string' ? 'str' : typeof v === 'boolean' ? 'bool' : Number.isInteger(v) ? 'int' : 'float';
 
-const show = (v: Py): string => (typeof v === 'boolean' ? (v ? 'True' : 'False') : String(v));
+export const show = (v: Py): string => (typeof v === 'boolean' ? (v ? 'True' : 'False') : String(v));
 
 const isNumberLike = (v: Py) => typeof v !== 'string';
 
@@ -185,9 +185,9 @@ function splitArgs(text: string): string[] {
   return trimmed.length === 1 && trimmed[0] === '' ? [] : trimmed;
 }
 
-type Literal = { ok: true; value: Py } | { ok: false; name?: string };
+export type Literal = { ok: true; value: Py } | { ok: false; name?: string };
 
-function literal(text: string): Literal {
+export function literal(text: string): Literal {
   const str = text.match(/^(['"])((?:\\.|(?!\1).)*)\1$/s);
   if (str) return { ok: true, value: str[2].replace(/\\(.)/g, '$1') };
   if (/^[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?$/.test(text)) return { ok: true, value: Number(text) };
@@ -201,7 +201,11 @@ const notDefined = (name: string) => ({ kind: 'error' as const, message: `NameEr
 // Names that exist after `from datascience import *` but that this preview cannot run
 const DATASCIENCE_NAMES = new Set(['Table', 'make_array', 'are', 'np', 'plots', 'percentile', 'sample_proportions', 'proportions_from_distribution']);
 
-export function parseCell(code: string, labels: string[]): Parsed {
+/**
+ * The cell's statements without comments, one per entry; a statement continues over lines while
+ * brackets are open. An unclosed bracket is Python's SyntaxError.
+ */
+export function cellStatements(code: string): { statements: string[] } | { error: string } {
   const statements: string[] = [];
   let current = '';
   let depth = 0;
@@ -218,9 +222,14 @@ export function parseCell(code: string, labels: string[]): Parsed {
       depth = 0;
     }
   }
-  if (current.trim()) return { kind: 'error', message: "SyntaxError: '(' was never closed" };
+  if (current.trim()) return { error: "SyntaxError: '(' was never closed" };
+  return { statements };
+}
 
-  const body = statements.filter((s) => !/^from\s+datascience\s+import\s+\*$/.test(s));
+export function parseCell(code: string, labels: string[]): Parsed {
+  const split = cellStatements(code);
+  if ('error' in split) return { kind: 'error', message: split.error };
+  const body = split.statements.filter((s) => !/^from\s+datascience\s+import\s+\*$/.test(s));
   if (body.length === 0) return { kind: 'empty' };
   if (body.length > 1) return { kind: 'unsupported' };
 

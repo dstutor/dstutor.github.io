@@ -276,12 +276,86 @@ main,
   stroke: none;
 }
 
-/* Phones: the section links that the page itself makes obvious go first */
+/* Phones: the wordmark goes first, the logo stays */
 @media (max-width: 560px) {
-  .site-nav .nav-optional,
   .brand span {
     display: none;
   }
+}
+
+/* The Tutors dropdown (main.ts): every tutor with its logo, the ones to come greyed out */
+.nav-menu {
+  position: relative;
+}
+
+.chevron {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 160ms ease;
+}
+
+.nav-menu-button[aria-expanded='true'] {
+  color: var(--ink);
+  background: var(--surface-2);
+}
+
+.nav-menu-button[aria-expanded='true'] .chevron {
+  transform: rotate(180deg);
+}
+
+.nav-menu-list {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  width: min(320px, calc(100vw - 32px));
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+}
+
+.nav-menu-list[hidden] {
+  display: none;
+}
+
+.site-nav .nav-menu-list a,
+.nav-menu-soon {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.nav-menu-soon {
+  opacity: 0.55;
+}
+
+.nav-menu-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.nav-menu-name {
+  font-weight: 700;
+}
+
+.nav-menu-desc {
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
 }
 
 /* Hero: a faint dot grid with a warm glow behind the demo */
@@ -489,6 +563,88 @@ main,
 
 .text-link:hover {
   text-decoration-color: var(--accent);
+}
+
+/* Which library the hero cell runs (heroCell.ts), each shown by its own logo */
+.lib-toggle {
+  grid-column: -2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.lib-toggle[hidden] {
+  display: none;
+}
+
+@media (min-width: 720px) {
+  .nb-code > .lib-toggle {
+    grid-row: 1;
+  }
+
+  .nb-code > .nb-gutter,
+  .nb-code > .nb-card {
+    grid-row: 2;
+  }
+}
+
+.lib-toggle button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-muted);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 150ms ease, color 150ms ease;
+}
+
+.lib-toggle button:not(:disabled):hover {
+  color: var(--ink);
+  border-color: var(--ink-muted);
+}
+
+.lib-toggle button[aria-checked='true'] {
+  color: var(--ink);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.lib-toggle button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.lib-logo {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+}
+
+.lib-logo img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+/* pandas has a mark for light backgrounds and a white one for dark */
+:root[data-theme='dark'] .on-light,
+:root[data-theme='light'] .on-dark {
+  display: none;
+}
+
+.soon {
+  margin-left: 6px;
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
 /* The code cell: In [ ] and a run button in the prompt column; the editor and its step view
@@ -1071,4 +1227,14 @@ a.tutor:hover .pill-live .arrow {
 .is-blinking .cel-eyes,
 .is-blinking .cel-glints {
   scale: 1 0.12;
+}
+
+/* pandas shows the index as the table's first column; datascience tables have none */
+.cell-tables:not(.show-index) .idx {
+  display: none;
+}
+
+.mini .idx {
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
 }

@@ -14,6 +14,8 @@ interface DataTransformationProps {
   before: TableState;
   after: TableState;
   operation: string;
+  /** Shown on the arrow; defaults to operation() */
+  title?: string;
   inputHighlights?: Highlights;
   outputHighlights?: Highlights;
   /** Intermediate result table shown instead of `after` while an operation is being built up */
@@ -106,6 +108,11 @@ export function ArrayView({ state, highlights, caption }: ArrayViewProps) {
   );
 }
 
+/** Leading columns that are row labels (a pandas index), shown but not counted as columns */
+const indexCount = (state: TableState) => state.index_columns ?? 0;
+const dataColumns = (state: TableState) => state.columns.slice(indexCount(state));
+const columnCount = (state: TableState) => state.num_columns - indexCount(state);
+
 interface TableViewProps {
   state: TableState;
   highlights?: Highlights;
@@ -137,9 +144,12 @@ function TableView({ state, highlights, addedColumns, removedColumns }: TableVie
   const beyondPreview = num_rows - preview.length;
   const numericCols = columns.map((_, j) => isNumericColumn(preview, j));
 
+  const labelColumns = indexCount(state);
+
   const cellClass = (rowIndex: number, colIndex: number): string => {
     const col = columns[colIndex];
     const classes: string[] = [];
+    if (colIndex < labelColumns) classes.push('index-cell');
     if (numericCols[colIndex]) classes.push('num');
     if (highlightCells.some(([r, c]) => r === rowIndex && c === col)) classes.push('hl-cell');
     else if (highlightColumns.includes(col)) classes.push('hl-col');
@@ -155,6 +165,7 @@ function TableView({ state, highlights, addedColumns, removedColumns }: TableVie
           <tr>
             {columns.map((col, j) => {
               const classes: string[] = [];
+              if (j < labelColumns) classes.push('index-cell');
               if (numericCols[j]) classes.push('num');
               if (highlightColumns.includes(col)) classes.push('hl-col-header');
               if (removedColumns?.includes(col)) classes.push('removed-column');
@@ -217,6 +228,7 @@ export default function DataTransformation({
   before,
   after,
   operation,
+  title,
   inputHighlights,
   outputHighlights,
   outputOverride,
@@ -236,8 +248,8 @@ export default function DataTransformation({
   // Legacy column diffing only applies when the frame has no sub-step visuals
   // The change badges and column diff describe the result, so they are suppressed while it is hidden
   const hasSubStepVisuals = Boolean(isSubStep || inputHighlights || outputHighlights || outputOverride || auxTable || auxOutput);
-  const columnsRemoved = hasSubStepVisuals ? [] : before.columns.filter(col => !after.columns.includes(col));
-  const columnsAdded = hasSubStepVisuals ? [] : after.columns.filter(col => !before.columns.includes(col));
+  const columnsRemoved = hasSubStepVisuals ? [] : dataColumns(before).filter(col => !dataColumns(after).includes(col));
+  const columnsAdded = hasSubStepVisuals ? [] : dataColumns(after).filter(col => !dataColumns(before).includes(col));
   const rowsChanged = before.num_rows !== after.num_rows;
 
   // Check if this is table initialization (empty table → table with data)
@@ -250,7 +262,7 @@ export default function DataTransformation({
   const sizeInfo = (state: TableState) =>
     state.kind === 'array' || (isArray && state === output)
       ? `${state.num_rows} value${state.num_rows !== 1 ? 's' : ''}`
-      : `${state.num_rows} row${state.num_rows !== 1 ? 's' : ''} × ${state.num_columns} col${state.num_columns !== 1 ? 's' : ''}`;
+      : `${state.num_rows} row${state.num_rows !== 1 ? 's' : ''} × ${columnCount(state)} col${columnCount(state) !== 1 ? 's' : ''}`;
   const resultHeading = outputLabel ?? (outputIsBuilding ? 'Result (building…)' : isArray ? 'Result array' : 'After');
 
   return (
@@ -260,7 +272,7 @@ export default function DataTransformation({
         <div className="section-header">
           <span className="section-title">Before</span>
           <span className="section-info">
-            {isInitialization ? 'Empty Table' : `${before.num_rows} rows × ${before.num_columns} cols`}
+            {isInitialization ? 'Empty Table' : `${before.num_rows} rows × ${columnCount(before)} cols`}
           </span>
         </div>
 
@@ -275,7 +287,7 @@ export default function DataTransformation({
             <div className="section-header aux-header">
               <span className="section-title">{auxTable.label}</span>
               <span className="section-info">
-                {auxTable.state.num_rows} rows × {auxTable.state.num_columns} cols
+                {auxTable.state.num_rows} rows × {columnCount(auxTable.state)} cols
               </span>
             </div>
             <TableView state={auxTable.state} highlights={auxTable.highlights} />
@@ -285,7 +297,7 @@ export default function DataTransformation({
 
       {/* Transformation Arrow */}
       <div className="transform-arrow-container">
-        <div className="transform-arrow-label">{operation}()</div>
+        <div className="transform-arrow-label">{title ?? `${operation}()`}</div>
         <div className="transform-arrow">→</div>
         <div className="transform-changes">
           {columnsRemoved.length > 0 && (

@@ -99,8 +99,9 @@
 .cel[data-state='idle'] .cel-dashes { display: inline; }
 
 .cel[data-state='running'] { --cel-bracket: var(--cel-running); }
-.cel[data-state='running'] .cel-glints { display: none; }
-.cel[data-state='running'] .cel-eyes { transform: translate(2px, -4px); }
+/* Eyes up at the spark; the glints move with them so the eyes still read as eyes when small */
+.cel[data-state='running'] .cel-eyes,
+.cel[data-state='running'] .cel-glints { transform: translate(2px, -4px); }
 .cel[data-state='running'] .cel-spark { display: inline; animation: cel-spin 1.6s linear infinite; }
 
 .cel[data-state='done'] { --cel-bracket: var(--cel-done); }

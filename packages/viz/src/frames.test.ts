@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { flattenTrace, firstFrameOfOperation, lastFrameOfOperation, framesFor } from './frames';
+import { flattenTrace, firstFrameOfOperation, lastFrameOfOperation, stepTitle, framesFor } from './frames';
 import type { TraceRecord, TableState } from '@dstutor/trace-schema';
 
 const state = (rows: number): TableState => ({
@@ -106,5 +106,13 @@ describe('framesFor', () => {
     expect(frames).toHaveLength(3);
     expect(frames.map(f => f.opIndex)).toEqual([0, 1, 2]);
     expect(frames.every(f => f.subStep === undefined && f.subIndex === undefined)).toBe(true);
+  });
+});
+
+describe('stepTitle', () => {
+  it('uses the label a tracer gave, else operation()', () => {
+    const record = { operation: 'filter' } as Parameters<typeof stepTitle>[0];
+    expect(stepTitle(record)).toBe('filter()');
+    expect(stepTitle({ ...record, label: 'keep rows where True' })).toBe('keep rows where True');
   });
 });

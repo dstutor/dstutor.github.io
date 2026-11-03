@@ -4,9 +4,17 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./schema.json": "./schema/trace.schema.json"
   },
   "scripts": {
-    "typecheck": "tsc -p ."
+    "typecheck": "tsc -p .",
+    "test": "vitest run",
+    "schema": "node scripts/schema.mjs"
+  },
+  "devDependencies": {
+    "ajv": "8.20.0",
+    "ts-json-schema-generator": "2.9.0",
+    "vitest": "5.0.5"
   }
 }

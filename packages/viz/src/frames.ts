@@ -28,6 +28,11 @@ export function flattenTrace(trace: TraceRecord[]): Frame[] {
   return frames;
 }
 
+/** What a step is called: its label when the tracer gave one, otherwise operation() */
+export function stepTitle(record: TraceRecord): string {
+  return record.label ?? `${record.operation}()`;
+}
+
 /** How much of each operation to show: every walkthrough frame, or just its result */
 export type DetailLevel = 'all' | 'results';
 

@@ -42,7 +42,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Install tracer test packages
-        run: pip install -r tracers/datascience/requirements-test.txt
+        run: pip install -r tracers/datascience/requirements-test.txt -r tracers/pandas/requirements-test.txt
 
       - name: Check
         run: npm run check

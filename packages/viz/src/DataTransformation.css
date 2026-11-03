@@ -124,6 +124,19 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Row labels (a pandas index): bold and muted like pandas prints them, set off from the data
+   columns, and left-aligned even when they are numbers */
+.data-table.compact th.index-cell,
+.data-table.compact td.index-cell {
+  text-align: left;
+  border-right: 1px solid var(--border-subtle);
+}
+
+.data-table.compact td.index-cell {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
 /* Arrays: a vertical stack of item blocks, each showing its 0-based position and value.
    No header row, so it reads as a list of values rather than a table. */
 .array-view {

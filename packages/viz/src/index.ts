@@ -8,6 +8,7 @@ export {
   framesFor,
   firstFrameOfOperation,
   lastFrameOfOperation,
+  stepTitle,
   type Frame,
   type DetailLevel,
 } from './frames';

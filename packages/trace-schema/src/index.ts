@@ -1,5 +1,16 @@
 // The trace format tracers emit and the frontend reads. Library-agnostic: nothing here knows
 // about Python or any particular library, so a new tutor needs only a tracer that emits these.
+// These types are the source of truth: schema/trace.schema.json is generated from them
+// (npm run schema), and check_trace.py holds every tracer to both. See README.md.
+
+/**
+ * A value as tracers send it: plain JSON. NaN and infinities are not JSON, so tracers send null
+ * for them; anything else that is not JSON (a function, an object) is sent as its string form.
+ */
+export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+
+/** Everything a run recorded, in order: what a tracer's trace() returns */
+export type Trace = TraceRecord[];
 
 export interface Highlights {
   /** Preview row indices (0-based) to emphasize */
@@ -30,12 +41,29 @@ export interface SubStep {
 }
 
 export interface TraceRecord {
+  /**
+   * Unique within a trace, increasing in the order the operations ran
+   * @asType integer
+   * @minimum 0
+   */
   step_id: number;
+  /** The method or function called, e.g. "where" */
   operation: string;
-  args: unknown[];
-  kwargs: Record<string, unknown>;
+  /**
+   * The step's title when `operation()` would not describe what the code did, e.g. "keep rows
+   * where True" for cones[cones['Price'] > 4], which calls no method. Without it the step is
+   * titled operation().
+   */
+  label?: string;
+  /** Positional arguments, as JSON (a predicate shows as its name or description) */
+  args: JsonValue[];
+  /** Keyword arguments, as JSON */
+  kwargs: Record<string, JsonValue>;
+  /** The table the operation was called on */
   input: TableState;
+  /** What it returned */
   output: TableState;
+  /** One sentence on what happened, e.g. "Filtered rows. Kept 2, removed 4." */
   explanation: string;
   /** Pedagogical walkthrough frames; absent => single before/after frame */
   sub_steps?: SubStep[];
@@ -48,10 +76,29 @@ export interface TraceRecord {
 }
 
 export interface TableState {
+  /**
+   * Rows in the whole table, which can be more than preview shows
+   * @asType integer
+   * @minimum 0
+   */
   num_rows: number;
+  /**
+   * Always columns.length
+   * @asType integer
+   * @minimum 0
+   */
   num_columns: number;
   columns: string[];
-  preview: unknown[][];
+  /** The first rows (all of them for small tables), one value per column */
+  preview: JsonValue[][];
+  /**
+   * How many of the leading columns are row labels rather than data: a pandas DataFrame's
+   * index (two for a two-level index). They are shown, but not counted as columns. Absent: 0.
+   * @asType integer
+   * @minimum 0
+   */
+  index_columns?: number;
+  /** Set when the table could not be read; the rest is then best effort */
   error?: string;
   /** 'array' when the result is an array shown as one column (apply), not a real table */
   kind?: 'array';

@@ -1,8 +1,12 @@
-// The hero's notebook cell. It runs itself the way the tutor does (In [ ] -> In [*] while Cel
+// The hero's notebook cell. It runs itself the way the tutors do (In [ ] -> In [*] while Cel
 // checks each row -> In [n]) until a visitor edits it; then Shift+Enter or the run button runs
-// their code. whereDemo.ts interprets cones.where(...) on the table in the page.
+// their code. The toggle above it switches library: demoLibraries.ts holds each one's code,
+// interpreter and wording, so the same filter can be watched in datascience and in pandas.
 import type { CelState } from '@dstutor/brand';
-import { evaluate, parseCell, type Column, type Evaluated, type Query } from './whereDemo';
+import type { Column, Evaluated } from './whereDemo';
+import { LIBRARIES, type DemoLibrary } from './demoLibraries';
+
+const LIBRARY_KEY = 'dstutor-hero-library';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -26,13 +30,12 @@ function highlight(code: string): string {
   return html + escapeHtml(code.slice(last)) + (code.endsWith('\n') ? ' ' : '');
 }
 
-// The tutor's own words for a where() step (tracers/datascience/tracer.py)
-const stepText = {
-  checking: (label: string) => `where checks every row's '${label}' value against the condition.`,
-  keeping: (kept: number, removed: number) =>
-    `Keep the ${kept} row${kept === 1 ? '' : 's'} that satisfy the condition; the other ${removed} (struck through) are removed.`,
-  done: (kept: number, removed: number) => `Filtered rows. Kept ${kept}, removed ${removed}.`,
-};
+/** A runnable query: where it is assigned, the column it checks, and what it does to each row */
+interface Step {
+  target: string | null;
+  label: string;
+  result: Evaluated;
+}
 
 export function setupHeroCell(): void {
   const el = <T extends HTMLElement>(id: string) => document.getElementById(id) as T | null;
@@ -49,6 +52,9 @@ export function setupHeroCell(): void {
   const demo = el('where-demo');
   const cel = el('demo-cel');
   const resultCaption = el('demo-result-caption');
+  const toggle = el('demo-libraries');
+  const tryLink = el<HTMLAnchorElement>('hero-try');
+  const tryName = el('hero-try-name');
   if (!cell || !prompt || !runButton || !editor || !code || !highlighted || !out || !viz) return;
   if (!progress || !status || !demo || !cel || !resultCaption) return;
 
@@ -56,15 +62,18 @@ export function setupHeroCell(): void {
   const resultBody = demo.querySelector<HTMLTableSectionElement>('table.result tbody');
   if (!sourceTable || !resultBody) return;
   const header = sourceTable.querySelector<HTMLTableRowElement>('thead tr');
-  const headerCells = [...sourceTable.querySelectorAll<HTMLTableCellElement>('thead th')];
+  // Index cells (.idx) belong to pandas' view; the data columns are the rest
+  const dataCells = (row: HTMLTableRowElement) => [...row.cells].filter((c) => !c.classList.contains('idx'));
+  const headerCells = header ? dataCells(header) : [];
   const rows = [...sourceTable.querySelectorAll<HTMLTableRowElement>('tbody tr')];
   const labels = headerCells.map((th) => th.textContent ?? '');
   // The table's columns, read from the page: numbers where every value is one
   const columns: Column[] = labels.map((label, c) => {
-    const shown = rows.map((row) => row.cells[c].textContent ?? '');
+    const shown = rows.map((row) => dataCells(row)[c].textContent ?? '');
     const numeric = shown.every((s) => s.trim() !== '' && !Number.isNaN(Number(s)));
     return { label, shown, values: numeric ? shown.map(Number) : shown };
   });
+  const columnFor = (label: string) => columns.find((c) => c.label === label)!;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // Editing: a textarea over a highlighted copy of the same text
@@ -76,7 +85,6 @@ export function setupHeroCell(): void {
   const syncHighlight = () => {
     highlighted.innerHTML = highlight(code.value);
   };
-  syncHighlight();
 
   const setCel = (state: CelState) => cel.setAttribute('data-state', state);
   const moveCelTo = (row: HTMLTableRowElement | null) => {
@@ -87,9 +95,9 @@ export function setupHeroCell(): void {
     const y = r.top - scan.getBoundingClientRect().top + (r.height - box.height) / 2;
     cel.style.transform = `translateY(${Math.round(y)}px)`;
   };
-  moveCelTo(header);
   window.addEventListener('resize', () => moveCelTo(header));
 
+  let library: DemoLibrary = LIBRARIES.datascience;
   let count = 1;
   /** Tell heartbeat.ts a run finished, and how */
   const finished = (ok: boolean) => cell.dispatchEvent(new CustomEvent('cell-finished', { detail: { ok } }));
@@ -98,30 +106,31 @@ export function setupHeroCell(): void {
     cell.classList.toggle('is-running', value === '*');
   };
 
-  /** The column being checked, highlighted like the tutor's input_highlights */
+  /** The column being checked, highlighted like the tutors' input_highlights */
   const markColumn = (label: string | null) => {
     const c = label === null ? -1 : labels.indexOf(label);
     headerCells.forEach((th, i) => th.classList.toggle('is-checked', i === c));
-    rows.forEach((row) => [...row.cells].forEach((td, i) => td.classList.toggle('is-checked', i === c)));
+    rows.forEach((row) => dataCells(row).forEach((td, i) => td.classList.toggle('is-checked', i === c)));
   };
 
   const resetRows = () => rows.forEach((row) => row.classList.remove('checking', 'kept', 'dropped'));
 
-  /** Fill the result table with the kept rows, hidden until shown */
+  /** Fill the result table with the kept rows (and their index labels), hidden until shown */
   const fillResult = (keep: boolean[], caption: string, shown: boolean) => {
     resultCaption.textContent = caption;
     resultBody.replaceChildren();
     const kept = rows.filter((_, i) => keep[i]);
     for (const row of kept) {
       const copy = document.createElement('tr');
-      for (const td of row.cells) copy.append(Object.assign(document.createElement('td'), { textContent: td.textContent }));
+      for (const td of row.cells) copy.append(Object.assign(document.createElement('td'), { textContent: td.textContent, className: td.className }));
+      copy.querySelectorAll('.is-checked').forEach((td) => td.classList.remove('is-checked'));
       if (shown) copy.classList.add('shown');
       resultBody.append(copy);
     }
     if (kept.length === 0) {
       const empty = document.createElement('tr');
       empty.className = 'empty shown';
-      empty.append(Object.assign(document.createElement('td'), { colSpan: labels.length, textContent: 'No rows' }));
+      empty.append(Object.assign(document.createElement('td'), { colSpan: rows[0].cells.length, textContent: 'No rows' }));
       resultBody.append(empty);
     }
   };
@@ -140,22 +149,23 @@ export function setupHeroCell(): void {
   };
 
   /** The finished step, without animation */
-  const showDone = (query: Query, result: Evaluated) => {
-    const kept = result.keep.filter(Boolean).length;
+  const showDone = (step: Step) => {
+    const kept = step.result.keep.filter(Boolean).length;
     resetRows();
-    rows.forEach((row, i) => row.classList.add(result.keep[i] ? 'kept' : 'dropped'));
-    markColumn(query.label);
-    fillResult(result.keep, query.target ?? `Out[${count}]`, true);
+    rows.forEach((row, i) => row.classList.add(step.result.keep[i] ? 'kept' : 'dropped'));
+    markColumn(step.label);
+    fillResult(step.result.keep, step.target ?? `Out[${count}]`, true);
     progress.textContent = `${rows.length} of ${rows.length} rows checked`;
-    status.textContent = stepText.done(kept, rows.length - kept);
+    status.textContent = library.done(kept, rows.length - kept);
     setCel('done');
     moveCelTo(header);
   };
 
   /** Play the step row by row; false if a newer run took over */
   let token = 0;
-  const play = async (query: Query, result: Evaluated, mine: number): Promise<boolean> => {
+  const play = async (step: Step, mine: number): Promise<boolean> => {
     const live = () => mine === token;
+    const { result } = step;
     const kept = result.keep.filter(Boolean).length;
     setPrompt('*');
     clearOutput();
@@ -164,11 +174,11 @@ export function setupHeroCell(): void {
 
     // The new step starts from the untouched table, with an empty result
     resetRows();
-    markColumn(query.label);
-    fillResult(result.keep, query.target ?? `Out[${count}]`, false);
+    markColumn(step.label);
+    fillResult(result.keep, step.target ?? `Out[${count}]`, false);
     setCel('running');
     moveCelTo(header);
-    status.textContent = stepText.checking(query.label);
+    status.textContent = library.checking(step.label);
     progress.textContent = `0 of ${rows.length} rows checked`;
     viz.classList.remove('is-cleared');
     await sleep(900);
@@ -192,7 +202,7 @@ export function setupHeroCell(): void {
     setCel('grouped');
     moveCelTo(header);
     progress.textContent = `${rows.length} of ${rows.length} rows checked`;
-    status.textContent = stepText.keeping(kept, rows.length - kept);
+    status.textContent = library.keeping(kept, rows.length - kept);
     for (const row of resultBody.rows) {
       if (!live()) return false;
       row.classList.add('shown');
@@ -201,7 +211,7 @@ export function setupHeroCell(): void {
     await sleep(1200);
     if (!live()) return false;
     setPrompt(count);
-    showDone(query, result);
+    showDone(step);
     finished(true);
     return true;
   };
@@ -209,70 +219,137 @@ export function setupHeroCell(): void {
   /** Run whatever is in the cell, like Shift+Enter in a notebook */
   const runCell = async () => {
     const mine = ++token;
-    const parsed = parseCell(code.value, labels);
-    if (parsed.kind === 'unsupported') {
+    const run = library.parse(code.value, labels);
+    if (run.kind === 'unsupported') {
       setPrompt(' ');
       viz.classList.remove('is-cleared');
-      showOutput('note', 'This preview runs one <code>cones.where(...)</code> on the <code>cones</code> table.');
+      showOutput('note', library.unsupported);
       return;
     }
     count += 1;
-    if (parsed.kind === 'empty') {
+    if (run.kind === 'empty') {
       setPrompt(count);
       showOutput(null);
       viz.hidden = true;
       return;
     }
-    const result = parsed.kind === 'query' ? evaluate(parsed.query, columns.find((c) => c.label === parsed.query.label)!) : null;
-    const error = parsed.kind === 'error' ? parsed.message : result && 'error' in result ? result.error : null;
-    if (error !== null || parsed.kind !== 'query' || !result || 'error' in result) {
+    const outcome = run.kind === 'query' ? run.evaluate(columnFor(run.label)) : null;
+    if (run.kind === 'error' || !outcome || 'error' in outcome) {
       setPrompt(count);
-      showOutput('error', `<pre>${escapeHtml(error ?? '')}</pre>`);
+      const message = run.kind === 'error' ? run.message : outcome && 'error' in outcome ? outcome.error : '';
+      showOutput('error', `<pre>${escapeHtml(message)}</pre>`);
       finished(false);
       return;
     }
+    const step = { target: run.target, label: run.label, result: outcome };
     if (reduceMotion) {
       showOutput(null);
       viz.classList.remove('is-cleared');
       setPrompt(count);
-      showDone(parsed.query, result);
+      showDone(step);
     } else {
-      await play(parsed.query, result, mine);
+      await play(step, mine);
     }
   };
 
-  // Until someone edits, the cell replays its own example while it is on screen
+  // Until someone edits, the cell replays its library's example while it is on screen
   let edited = false;
-  const example = parseCell(code.value, labels);
-  const exampleQuery = example.kind === 'query' ? example.query : null;
-  const exampleResult = exampleQuery ? evaluate(exampleQuery, columns.find((c) => c.label === exampleQuery.label)!) : null;
-  if (!exampleQuery || !exampleResult || 'error' in exampleResult) return;
+  let visible = false;
+  let example: Step | null = null;
+
+  const exampleFor = (lib: DemoLibrary): Step | null => {
+    const run = lib.parse(lib.code, labels);
+    if (run.kind !== 'query') return null;
+    const outcome = run.evaluate(columnFor(run.label));
+    return 'error' in outcome ? null : { target: run.target, label: run.label, result: outcome };
+  };
 
   const autoplay = async (mine: number) => {
-    while (mine === token && !edited) {
+    while (mine === token && !edited && example) {
       count = 1;
       // A cell that has not run has no output
       setPrompt(' ');
       clearOutput();
       await sleep(1400);
       if (mine !== token || edited) return;
-      if (!(await play(exampleQuery, exampleResult, mine))) return;
+      if (!(await play(example, mine))) return;
       await sleep(4500);
     }
   };
 
   const finishExample = () => {
+    if (!example) return;
     showOutput(null);
     viz.classList.remove('is-cleared');
     setPrompt(count);
-    showDone(exampleQuery, exampleResult);
+    showDone(example);
   };
-  finishExample();
+
+  /** Show a library: its code and table view, its example finished, then replaying if on screen */
+  const showLibrary = (lib: DemoLibrary) => {
+    library = lib;
+    example = exampleFor(lib);
+    token += 1;
+    edited = false;
+    count = 1;
+    code.value = lib.code;
+    syncHighlight();
+    demo.classList.toggle('show-index', lib.showIndex);
+    if (tryLink && tryName) {
+      tryLink.href = lib.href;
+      tryName.textContent = lib.name;
+    }
+    toggle?.querySelectorAll<HTMLButtonElement>('[data-library]').forEach((button) => {
+      const checked = button.dataset.library === lib.id;
+      button.setAttribute('aria-checked', String(checked));
+      // Only the chosen library is in the tab order; arrow keys move between them
+      button.tabIndex = checked ? 0 : -1;
+    });
+    finishExample();
+    if (visible && !reduceMotion) void autoplay(++token);
+  };
+
+  let stored: string | null = null;
+  try {
+    stored = localStorage.getItem(LIBRARY_KEY);
+  } catch {
+    // Storage blocked: start with datascience
+  }
+  showLibrary(LIBRARIES[stored ?? ''] ?? LIBRARIES.datascience);
+
+  if (toggle) {
+    toggle.hidden = false;
+    const buttons = [...toggle.querySelectorAll<HTMLButtonElement>('[data-library]:not([disabled])')];
+    const choose = (button: HTMLButtonElement) => {
+      const lib = LIBRARIES[button.dataset.library ?? ''];
+      if (!lib || lib === library) return;
+      try {
+        localStorage.setItem(LIBRARY_KEY, lib.id);
+      } catch {
+        // Storage blocked: the choice still holds for this visit
+      }
+      showLibrary(lib);
+    };
+    for (const button of buttons) {
+      button.addEventListener('click', () => choose(button));
+      // A radio group: arrow keys move between the libraries
+      button.addEventListener('keydown', (event) => {
+        if (!['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp'].includes(event.key)) return;
+        event.preventDefault();
+        const step = event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : -1;
+        const next = buttons[(buttons.indexOf(button) + step + buttons.length) % buttons.length];
+        next.focus();
+        choose(next);
+      });
+    }
+  }
+
   if (!reduceMotion) {
     new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
       if (edited) return;
       const mine = ++token;
-      if (entry.isIntersecting) void autoplay(mine);
+      if (visible) void autoplay(mine);
       else finishExample();
     }).observe(demo);
   }

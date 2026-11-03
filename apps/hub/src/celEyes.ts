@@ -67,10 +67,11 @@ export function setupCelEyes(): void {
     }
   }
 
-  // A blink every few seconds, at slightly different moments for each Cel
+  // A blink every few seconds, at slightly different moments for each Cel; only at rest, so a
+  // working Cel never looks eyeless
   for (const w of watchers) {
     const blink = () => {
-      if (!document.hidden) {
+      if (!document.hidden && w.active()) {
         w.svg.classList.add('is-blinking');
         setTimeout(() => w.svg.classList.remove('is-blinking'), 150);
       }

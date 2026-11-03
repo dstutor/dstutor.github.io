@@ -26,7 +26,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['scripts/**/*.mjs', '**/vite.config.ts', 'packages/runtime-pyodide/src/vite.ts'],
+    files: ['**/scripts/**/*.mjs', '**/vite.config.ts', 'packages/runtime-pyodide/src/vite.ts'],
     languageOptions: { globals: globals.node },
   },
   {

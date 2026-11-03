@@ -16,3 +16,9 @@ requests==2.33.1
 xyzservices==2026.3.0
 pytz==2026.1.post1
 python-dateutil==2.9.0.post0
+# The trace contract check (packages/trace-schema/check_trace.py) and its dependencies
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
+referencing==0.37.0
+rpds-py==2026.9.1
+attrs==26.1.0

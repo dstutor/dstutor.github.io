@@ -90,6 +90,11 @@ def run_cell(code, tracer, namespace):
             code = '\n'.join('' if line.lstrip().startswith('%') else line for line in code.split('\n'))
             tree = ast.parse(code, CELL_FILENAME)
             tracer.set_cell_statements(cell_statements(tree))
+            # A tracer that rewrites code (pandas) wraps the calls it traces before the cell runs;
+            # one that patches its library (datascience) has no transform
+            transform = getattr(tracer, 'transform', None)
+            if transform is not None:
+                tree = transform(tree)
             last = tree.body.pop() if tree.body and isinstance(tree.body[-1], ast.Expr) else None
             exec(compile(tree, CELL_FILENAME, 'exec'), namespace)
             if last is not None:

@@ -1,0 +1,313 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/Trace",
+  "definitions": {
+    "Trace": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/TraceRecord"
+      },
+      "description": "Everything a run recorded, in order: what a tracer's trace() returns"
+    },
+    "TraceRecord": {
+      "type": "object",
+      "properties": {
+        "step_id": {
+          "type": "integer",
+          "description": "Unique within a trace, increasing in the order the operations ran",
+          "minimum": 0
+        },
+        "operation": {
+          "type": "string",
+          "description": "The method or function called, e.g. \"where\""
+        },
+        "label": {
+          "type": "string",
+          "description": "The step's title when `operation()` would not describe what the code did, e.g. \"keep rows where True\" for cones[cones['Price'] > 4], which calls no method. Without it the step is titled operation()."
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/JsonValue"
+          },
+          "description": "Positional arguments, as JSON (a predicate shows as its name or description)"
+        },
+        "kwargs": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/JsonValue"
+          },
+          "description": "Keyword arguments, as JSON"
+        },
+        "input": {
+          "$ref": "#/definitions/TableState",
+          "description": "The table the operation was called on"
+        },
+        "output": {
+          "$ref": "#/definitions/TableState",
+          "description": "What it returned"
+        },
+        "explanation": {
+          "type": "string",
+          "description": "One sentence on what happened, e.g. \"Filtered rows. Kept 2, removed 4.\""
+        },
+        "sub_steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SubStep"
+          },
+          "description": "Pedagogical walkthrough frames; absent => single before/after frame"
+        },
+        "site": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "line": {
+                  "type": "number"
+                },
+                "stmt_start": {
+                  "type": "number"
+                },
+                "stmt_end": {
+                  "type": "number"
+                },
+                "target": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "line",
+                "stmt_start",
+                "stmt_end",
+                "target"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Where in the cell the call was made (1-based lines) and the variable the statement assigns"
+        },
+        "cell": {
+          "type": "string",
+          "description": "Id of the notebook cell that produced this step (stamped by the runner)"
+        },
+        "assigns": {
+          "type": "string",
+          "description": "Set on the last step of an assignment statement: the name that receives the result"
+        }
+      },
+      "required": [
+        "step_id",
+        "operation",
+        "args",
+        "kwargs",
+        "input",
+        "output",
+        "explanation"
+      ],
+      "additionalProperties": false
+    },
+    "JsonValue": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/JsonValue"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/JsonValue"
+          }
+        }
+      ],
+      "description": "A value as tracers send it: plain JSON. NaN and infinities are not JSON, so tracers send null for them; anything else that is not JSON (a function, an object) is sent as its string form."
+    },
+    "TableState": {
+      "type": "object",
+      "properties": {
+        "num_rows": {
+          "type": "integer",
+          "description": "Rows in the whole table, which can be more than preview shows",
+          "minimum": 0
+        },
+        "num_columns": {
+          "type": "integer",
+          "description": "Always columns.length",
+          "minimum": 0
+        },
+        "columns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "preview": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/JsonValue"
+            }
+          },
+          "description": "The first rows (all of them for small tables), one value per column"
+        },
+        "index_columns": {
+          "type": "integer",
+          "description": "How many of the leading columns are row labels rather than data: a pandas DataFrame's index (two for a two-level index). They are shown, but not counted as columns. Absent: 0.",
+          "minimum": 0
+        },
+        "error": {
+          "type": "string",
+          "description": "Set when the table could not be read; the rest is then best effort"
+        },
+        "kind": {
+          "type": "string",
+          "const": "array",
+          "description": "'array' when the result is an array shown as one column (apply), not a real table"
+        }
+      },
+      "required": [
+        "num_rows",
+        "num_columns",
+        "columns",
+        "preview"
+      ],
+      "additionalProperties": false
+    },
+    "SubStep": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "Replaces record.explanation for this frame"
+        },
+        "detail": {
+          "type": "string",
+          "description": "Monospace detail line, e.g. \"sum([3.55, 5.25]) = 8.8\""
+        },
+        "input_highlights": {
+          "$ref": "#/definitions/Highlights"
+        },
+        "output_highlights": {
+          "$ref": "#/definitions/Highlights"
+        },
+        "output_state": {
+          "$ref": "#/definitions/TableState",
+          "description": "Intermediate result table; absent => render record.output"
+        },
+        "aux_table": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string"
+            },
+            "state": {
+              "$ref": "#/definitions/TableState"
+            },
+            "highlights": {
+              "$ref": "#/definitions/Highlights"
+            }
+          },
+          "required": [
+            "label",
+            "state"
+          ],
+          "additionalProperties": false,
+          "description": "Secondary input table (e.g. the right table of a join)"
+        },
+        "output_label": {
+          "type": "string",
+          "description": "Heading for the result panel, e.g. \"Result array\" or \"First table (3 rows)\"; defaults to After"
+        },
+        "aux_output": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string"
+            },
+            "state": {
+              "$ref": "#/definitions/TableState"
+            },
+            "highlights": {
+              "$ref": "#/definitions/Highlights"
+            }
+          },
+          "required": [
+            "label",
+            "state"
+          ],
+          "additionalProperties": false,
+          "description": "Secondary result table shown under the main one (e.g. the second half of a split)"
+        }
+      },
+      "required": [
+        "message"
+      ],
+      "additionalProperties": false
+    },
+    "Highlights": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "Preview row indices (0-based) to emphasize"
+        },
+        "rows_removed": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "Preview row indices shown struck-through (e.g. rows removed by where)"
+        },
+        "columns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Column names to emphasize"
+        },
+        "cells": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "items": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "maxItems": 2
+          },
+          "description": "Individual cells as [previewRowIndex, columnName] pairs"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

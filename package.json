@@ -10,11 +10,12 @@
     "node": ">=24.21.0"
   },
   "scripts": {
+    "dev": "node scripts/dev.mjs",
     "dev:hub": "npm run dev -w @dstutor/hub",
     "lint": "eslint .",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "test:tracers": "cd tracers/datascience && ${PYTHON:-python3} -m unittest discover -p '*_test.py'",
+    "test:tracers": "cd tracers/datascience && ${PYTHON:-python3} -m unittest discover -p '*_test.py' && cd ../pandas && ${PYTHON:-python3} -m unittest discover -p '*_test.py'",
     "check": "npm run lint && npm run typecheck && npm test && npm run test:tracers",
     "build": "npm run build --workspaces --if-present && node scripts/assemble.mjs",
     "preview": "npm run build && vite preview --outDir site --port 4173"

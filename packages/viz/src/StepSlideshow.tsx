@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef, forwardRef } from 'react';
 import type { TraceRecord } from '@dstutor/trace-schema';
-import { framesFor, firstFrameOfOperation, lastFrameOfOperation, type Frame, type DetailLevel } from './frames';
+import { framesFor, firstFrameOfOperation, lastFrameOfOperation, stepTitle, type Frame, type DetailLevel } from './frames';
 import DataTransformation from './DataTransformation';
 import './StepSlideshow.css';
 
@@ -35,7 +35,7 @@ export function StepCard({ frame }: StepCardProps) {
         <div className="step-operation-title">
           <code>
             {record.assigns && <span className="step-assigns">{record.assigns} = </span>}
-            {record.operation}()
+            {stepTitle(record)}
           </code>
         </div>
       </div>
@@ -51,6 +51,7 @@ export function StepCard({ frame }: StepCardProps) {
             before={record.input}
             after={record.output}
             operation={record.operation}
+            title={stepTitle(record)}
             inputHighlights={subStep?.input_highlights}
             outputHighlights={subStep?.output_highlights}
             outputOverride={subStep?.output_state}
@@ -216,7 +217,7 @@ const StepSlideshow = forwardRef<HTMLDivElement, StepSlideshowProps>(function St
                 key={opIndex}
                 className={`dot ${isActive ? 'active' : ''}`}
                 onClick={() => setCurrentFrame(isActive ? lastFrameOfOperation(frames, opIndex) : firstFrameOfOperation(frames, opIndex))}
-                title={isActive ? `Skip to the result of ${record.operation}()` : `Go to step ${opIndex + 1}: ${record.operation}()`}
+                title={isActive ? `Skip to the result of ${stepTitle(record)}` : `Go to step ${opIndex + 1}: ${stepTitle(record)}`}
               >
                 {isActive && subCount > 1 && (
                   <span className="dot-sub-label">{(frame.subIndex ?? 0) + 1}/{subCount}</span>
