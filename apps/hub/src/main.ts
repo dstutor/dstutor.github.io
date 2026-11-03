@@ -62,8 +62,27 @@ function setupTutorsMenu(): void {
   });
 }
 
+// The feature cards' clips play while on screen and pause when not. With reduced motion they
+// stay on their poster, the finished result.
+function setupFeatureClips(): void {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const clips = [...document.querySelectorAll<HTMLVideoElement>('.feature-clip')];
+  const observer = new IntersectionObserver(
+    (entries) => {
+      for (const { target, isIntersecting } of entries) {
+        const video = target as HTMLVideoElement;
+        if (isIntersecting) video.play().catch(() => {});
+        else video.pause();
+      }
+    },
+    { threshold: 0.5 },
+  );
+  clips.forEach((clip) => observer.observe(clip));
+}
+
 setupThemeToggle();
 setupTutorsMenu();
+setupFeatureClips();
 setupHeroCell();
 const hero = document.querySelector<HTMLElement>('.hero');
 const cell = document.getElementById('demo-cell');

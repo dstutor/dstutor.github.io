@@ -18,7 +18,8 @@
     "test:tracers": "cd tracers/datascience && ${PYTHON:-python3} -m unittest discover -p '*_test.py' && cd ../pandas && ${PYTHON:-python3} -m unittest discover -p '*_test.py'",
     "check": "npm run lint && npm run typecheck && npm test && npm run test:tracers",
     "build": "npm run build --workspaces --if-present && node scripts/assemble.mjs",
-    "preview": "npm run build && vite preview --outDir site --port 4173"
+    "preview": "npm run build && vite preview --outDir site --port 4173",
+    "record:demos": "npm run build && node scripts/record-demos.mjs"
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",
@@ -28,6 +29,7 @@
     "eslint-plugin-react": "7.37.5",
     "eslint-plugin-react-hooks": "7.1.1",
     "globals": "17.13.0",
+    "playwright-core": "1.64.1",
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.2",
     "vite": "8.3.5"

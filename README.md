@@ -35,6 +35,10 @@ runs its own Vite dev server behind that one address ([scripts/dev.mjs](scripts/
 To see the production build instead, `npm run preview` builds every app, assembles them the
 way GitHub Pages serves them, and serves the result at http://localhost:4173.
 
+The hub's feature cards play short clips of the tutor, recorded from the real site by
+[scripts/record-demos.mjs](scripts/record-demos.mjs). After a change to the tutor's look, record
+them again with `npm run record:demos` (needs Chrome and `ffmpeg`).
+
 ## Check and build
 
 ```bash

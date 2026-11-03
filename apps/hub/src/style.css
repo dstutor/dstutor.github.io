@@ -492,6 +492,11 @@ main,
   animation: md-follow 3300ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* The code cell arrives last; heroCell.ts starts running it when this animation ends */
+.intro .nb-code {
+  animation: md-follow 3600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 @keyframes md-source {
   0% { opacity: 0; }
   4%, 76% { opacity: 1; }
@@ -856,7 +861,7 @@ main,
   margin-top: 18px;
   min-width: 0;
   container-type: inline-size;
-  transition: opacity 180ms ease;
+  transition: opacity 260ms ease;
 }
 
 /* Output cleared for a rerun; it keeps its space so the page does not jump */
@@ -965,7 +970,15 @@ main,
   padding: 5px 12px;
   text-align: left;
   border-bottom: 1px solid var(--border);
-  transition: background-color 200ms ease, color 200ms ease;
+}
+
+/* Row states fade from one to the next: the checking outline, the colors, and the strike-through
+   (always there, transparent until a row is removed, so it can fade in too) */
+.mini td {
+  box-shadow: inset 0 2px 0 transparent, inset 0 -2px 0 transparent;
+  text-decoration: line-through;
+  text-decoration-color: transparent;
+  transition: background-color 300ms ease, color 300ms ease, box-shadow 300ms ease, text-decoration-color 300ms ease;
 }
 
 .mini th {
@@ -989,7 +1002,7 @@ main,
 .mini tr.dropped td {
   background-color: var(--removed);
   color: var(--removed-ink);
-  text-decoration: line-through;
+  text-decoration-color: currentColor;
 }
 
 /* The column being checked gets a light tint from header to last row, like the tutor's column
@@ -1012,8 +1025,8 @@ main,
 
 .is-animated .result tbody tr {
   opacity: 0;
-  transform: translateX(-10px);
-  transition: opacity 240ms ease, transform 240ms ease;
+  transform: translateX(-8px);
+  transition: opacity 450ms cubic-bezier(0.16, 1, 0.3, 1), transform 450ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .is-animated .result tbody tr.shown {
@@ -1188,21 +1201,45 @@ a.tutor:hover .pill-live .arrow {
 
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(12.5rem, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
   margin: 24px 0 0;
   padding: 0;
   list-style: none;
 }
 
+/* Two to a row, so each clip is large enough to read */
+@media (min-width: 720px) {
+  .feature-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+}
+
 .feature-grid li {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 18px;
+  padding: 12px 12px 18px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+}
+
+.feature-clip {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  margin-bottom: 12px;
+  object-fit: cover;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.feature-grid strong,
+.feature-grid span {
+  padding: 0 6px;
 }
 
 .feature-grid strong {

@@ -239,11 +239,25 @@ chocolate = cones.where('Flavor', 'chocolate')</textarea>
 
       <section id="features" class="features" aria-labelledby="features-heading">
         <h2 id="features-heading">Every tutor is a notebook</h2>
+        <!-- Clips of the real tutor, recorded by scripts/record-demos.mjs (npm run record:demos);
+             main.ts plays each one while it is on screen -->
         <ul class="feature-grid">
-          <li><strong>Cells share state</strong><span>Load a table in one cell and reshape it over the next five, like Jupyter.</span></li>
-          <li><strong>Step through it</strong><span>Each operation becomes before-and-after tables you can play frame by frame.</span></li>
-          <li><strong>Present mode</strong><span>Fill the screen for lecture.</span></li>
-          <li><strong>Share and save</strong><span>Send a link that carries the notebook, or open and save <code>.ipynb</code>.</span></li>
+          <li>
+            <video class="feature-clip" src="./src/demos/notebook.mp4" poster="./src/demos/notebook.jpg" muted loop playsinline preload="none" aria-label="Clicking Run all: each cell runs in turn and the last one shows the filtered table"></video>
+            <strong>Cells share state</strong><span>Load a table in one cell and reshape it over the next five, like Jupyter.</span>
+          </li>
+          <li>
+            <video class="feature-clip" src="./src/demos/steps.mp4" poster="./src/demos/steps.jpg" muted loop playsinline preload="none" aria-label="Clicking Next steps through a where() filter, frame by frame"></video>
+            <strong>Step through it</strong><span>Each operation becomes before-and-after tables you can play frame by frame.</span>
+          </li>
+          <li>
+            <video class="feature-clip" src="./src/demos/present.mp4" poster="./src/demos/present.jpg" muted loop playsinline preload="none" aria-label="Clicking Present fills the window with the step, then stepping through it"></video>
+            <strong>Present mode</strong><span>Fill the screen for lecture.</span>
+          </li>
+          <li>
+            <video class="feature-clip" src="./src/demos/share.mp4" poster="./src/demos/share.jpg" muted loop playsinline preload="none" aria-label="Clicking Share copies a link that carries the notebook"></video>
+            <strong>Share and save</strong><span>Send a link that carries the notebook, or open and save <code>.ipynb</code>.</span>
+          </li>
         </ul>
       </section>
     </main>

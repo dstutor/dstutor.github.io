@@ -1,5 +1,5 @@
 // Kernel heartbeat: while the hero cell runs (In [*]:), square rings of the hero's dot grid
-// light up around its prompt, one ring per beat, stepping outward a dot at a time and fading as
+// light up around its prompt, one ring per beat, gliding outward across the dots and fading as
 // they spread. When the run finishes, one last ring goes out in Cel's color for the outcome
 // (teal when it worked, coral for an error) and then the grid rests. The canvas sits over the
 // CSS dot grid and only draws while a ring is alive.
@@ -7,9 +7,9 @@
 /** The hero's dot grid: background-size in style.css, one dot centred in each tile */
 const GRID = 18;
 const DOT = 4;
-/** How far a ring travels, in dots, how long each step takes, and how often a beat comes */
+/** How far a ring travels, in dots, how long it takes to cross one, and how often a beat comes */
 const REACH = 16;
-const STEP_MS = 65;
+const STEP_MS = 75;
 const BEAT_MS = 950;
 
 interface Ring {
@@ -60,17 +60,23 @@ export function setupHeartbeat(hero: HTMLElement, cell: HTMLElement, origin: HTM
     const cy = Math.round((box.top + box.height / 2 - heroBox.top - GRID / 2) / GRID);
 
     rings = rings.filter((ring) => {
-      // Stepped, a whole dot at a time, so it reads as pixels rather than a smooth wave
-      const r = Math.floor((now - ring.born) / STEP_MS) + 1;
-      if (r >= REACH) return false;
-      if (r < 1) return true;
+      // The ring's radius grows smoothly; the two rings of dots on either side of it share the
+      // light by how close it is, so the wave glides across the grid instead of hopping
+      const radius = (now - ring.born) / STEP_MS + 1;
+      if (radius >= REACH) return false;
+      if (radius < 1) return true;
       ctx.fillStyle = ring.color;
-      ctx.globalAlpha = ring.strength * (1 - r / REACH) ** 1.5;
-      for (let i = -r; i <= r; i++) {
-        dot(cx + i, cy - r);
-        dot(cx + i, cy + r);
-        dot(cx - r, cy + i);
-        dot(cx + r, cy + i);
+      const fade = ring.strength * (1 - radius / REACH) ** 1.5;
+      for (const r of [Math.floor(radius), Math.floor(radius) + 1]) {
+        const weight = 1 - Math.abs(r - radius);
+        if (weight <= 0 || r < 1) continue;
+        ctx.globalAlpha = fade * weight;
+        for (let i = -r; i <= r; i++) {
+          dot(cx + i, cy - r);
+          dot(cx + i, cy + r);
+          dot(cx - r, cy + i);
+          dot(cx + r, cy + i);
+        }
       }
       return true;
     });

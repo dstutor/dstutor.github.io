@@ -30,6 +30,11 @@ export default tseslint.config(
     languageOptions: { globals: globals.node },
   },
   {
+    // Functions passed to page.evaluate and addInitScript run in the browser
+    files: ['scripts/record-demos.mjs'],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+  },
+  {
     files: ['packages/runtime-pyodide/src/sw.js'],
     languageOptions: { globals: globals.serviceworker },
   },

@@ -76,6 +76,20 @@ export function setupHeroCell(): void {
   const columnFor = (label: string) => columns.find((c) => c.label === label)!;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // The headline's intro (style.css) plays first, and the cell fades in as its last part; the
+  // cell only starts running once that has ended, so one thing moves at a time
+  let introPlaying = !reduceMotion && document.documentElement.classList.contains('intro');
+  const introDone = new Promise<void>((resolve) => {
+    if (!introPlaying) return resolve();
+    cell.addEventListener('animationend', (event) => {
+      if (event.target === cell) resolve();
+    });
+    // In case the animation never runs (a hidden tab, say)
+    setTimeout(resolve, 4500);
+  }).then(() => {
+    introPlaying = false;
+  });
+
   // Editing: a textarea over a highlighted copy of the same text
   editor.classList.add('is-editable');
   code.hidden = false;
@@ -84,6 +98,13 @@ export function setupHeroCell(): void {
   demo.classList.add('is-animated');
   const syncHighlight = () => {
     highlighted.innerHTML = highlight(code.value);
+  };
+
+  /** New text fades in rather than snapping, so the lines above the tables do not flicker */
+  const swapText = (el: HTMLElement, text: string) => {
+    if (el.textContent === text) return;
+    el.textContent = text;
+    if (!reduceMotion) el.animate([{ opacity: 0.25 }, { opacity: 1 }], { duration: 260, easing: 'ease-out' });
   };
 
   const setCel = (state: CelState) => cel.setAttribute('data-state', state);
@@ -155,8 +176,8 @@ export function setupHeroCell(): void {
     rows.forEach((row, i) => row.classList.add(step.result.keep[i] ? 'kept' : 'dropped'));
     markColumn(step.label);
     fillResult(step.result.keep, step.target ?? `Out[${count}]`, true);
-    progress.textContent = `${rows.length} of ${rows.length} rows checked`;
-    status.textContent = library.done(kept, rows.length - kept);
+    swapText(progress, `${rows.length} of ${rows.length} rows checked`);
+    swapText(status, library.done(kept, rows.length - kept));
     setCel('done');
     moveCelTo(header);
   };
@@ -169,7 +190,7 @@ export function setupHeroCell(): void {
     const kept = result.keep.filter(Boolean).length;
     setPrompt('*');
     clearOutput();
-    await sleep(450);
+    await sleep(600);
     if (!live()) return false;
 
     // The new step starts from the untouched table, with an empty result
@@ -178,37 +199,37 @@ export function setupHeroCell(): void {
     fillResult(result.keep, step.target ?? `Out[${count}]`, false);
     setCel('running');
     moveCelTo(header);
-    status.textContent = library.checking(step.label);
-    progress.textContent = `0 of ${rows.length} rows checked`;
+    swapText(status, library.checking(step.label));
+    swapText(progress, `0 of ${rows.length} rows checked`);
     viz.classList.remove('is-cleared');
-    await sleep(900);
+    await sleep(1400);
 
     for (const [i, row] of rows.entries()) {
       if (!live()) return false;
       const keep = result.keep[i];
-      progress.textContent = `Row ${i + 1} of ${rows.length}: ${result.reasons[i]}, ${keep ? 'keep' : 'remove'}`;
+      swapText(progress, `Row ${i + 1} of ${rows.length}: ${result.reasons[i]}, ${keep ? 'keep' : 'remove'}`);
       setCel('running');
       moveCelTo(row);
       row.classList.add('checking');
-      await sleep(800);
+      await sleep(1100);
       row.classList.remove('checking');
       row.classList.add(keep ? 'kept' : 'dropped');
       if (!keep) setCel('removed');
       // Hold the crossed-out face long enough to read before moving on
-      await sleep(keep ? 300 : 650);
+      await sleep(keep ? 450 : 900);
     }
     if (!live()) return false;
 
     setCel('grouped');
     moveCelTo(header);
-    progress.textContent = `${rows.length} of ${rows.length} rows checked`;
-    status.textContent = library.keeping(kept, rows.length - kept);
+    swapText(progress, `${rows.length} of ${rows.length} rows checked`);
+    swapText(status, library.keeping(kept, rows.length - kept));
     for (const row of resultBody.rows) {
       if (!live()) return false;
       row.classList.add('shown');
-      await sleep(420);
+      await sleep(600);
     }
-    await sleep(1200);
+    await sleep(1800);
     if (!live()) return false;
     setPrompt(count);
     showDone(step);
@@ -265,15 +286,16 @@ export function setupHeroCell(): void {
   };
 
   const autoplay = async (mine: number) => {
+    await introDone;
     while (mine === token && !edited && example) {
       count = 1;
       // A cell that has not run has no output
       setPrompt(' ');
       clearOutput();
-      await sleep(1400);
+      await sleep(1800);
       if (mine !== token || edited) return;
       if (!(await play(example, mine))) return;
-      await sleep(4500);
+      await sleep(5500);
     }
   };
 
@@ -305,7 +327,13 @@ export function setupHeroCell(): void {
       // Only the chosen library is in the tab order; arrow keys move between them
       button.tabIndex = checked ? 0 : -1;
     });
-    finishExample();
+    // During the intro the cell waits, not yet run, rather than showing a finished step
+    if (introPlaying) {
+      setPrompt(' ');
+      clearOutput();
+    } else {
+      finishExample();
+    }
     if (visible && !reduceMotion) void autoplay(++token);
   };
 
