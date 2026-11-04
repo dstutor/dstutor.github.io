@@ -4,13 +4,15 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./standalone.css": "./src/standalone.css"
   },
   "scripts": {
     "typecheck": "tsc -p .",
     "test": "vitest run"
   },
   "dependencies": {
+    "@dstutor/brand": "0.0.0",
     "@dstutor/trace-schema": "0.0.0",
     "fflate": "0.8.3",
     "html2canvas": "1.4.1",

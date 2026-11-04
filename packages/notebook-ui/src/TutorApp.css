@@ -348,7 +348,18 @@
 .main-content {
   flex: 1;
   display: flex;
+  min-height: 0;
   overflow: hidden;
+}
+
+/* Side by side, the app is exactly the window's height and each pane scrolls on its own, so a
+   long notebook and the step it is showing stay in view together */
+@media (min-width: 1025px) {
+  .app:not(.is-embed) {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+  }
 }
 
 .main-content.jupyter-style {
@@ -648,8 +659,9 @@
     order: 0;
   }
 
+  /* Cel and the library name are enough to know where you are; the room goes to the notebook */
   .brand-name {
-    font-size: 1.2rem;
+    display: none;
   }
 
   .theme-switcher {
@@ -682,7 +694,7 @@
   .examples-button,
   .share-button {
     width: 100%;
-    min-height: 2.75rem;
+    min-height: 2.5rem;
     padding: 0 0.6rem;
   }
 
@@ -706,6 +718,12 @@
   .notebook-toolbar button {
     flex: 1 1 auto;
     min-height: 2.5rem;
+  }
+
+  /* Stop and the restarts are icons: they keep their size instead of taking a row each */
+  .notebook-toolbar button.icon-button {
+    flex: 0 0 2.75rem;
+    padding: 0;
   }
 
   .notebook-header .status {

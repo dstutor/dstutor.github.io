@@ -2,6 +2,7 @@
 // rewrites each cell so its DataFrame operations are recorded.
 import { createRuntime } from '@dstutor/runtime-pyodide';
 import tracer from '../../../tracers/pandas/tracer.py?raw';
+import rewriting from '../../../tracers/shared/dstutor_rewriting.py?raw';
 import setup from '../../../tracers/pandas/notebook_setup.py?raw';
 
 export const runtime = createRuntime({
@@ -10,5 +11,6 @@ export const runtime = createRuntime({
   pyodidePackages: ['numpy', 'pandas', 'matplotlib'],
   pypiPackages: [],
   tracer,
+  modules: { dstutor_rewriting: rewriting },
   setup,
 });

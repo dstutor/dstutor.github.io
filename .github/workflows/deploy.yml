@@ -42,13 +42,18 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Install tracer test packages
-        run: pip install -r tracers/datascience/requirements-test.txt -r tracers/pandas/requirements-test.txt
+        run: pip install $(printf -- '-r %s ' tracers/*/requirements-test.txt)
 
       - name: Check
         run: npm run check
 
       - name: Build and assemble site
         run: npm run build
+
+      # The runner's Chrome loads each tutor's Pyodide and runs its whole gallery, and the
+      # step counts are compared with the same examples under CPython
+      - name: Browser tests
+        run: npm run test:e2e
 
       - name: Upload Pages artifact
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'

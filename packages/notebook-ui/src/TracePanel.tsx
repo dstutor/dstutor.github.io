@@ -1,6 +1,6 @@
 import type { ReactNode, RefObject } from 'react';
 import type { RunOutput } from '@dstutor/trace-schema';
-import type { Frame, DetailLevel } from '@dstutor/viz';
+import type { Frame, DetailLevel, TableStyle } from '@dstutor/viz';
 import { StepSlideshow } from '@dstutor/viz';
 
 interface TracePanelProps {
@@ -20,9 +20,11 @@ interface TracePanelProps {
   onFrameChange?: (frame: Frame) => void;
   detail?: DetailLevel;
   onDetailChange?: (detail: DetailLevel) => void;
+  /** How step tables print, as the tutor's library prints them */
+  tableStyle?: TableStyle;
 }
 
-export default function TracePanel({ output, dataNoun, tracedNote, tryThis, slideshowRef, version = 0, onPresent, onFrameChange, detail = 'all', onDetailChange }: TracePanelProps) {
+export default function TracePanel({ output, dataNoun, tracedNote, tryThis, slideshowRef, version = 0, onPresent, onFrameChange, detail = 'all', onDetailChange, tableStyle }: TracePanelProps) {
   const hasTrace = output.trace && output.trace.length > 0;
   const hasOutput = output.stdout || output.stderr || output.error;
 
@@ -50,7 +52,7 @@ export default function TracePanel({ output, dataNoun, tracedNote, tryThis, slid
         {/* Trace View FIRST */}
         <div className="trace-view fade-in" key={version}>
           {hasTrace ? (
-            <StepSlideshow ref={slideshowRef} trace={output.trace!} onFrameChange={onFrameChange} detail={detail} />
+            <StepSlideshow ref={slideshowRef} trace={output.trace!} onFrameChange={onFrameChange} detail={detail} tableStyle={tableStyle} />
           ) : hasOutput ? (
             <div className="empty-state">
               <h3>No {dataNoun.toLowerCase()} operations to show.</h3>

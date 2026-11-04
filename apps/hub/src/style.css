@@ -851,6 +851,13 @@ main,
   overflow-wrap: anywhere;
 }
 
+.nb-out.is-error pre.nb-out-place {
+  margin-top: 1.4em;
+  overflow-x: auto;
+  white-space: pre;
+  overflow-wrap: normal;
+}
+
 .nb-out.is-note {
   background: var(--surface-2);
   color: var(--ink-muted);

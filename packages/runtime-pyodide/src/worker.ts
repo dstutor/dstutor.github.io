@@ -41,6 +41,9 @@ await micropip.install(list(__requirements), deps=False)
 del __requirements
 `);
 
+  for (const [name, source] of Object.entries(config.modules ?? {})) {
+    await loadModule(py, name, '<tracer>', source);
+  }
   await loadModule(py, 'dstutor_tracer', '<tracer>', config.tracer);
   await loadModule(py, 'dstutor_runner', '<runner>', RUNNER);
   await py.runPythonAsync(`

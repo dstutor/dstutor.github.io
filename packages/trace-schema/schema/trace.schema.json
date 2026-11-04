@@ -176,6 +176,13 @@
           "description": "How many of the leading columns are row labels rather than data: a pandas DataFrame's index (two for a two-level index). They are shown, but not counted as columns. Absent: 0.",
           "minimum": 0
         },
+        "column_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Each column's type as its library names it, one per column: polars' `str` and `f64`, DuckDB's `varchar` and `double`, pandas' `float64`. Tables of libraries that print types (polars, DuckDB) show them; for the others they only decide how values print (pandas gives a float64 column one number of decimals)."
+        },
         "error": {
           "type": "string",
           "description": "Set when the table could not be read; the rest is then best effort"
@@ -197,9 +204,21 @@
     "SubStep": {
       "type": "object",
       "properties": {
+        "stage": {
+          "type": "string",
+          "description": "The stage this frame belongs to, in a few words (\"Which keys match\"); the step shows its stages as a rail. Frames of one stage share the name."
+        },
         "message": {
           "type": "string",
           "description": "Replaces record.explanation for this frame"
+        },
+        "note": {
+          "type": "string",
+          "description": "How the library actually does this, when that differs from the picture (one sentence)"
+        },
+        "panel": {
+          "$ref": "#/definitions/Panel",
+          "description": "A picture for this stage other than a table, shown where the result table would be"
         },
         "detail": {
           "type": "string",
@@ -265,6 +284,354 @@
       ],
       "additionalProperties": false
     },
+    "Panel": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/KeysPanel"
+        },
+        {
+          "$ref": "#/definitions/PairsPanel"
+        },
+        {
+          "$ref": "#/definitions/GroupsPanel"
+        },
+        {
+          "$ref": "#/definitions/OrderPanel"
+        },
+        {
+          "$ref": "#/definitions/PlanPanel"
+        }
+      ],
+      "description": "A stage's picture when it is not a table"
+    },
+    "KeysPanel": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "keys"
+        },
+        "key": {
+          "type": "string",
+          "description": "What is compared, e.g. \"Flavor\" or \"Flavor = Name\""
+        },
+        "left": {
+          "type": "string",
+          "description": "The two tables' names"
+        },
+        "right": {
+          "type": "string"
+        },
+        "left_only": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/KeyChip"
+          }
+        },
+        "both": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/KeyChip"
+          }
+        },
+        "right_only": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/KeyChip"
+          }
+        },
+        "keeps": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "left_only",
+              "both",
+              "right_only"
+            ]
+          },
+          "description": "The regions this join keeps rows from"
+        }
+      },
+      "required": [
+        "kind",
+        "key",
+        "left",
+        "right",
+        "left_only",
+        "both",
+        "right_only",
+        "keeps"
+      ],
+      "additionalProperties": false,
+      "description": "A join's first stage: the distinct key values on each side, as a Venn of keys"
+    },
+    "KeyChip": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "$ref": "#/definitions/JsonValue"
+        },
+        "color": {
+          "$ref": "#/definitions/ColorSlot"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "additionalProperties": false,
+      "description": "A key or group value as a labelled chip in its colour"
+    },
+    "ColorSlot": {
+      "type": "integer",
+      "description": "One of eight colours the visualization gives keys and groups, always shown with a label",
+      "minimum": 0,
+      "maximum": 7
+    },
+    "PairsPanel": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "pairs"
+        },
+        "pairs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "$ref": "#/definitions/KeyChip"
+              },
+              "left": {
+                "type": "integer",
+                "description": "Rows with this key on the left (whole table)",
+                "minimum": 0
+              },
+              "right": {
+                "type": "integer",
+                "description": "Rows with this key on the right (whole table)",
+                "minimum": 0
+              },
+              "rows": {
+                "type": "integer",
+                "description": "Rows this key puts in the result",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "key",
+              "left",
+              "right",
+              "rows"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "more": {
+          "type": "integer",
+          "description": "Keys not shown",
+          "minimum": 0
+        },
+        "total": {
+          "type": "integer",
+          "description": "Rows in the result",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "kind",
+        "pairs",
+        "total"
+      ],
+      "additionalProperties": false,
+      "description": "How rows pair up: for each key, how many rows each side has and how many rows it makes"
+    },
+    "GroupsPanel": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "groups"
+        },
+        "keys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "The key columns"
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/JsonValue"
+                }
+              },
+              "color": {
+                "$ref": "#/definitions/ColorSlot"
+              },
+              "rows": {
+                "type": "integer",
+                "description": "Rows in the group (whole table)",
+                "minimum": 0
+              },
+              "values": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "column": {
+                      "type": "string"
+                    },
+                    "values": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/definitions/JsonValue"
+                      }
+                    },
+                    "result": {
+                      "$ref": "#/definitions/JsonValue"
+                    },
+                    "formula": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "column",
+                    "values"
+                  ],
+                  "additionalProperties": false
+                },
+                "description": "Each aggregated column: the group's values, and its result once combined"
+              }
+            },
+            "required": [
+              "key",
+              "rows",
+              "values"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "more": {
+          "type": "integer",
+          "description": "Groups not shown",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "kind",
+        "keys",
+        "groups"
+      ],
+      "additionalProperties": false,
+      "description": "Rows sorted into groups: one card per group with its values and, once combined, the result"
+    },
+    "OrderPanel": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "order"
+        },
+        "from": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/JsonValue"
+          },
+          "description": "For each result row in order, its row label or position in the input"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/JsonValue"
+          },
+          "description": "For each result row, its value of the first sort key"
+        },
+        "ties": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "description": "Runs of result rows that tie on the first sort key, as [first, last] positions"
+        },
+        "more": {
+          "type": "integer",
+          "description": "Result rows not shown",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "kind",
+        "from"
+      ],
+      "additionalProperties": false,
+      "description": "A sort's new order: where each result row was in the input"
+    },
+    "PlanPanel": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "plan"
+        },
+        "plans": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "steps": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "rows": {
+                      "type": "integer",
+                      "description": "Rows out of this step, when the library reports them",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "title",
+              "steps"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "plans"
+      ],
+      "additionalProperties": false,
+      "description": "How the library actually ran it: one or more lists of plan steps, first to last"
+    },
     "Highlights": {
       "type": "object",
       "properties": {
@@ -305,6 +672,20 @@
             "maxItems": 2
           },
           "description": "Individual cells as [previewRowIndex, columnName] pairs"
+        },
+        "row_colors": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/ColorSlot"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description": "A colour slot (0-7) for each preview row, or null: rows of the same join key or group share a slot, and the stage's panel labels each slot with its key"
         }
       },
       "additionalProperties": false

@@ -11,6 +11,9 @@ pandas prints it, so filtering and sorting show where each row went.
 Traced: boolean filtering (df[mask], df.loc[mask], df.query), sort_values, groupby followed by an
 aggregation, merge (method and pd.merge), assign and df[col] = value, and pivot_table.
 
+The rewriting, the step log and the formatting are shared with the polars tracer
+(tracers/shared/dstutor_rewriting.py, loaded by the runtime before this module).
+
 The runtime (@dstutor/runtime-pyodide) loads this file as a module and calls install(),
 reset(), get_trace(), is_trace_truncated(), set_cell_statements() and transform(); run(code)
 runs code on its own, for tests and use outside the notebook.
@@ -20,14 +23,13 @@ import builtins
 import math
 import types
 
-MAX_TRACE_RECORDS = 200
-MAX_ROWS_PREVIEW = 20
-# Groups walked through one by one before the rest are summarised
-MAX_GROUP_STEPS = 4
+from dstutor_rewriting import (
+    MAX_GROUP_STEPS, MAX_ROWS_PREVIEW, Log, Rewriter, group_stages, join_stages, table_name,
+    columns_in as _columns_in, display as _display, fmt_list as _fmt_list, fmt_val as _fmt_val,
+    like as _like, make_state as _make_state, plural as _plural, truncation_note as _truncation_note,
+)
 
-_trace_log = []
-_step_counter = 0
-_trace_truncated = False
+_log = Log()
 _enabled = False
 
 # Methods that become steps when called on a DataFrame
@@ -58,34 +60,26 @@ def disable():
 
 def reset():
     """Forget every recorded step."""
-    global _trace_log, _step_counter, _trace_truncated
-    _trace_log = []
-    _step_counter = 0
-    _trace_truncated = False
+    _log.reset()
 
 
 def get_trace():
-    return _trace_log.copy()
+    return _log.records.copy()
 
 
 def is_trace_truncated():
-    return _trace_truncated
-
-
-# Statements of the cell being run, as (start_line, end_line, assigned_name_or_None); set by
-# the runner from the cell's AST so each step can say which line and which variable it belongs to
-_cell_statements = []
+    return _log.truncated
 
 
 def set_cell_statements(statements):
-    global _cell_statements
-    # innermost statement first, so a call inside a loop body maps to the body's assignment
-    _cell_statements = sorted(((int(a), int(b), t) for a, b, t in statements), key=lambda x: x[1] - x[0])
+    """Statements of the cell being run, as (start_line, end_line, assigned_name_or_None), so each
+    step can say which line and which variable it belongs to."""
+    _log.set_cell_statements(statements)
 
 
 def transform(tree):
     """Rewrite a parsed cell so the operations it runs are traced. Returns the new tree."""
-    return ast.fix_missing_locations(_Rewriter().visit(tree))
+    return Rewriter(REWRITTEN_METHODS).rewrite(tree)
 
 
 def run(code):
@@ -98,71 +92,6 @@ def run(code):
     import numpy as np
     exec(compile(transform(tree), '<cell>', 'exec'), {'__name__': '__main__', 'pd': pd, 'np': np})
     return get_trace()
-
-
-# ---------------------------------------------------------------------------------------------
-# Rewriting
-
-def _helper(name, args, node):
-    call = ast.Call(func=ast.Name(name, ast.Load()), args=args, keywords=[])
-    return ast.copy_location(call, node)
-
-
-def _as_expression(node):
-    """A subscript's slice as an expression: `a:b` is only valid inside [], so spell it slice(a, b)."""
-    if isinstance(node, ast.Slice):
-        none = ast.Constant(None)
-        return ast.copy_location(
-            ast.Call(func=ast.Name('slice', ast.Load()),
-                     args=[node.lower or none, node.upper or none, node.step or none], keywords=[]),
-            node)
-    if isinstance(node, ast.Tuple):
-        return ast.copy_location(ast.Tuple([_as_expression(e) for e in node.elts], ast.Load()), node)
-    return node
-
-
-def _source(node):
-    try:
-        return ast.unparse(node)
-    except Exception:
-        return ''
-
-
-class _Rewriter(ast.NodeTransformer):
-    def visit_Call(self, node):
-        func = node.func
-        # assign(Sale=cones['Price'] * 0.9): each new column's expression as written, for its step
-        sources = ast.Dict(keys=[ast.Constant(k.arg) for k in node.keywords if k.arg],
-                           values=[ast.Constant(_source(k.value)) for k in node.keywords if k.arg])
-        self.generic_visit(node)
-        if isinstance(func, ast.Attribute) and func.attr in REWRITTEN_METHODS:
-            # The line of `.method`, which is where it sits in a chain split over lines
-            line = getattr(func, 'end_lineno', None) or node.lineno
-            node.func = _helper('_dstutor_method', [func.value, ast.Constant(func.attr), ast.Constant(line), sources], func)
-        return node
-
-    def visit_Subscript(self, node):
-        # The key as the student wrote it, before anything inside it is rewritten
-        key_source = _source(node.slice)
-        self.generic_visit(node)
-        if not isinstance(node.ctx, ast.Load):
-            return node
-        return _helper('_dstutor_getitem', [node.value, _as_expression(node.slice),
-                                            ast.Constant(key_source), ast.Constant(node.lineno)], node)
-
-    def visit_Assign(self, node):
-        # df['col'] = value: a column added or replaced in place
-        if len(node.targets) == 1 and isinstance(node.targets[0], ast.Subscript):
-            target = node.targets[0]
-            key_source = _source(target.slice)
-            value_source = _source(node.value)
-            self.generic_visit(node)
-            call = _helper('_dstutor_setitem', [target.value, _as_expression(target.slice), node.value,
-                                                ast.Constant(key_source), ast.Constant(node.lineno),
-                                                ast.Constant(value_source)], node)
-            return ast.copy_location(ast.Expr(call), node)
-        self.generic_visit(node)
-        return node
 
 
 # ---------------------------------------------------------------------------------------------
@@ -183,7 +112,7 @@ def _is_groupby(obj):
     return isinstance(obj, (DataFrameGroupBy, SeriesGroupBy))
 
 
-def _method(receiver, name, line, sources=None):
+def _method(receiver, name, line, sources=None, arg_sources=None, receiver_source=''):
     bound = getattr(receiver, name)
     if not _enabled:
         return bound
@@ -215,7 +144,12 @@ def _method(receiver, name, line, sources=None):
         result = bound(*args, **kwargs)
         try:
             output = left if (result is None and kwargs.get('inplace')) else result
-            _record_call(name, left, rest, kwargs, input_state, output, line, sources or {})
+            # The tables' names as written, for the stages (cones.merge(stock) or pd.merge(cones, stock))
+            written = list(arg_sources or [])
+            names = ({'left': table_name(written[0] if written else '', 'left'),
+                      'right': table_name(written[1] if len(written) > 1 else '', 'right')} if is_pd_merge else
+                     {'left': table_name(receiver_source, 'left'), 'right': table_name(written[0] if written else '', 'right')})
+            _record_call(name, left, rest, kwargs, input_state, output, line, sources or {}, names)
         except Exception:
             pass
         return result
@@ -279,24 +213,8 @@ def _is_row_mask(key, frame):
 # ---------------------------------------------------------------------------------------------
 # Recording
 
-def _record(record):
-    global _trace_truncated, _step_counter
-    if len(_trace_log) >= MAX_TRACE_RECORDS:
-        _trace_truncated = True
-        return
-    record["step_id"] = _step_counter
-    _step_counter += 1
-    # No walkthrough means no sub_steps field at all, not null (the contract allows only a list)
-    if record.get("sub_steps") is None:
-        record.pop("sub_steps", None)
-    _trace_log.append(record)
-
-
-def _site(line):
-    for start, end, target in _cell_statements:
-        if start <= line <= end:
-            return {"line": line, "stmt_start": start, "stmt_end": end, "target": target}
-    return {"line": line, "stmt_start": line, "stmt_end": line, "target": None}
+_record = _log.add
+_site = _log.site
 
 
 def _json_safe(value):
@@ -381,6 +299,8 @@ def _state(obj):
         for label, row in zip(head.index, head.itertuples(index=False, name=None)):
             labels = list(label) if isinstance(label, tuple) else [label]
             preview.append([_cell(v) for v in labels] + [_cell(v) for v in row])
+        # pandas does not print types, but they decide how it prints a float column (4.50)
+        types = [str(obj.index.get_level_values(i).dtype) for i in range(obj.index.nlevels)] + [str(t) for t in obj.dtypes]
         return {
             "num_rows": len(obj),
             "num_columns": len(index_columns) + len(columns),
@@ -388,50 +308,10 @@ def _state(obj):
             "preview": preview,
             # The index is shown as the first column(s), but pandas does not count it as one
             "index_columns": len(index_columns),
+            "column_types": types,
         }
     except Exception as e:
         return {"error": str(e), "num_rows": 0, "num_columns": 0, "columns": [], "preview": []}
-
-
-def _make_state(columns, preview, index_columns=0):
-    """Synthetic TableState for intermediate result tables; the first index_columns are the index."""
-    state = {"num_rows": len(preview), "num_columns": len(columns), "columns": list(columns),
-             "preview": [list(row) for row in preview]}
-    if index_columns:
-        state["index_columns"] = index_columns
-    return state
-
-
-def _fmt_val(v):
-    if isinstance(v, str):
-        return repr(v)
-    if isinstance(v, float):
-        rounded = round(v, 4)
-        return str(int(rounded)) if rounded == int(rounded) and abs(rounded) < 1e15 else str(rounded)
-    if isinstance(v, (list, tuple)):
-        return '[' + ', '.join(_fmt_val(x) for x in v) + ']'
-    return str(v)
-
-
-def _fmt_list(vals, max_items=12):
-    shown = ', '.join(_fmt_val(v) for v in vals[:max_items])
-    if len(vals) > max_items:
-        shown += f', … (+{len(vals) - max_items} more)'
-    return '[' + shown + ']'
-
-
-def _plural(n, word):
-    return f"{n} {word}{'' if n == 1 else 's'}"
-
-
-def _truncation_note(state):
-    shown = len(state["preview"])
-    return f" (showing the first {shown} of {state['num_rows']})" if state["num_rows"] > shown else ""
-
-
-def _columns_in(source, state):
-    """Columns of state that the code mentions by name, e.g. in cones['Price'] > 4."""
-    return [c for c in state["columns"] if c and (f"'{c}'" in source or f'"{c}"' in source or f'.{c}' in source)]
 
 
 def _record_filter(frame, result, condition, line, via):
@@ -455,7 +335,8 @@ def _record_filter(frame, result, condition, line, via):
         checked = [[row[c] for c in shown] + [i in kept] for i, row in enumerate(input_state["preview"])]
         steps = [
             {
-                "message": "First the condition is checked for every row, giving True or False.",
+                "stage": "Ask every row",
+                "message": "First the condition is checked for every row at once, giving True or False.",
                 "detail": f"Condition: {condition}",
                 "input_highlights": {"columns": columns},
                 "output_state": {**_make_state(checked_columns, checked, frame.index.nlevels), "num_rows": input_state["num_rows"]},
@@ -463,6 +344,7 @@ def _record_filter(frame, result, condition, line, via):
                 "output_highlights": {"columns": [condition]},
             },
             {
+                "stage": "Keep the True rows",
                 "message": (f"Keep the rows where it is True: {n_kept} kept, {n_removed} (struck through) "
                             f"removed. Kept rows keep their index labels.{note}"),
                 "input_highlights": {"rows": kept, "rows_removed": removed, "columns": columns},
@@ -484,7 +366,7 @@ def _record_filter(frame, result, condition, line, via):
     _record(record)
 
 
-def _record_call(name, left, args, kwargs, input_state, output, line, sources):
+def _record_call(name, left, args, kwargs, input_state, output, line, sources, names=None):
     if name == 'query':
         condition = args[0] if args else kwargs.get('expr', '')
         _record_filter(left, output, repr(condition), line, via='query')
@@ -497,7 +379,7 @@ def _record_call(name, left, args, kwargs, input_state, output, line, sources):
     if name == 'sort_values':
         steps, explanation = _sort(left, args, kwargs, input_state, output, output_state)
     elif name == 'merge':
-        steps, explanation = _merge(left, args, kwargs, input_state, output, output_state)
+        steps, explanation = _merge(left, args, kwargs, input_state, output, output_state, names or {})
     elif name == 'pivot_table':
         steps, explanation = _pivot_table(left, args, kwargs, input_state, output, output_state)
     else:
@@ -513,11 +395,6 @@ def _record_call(name, left, args, kwargs, input_state, output, line, sources):
         "sub_steps": steps,
         "site": _site(line),
     })
-
-
-def _like(state, preview):
-    """An intermediate table with state's columns and index, holding preview."""
-    return _make_state(state["columns"], preview, state.get("index_columns", 0))
 
 
 def _positions(frame, n_preview):
@@ -538,35 +415,26 @@ def _record_assign(frame, names, input_state, output, line, replaced, in_place, 
     steps = None
     name = names[0] if names else None
     columns = output_state["columns"]
-    if name in columns and len(names) == 1:
-        c = columns.index(name)
+    if name in columns:
         source = sources.get(name) or ''
-        uses = [col for col in _columns_in(source, input_state)]
-        rows = output_state["preview"]
-        # The new column, blank until each row's value is computed
-        def partial(filled):
-            return [row[:c] + [row[c] if i < filled else None] + row[c + 1:] for i, row in enumerate(rows)]
-        steps = [{
-            "message": f"{name} = {source}" if source else f"The new column {name!r} gets one value per row.",
-            "detail": "The expression is worked out for every row, using that row's values.",
+        uses = _columns_in(' '.join(sources.get(n) or '' for n in names), input_state)
+        work = [{
+            "stage": "Work out the column",
+            "message": (f"{name} = {source}" if source and len(names) == 1 else
+                        f"The new {'column' if len(names) == 1 else 'columns'} {', '.join(map(repr, names))}, "
+                        f"one value per row."),
+            "detail": "Worked out for every row at once, each row from its own values.",
             "input_highlights": {"columns": uses},
-            "output_state": _like(output_state, partial(0)),
-            "output_highlights": {"columns": [name]},
+            "output_highlights": {"columns": list(names)},
         }]
-        shown = min(len(rows), 3)
-        for i in range(shown):
-            steps.append({
-                "message": f"Row {_fmt_val(rows[i][0]) if output_state.get('index_columns') else i}: {name} = {_fmt_val(_display(rows[i][c]))}",
-                "input_highlights": {"rows": [i], "columns": uses},
-                "output_state": _like(output_state, partial(i + 1)),
-                "output_highlights": {"cells": [[i, name]]},
-            })
-        rest = output_state["num_rows"] - shown
-        steps.append({
-            "message": (f"…the same for the remaining {_plural(rest, 'row')}. The table keeps the same rows "
-                        f"and index.{where}" if rest > 0 else f"The table keeps the same rows and index.{where}"),
-            "output_highlights": {"columns": [name]},
-        })
+        if len(names) > 1 and not in_place:
+            work[0]["note"] = ("assign works its columns out in the order written, so a later one can use "
+                               "a column made earlier in the same call.")
+        steps = work + [{
+            "stage": "Result",
+            "message": f"The table keeps the same rows and index.{where}",
+            "output_highlights": {"columns": list(names)},
+        }]
     _record({
         "operation": 'assign',
         # df[col] = ... is not a call to assign, so say what it is instead
@@ -581,11 +449,6 @@ def _record_assign(frame, names, input_state, output, line, replaced, in_place, 
     })
 
 
-def _display(value):
-    """A cell's value as the message should print it: pandas' text for NaN and friends."""
-    return value["shown"] if isinstance(value, dict) and "shown" in value else value
-
-
 def _sort(frame, args, kwargs, input_state, output, output_state):
     by = args[0] if args else kwargs.get('by')
     by = [by] if isinstance(by, str) else list(by or [])
@@ -597,36 +460,50 @@ def _sort(frame, args, kwargs, input_state, output, output_state):
     explanation = f"Sorted {_plural(len(frame), 'row')} by {named}, {direction}."
     in_by = [b for b in by if b in input_state["columns"]]
     tie = f" Rows with the same {by[0]!r} are ordered by {', '.join(repr(b) for b in by[1:])}." if len(by) > 1 else ""
-    steps = [{
-        "message": f"sort_values reorders all rows by {named}, {direction}.{tie} No rows are added or removed.",
-        "input_highlights": {"columns": in_by},
-        "output_state": _like(output_state, []),
-    }]
-    positions = _positions(frame, len(input_state["preview"]))
     rows = output_state["preview"]
-    shown = min(len(rows), 3)
-    for k in range(shown):
-        label = output.index[k]
-        values = ', '.join(f"{b} = {_fmt_val(_display(rows[k][output_state['columns'].index(b)]))}"
-                           for b in in_by if b in output_state["columns"])
-        place = ['first', 'second', 'third'][k]
-        steps.append({
-            "message": f"Row {_fmt_val(_json_safe(label))} comes {place}: {values}.",
-            "input_highlights": {"rows": [positions[label]] if label in positions else [], "columns": in_by},
-            "output_state": _like(output_state, rows[:k + 1]),
-            "output_highlights": {"rows": [k]},
-        })
-    rest = output_state["num_rows"] - shown
-    steps.append({
-        "message": (f"…and the other {_plural(rest, 'row')} follow in the same order. " if rest > 0 else "")
-                   + "Each row keeps its index label, so you can see where every row moved.",
-        "detail": f"New order of index labels: {_fmt_list([_json_safe(v) for v in output.index])}",
-        "output_highlights": {"columns": output_state["columns"][:output_state.get("index_columns", 0)] + in_by},
-    })
+    labels = [_json_safe(v) for v in output.index[:len(rows)]]
+    # Runs of result rows that tie on the first key
+    ties = []
+    if in_by and by[0] in output.columns:
+        first = list(output[by[0]].iloc[:len(rows)])
+        start = 0
+        for i in range(1, len(first) + 1):
+            if i == len(first) or not (first[i] == first[start] or (first[i] != first[i] and first[start] != first[start])):
+                if i - start > 1:
+                    ties.append([start, i - 1])
+                start = i
+    stable = len(by) > 1 or kwargs.get('kind') in ('stable', 'mergesort')
+    steps = [
+        {
+            "stage": "Read the sort key",
+            "message": f"sort_values orders the rows by {named}, {direction}.{tie} No rows are added or removed.",
+            "input_highlights": {"columns": in_by},
+            "output_state": _like(output_state, []),
+        },
+        {
+            "stage": "Work out the new order",
+            "message": "First pandas works out the new order: which row goes first, second, and so on.",
+            "detail": f"New order of index labels: {_fmt_list(labels)}",
+            "input_highlights": {"columns": in_by},
+            "panel": {"kind": "order", "from": labels, **({"ties": ties} if ties else {}),
+                      **({"values": [_cell(v) for v in output[by[0]].iloc[:len(labels)]]} if in_by and by[0] in output.columns else {}),
+                      **({"more": output_state["num_rows"] - len(labels)} if output_state["num_rows"] > len(labels) else {})},
+            "output_label": "New order",
+            "note": ("pandas works out the order with numpy's argsort "
+                     + ("(a stable sort, so rows that tie keep their order)" if stable else
+                        "(quicksort for one key, so rows that tie may swap places in a long table)")
+                     + ", puts NaN last whichever the direction, then moves every row in one go."),
+        },
+        {
+            "stage": "Move every row at once",
+            "message": "Then every row moves to its new place at once, keeping its index label, so you can see where each one went.",
+            "output_highlights": {"columns": output_state["columns"][:output_state.get("index_columns", 0)] + in_by},
+        },
+    ]
     return steps, explanation
 
 
-def _merge(left, args, kwargs, input_state, output, output_state):
+def _merge(left, args, kwargs, input_state, output, output_state, names):
     right = args[0] if args else kwargs.get('right')
     if not _is_frame(right):
         return None, f"Merged into {_plural(len(output), 'row')}."
@@ -639,82 +516,30 @@ def _merge(left, args, kwargs, input_state, output, output_state):
         left_on = right_on = shared
     left_keys = [left_on] if isinstance(left_on, str) else list(left_on or [])
     right_keys = [right_on] if isinstance(right_on, str) else list(right_on or [])
-    aux_state = _state(right)
-    if len(left_keys) != 1 or len(right_keys) != 1:
+    if len(left_keys) != 1 or len(right_keys) != 1 or how not in ('inner', 'left', 'right', 'outer'):
         return None, f"Merged on {', '.join(map(repr, left_keys))} into {_plural(len(output), 'row')}."
     lk, rk = left_keys[0], right_keys[0]
     if lk not in left.columns or rk not in right.columns:
         return None, f"Merged into {_plural(len(output), 'row')}."
-    key_desc = repr(lk) if lk == rk else f"{lk!r} (left) and {rk!r} (right)"
-    explanation = f"Merged ({how}) on {key_desc}: {_plural(len(output), 'row')}."
-    right_label = "Right table"
-    n_left, n_right = len(input_state["preview"]), len(aux_state["preview"])
-    left_vals, right_vals = list(left[lk]), list(right[rk])
-    out_rows = output_state["preview"]
-    out_cols = output_state["columns"]
-    # Which key each result row came from: the left key column, or the right one for right-only rows
-    lk_col = out_cols.index(lk) if lk in out_cols else None
-    rk_col = out_cols.index(rk) if rk in out_cols else None
-    def row_key(row):
-        for c in (lk_col, rk_col):
-            if c is not None and not isinstance(row[c], dict):
-                return row[c]
-        return None
-    keys = []
-    for row in out_rows:
-        k = row_key(row)
-        if k not in keys:
-            keys.append(k)
-    shared = set(left_vals) & set(right_vals)
-    steps = [{
-        "message": f"merge combines two tables, matching rows whose {key_desc} values are equal.",
-        "input_highlights": {"columns": [lk]},
-        "aux_table": {"label": right_label, "state": aux_state, "highlights": {"columns": [rk]}},
-        "output_state": _like(output_state, []),
-    }]
-    done = []
-    shown = keys if len(keys) <= MAX_GROUP_STEPS + 1 else keys[:MAX_GROUP_STEPS]
-    for k in shown:
-        done.append(k)
-        lrows = [i for i in range(n_left) if left_vals[i] == k]
-        rrows = [i for i in range(n_right) if right_vals[i] == k]
-        a, b = sum(1 for v in left_vals if v == k), sum(1 for v in right_vals if v == k)
-        if k in shared:
-            message = (f"Key {_fmt_val(_json_safe(k))}: {_plural(a, 'left row')} × {_plural(b, 'right row')} "
-                       f"→ {_plural(a * b, 'row')}, each with the columns of both tables.")
-        elif a:
-            message = (f"Key {_fmt_val(_json_safe(k))} has no match on the right; how={how!r} keeps it, "
-                       f"with NaN for the right table's columns.")
-        else:
-            message = (f"Key {_fmt_val(_json_safe(k))} has no match on the left; how={how!r} keeps it, "
-                       f"with NaN for the left table's columns.")
-        partial = [row for row in out_rows if row_key(row) in done]
-        steps.append({
-            "message": message,
-            "input_highlights": {"rows": lrows, "columns": [lk]},
-            "aux_table": {"label": right_label, "state": aux_state, "highlights": {"rows": rrows, "columns": [rk]}},
-            "output_state": _like(output_state, partial),
-            "output_highlights": {"rows": list(range(len(partial) - sum(1 for r in out_rows if row_key(r) == k), len(partial)))},
-        })
-    if len(shown) < len(keys):
-        rest = len(keys) - len(shown)
-        steps.append({
-            "message": f"…and the remaining {_plural(rest, 'key')} are matched the same way.",
-            "aux_table": {"label": right_label, "state": aux_state},
-        })
-    # With an inner merge, keys found on one side only leave no row at all
-    dropped_left = [i for i in range(n_left) if left_vals[i] not in shared] if how in ('inner', 'right') else []
-    dropped_right = [i for i in range(n_right) if right_vals[i] not in shared] if how in ('inner', 'left') else []
-    if dropped_left or dropped_right:
-        gone = sorted({_json_safe(left_vals[i]) for i in dropped_left} | {_json_safe(right_vals[i]) for i in dropped_right}, key=str)
-        steps.append({
-            "message": (f"Rows whose key has no match on the other side are left out (struck through): "
-                        f"how={how!r} only keeps {'matches' if how == 'inner' else ('every left row' if how == 'left' else 'every right row')}."),
-            "detail": f"Keys with no match: {_fmt_list(gone)}",
-            "input_highlights": {"rows_removed": dropped_left, "columns": [lk]},
-            "aux_table": {"label": right_label, "state": aux_state,
-                          "highlights": {"rows_removed": dropped_right, "columns": [rk]}},
-        })
+    key_desc = lk if lk == rk else f"{lk} = {rk}"
+    explanation = f"Merged ({how}) on {key_desc!r}: {_plural(len(output), 'row')}."
+    head = output.head(MAX_ROWS_PREVIEW)
+    lvals = list(head[lk]) if lk in output.columns else [None] * len(head)
+    rvals = list(head[rk]) if rk in output.columns and rk != lk else [None] * len(head)
+    is_missing = lambda v: v is None or (isinstance(v, float) and v != v)
+    out_keys = [l if not is_missing(l) else r for l, r in zip(lvals, rvals)]
+    keeps = {'inner': ['both'], 'left': ['left_only', 'both'], 'right': ['both', 'right_only'],
+             'outer': ['left_only', 'both', 'right_only']}[how]
+    order = {'inner': "Rows follow the left table's order.", 'left': "Rows follow the left table's order.",
+             'right': "Rows follow the right table's order.", 'outer': "how='outer' sorts the rows by key."}[how]
+    steps = join_stages(
+        left_keys=list(left[lk]), right_keys=list(right[rk]), null_matches=True, keeps=keeps, mode='pairs',
+        left_name=names.get('left', 'left'), right_name=names.get('right', 'right'), key_desc=key_desc,
+        left_state=input_state, right_state=_state(right), left_col=lk, right_col=rk,
+        out_state=output_state, out_keys=out_keys, missing='NaN',
+        note=("pandas gives each key a number shared by both tables, sorts each side's rows by that number, "
+              "then writes out every left × right pair. NaN keys match each other."),
+        order_note=order, cell=_cell)
     return steps, explanation
 
 
@@ -740,68 +565,47 @@ def _groupby(groupby, name, args, kwargs, input_state, output, output_state):
     explanation = f"Grouped by {named} into {_plural(n_groups, 'group')} and took the {agg}."
     if name == 'size':
         explanation = f"Grouped by {named} into {_plural(n_groups, 'group')} and counted the rows in each."
-    if source is None or len(keys) != 1 or keys[0] not in source.columns:
+    if source is None or not keys or not all(isinstance(k, str) and k in source.columns for k in keys):
         return None, explanation
-    key = keys[0]
-    values = [selection] if isinstance(selection, str) else list(selection) if selection else \
-        [c for c in source.columns if c != key]
-    counting = name in ('size', 'count')
-    what = "counts the rows" if name == 'size' else f"takes the {agg} of {', '.join(repr(v) for v in values)}"
     out_cols = output_state["columns"]
     n_index = output_state.get("index_columns", 0)
+    if n_index != len(keys) or output is None or not hasattr(output, 'index'):
+        return None, explanation
     data_cols = out_cols[n_index:]
-    steps = [{
-        "message": (f"groupby({key!r}) puts rows with the same {key!r} into one group; then {name}() {what} "
-                    f"in each group, so every group becomes one row."),
-        "input_highlights": {"columns": [key]},
-        "output_state": _like(output_state, []),
-    }]
-    n_preview = len(input_state["preview"])
-    key_values = list(source[key])
-    group_keys = list(output.index) if output is not None else []
-    note = _truncation_note(input_state)
-    # Before the aggregation, each group's cell holds the values it will combine (as datascience's
-    # group shows them); counting shows the count straight away
-    collect = not counting and all(c in source.columns for c in data_cols) and len(data_cols) > 0
-    grid = []
-    shown = group_keys if len(group_keys) <= MAX_GROUP_STEPS + 1 else group_keys[:MAX_GROUP_STEPS]
-    for gi, gv in enumerate(group_keys[:len(output_state["preview"])]):
-        members = [i for i, v in enumerate(key_values) if v == gv]
-        if collect:
-            grid.append(output_state["preview"][gi][:n_index] + [[_json_safe(source[c].iloc[i]) for i in members] for c in data_cols])
-        else:
-            grid.append(output_state["preview"][gi])
-        if gi < len(shown):
-            total = len(members)
-            verb = 'collects' if total == 1 else 'collect'
-            collected = f" {verb} into one list per column" if collect else f" become{'s' if total == 1 else ''} one row"
-            steps.append({
-                "message": f"Group {_fmt_val(_json_safe(gv))}: {_plural(total, 'row')}{collected}.{note}",
-                "input_highlights": {"rows": [i for i in members if i < n_preview],
-                                     "columns": [key] + [v for v in values if v in input_state["columns"]]},
-                "output_state": _like(output_state, list(grid)),
-                "output_highlights": {"rows": [gi]},
+    key_rows = list(source[keys].itertuples(index=False, name=None))
+    groups = []
+    for gi, row in enumerate(output_state["preview"]):
+        label = output.index[gi]
+        label = label if isinstance(label, tuple) else (label,)
+        members = [i for i, k in enumerate(key_rows) if k == label]
+        values = []
+        for ci, col in enumerate(data_cols):
+            # The column each result combines: the same name in the table (not for size)
+            src = col if (col in source.columns and name != 'size') else None
+            values.append({
+                "column": col or name,
+                "values": [_cell(source[src].iloc[i]) for i in members] if src else [],
+                "result": row[n_index + ci],
+                "fn": agg,
             })
-    if len(shown) < len(group_keys):
-        rest = len(group_keys) - len(shown)
-        steps.append({
-            "message": f"…and the remaining {_plural(rest, 'group')} are gathered the same way.",
-            "output_state": _like(output_state, grid),
-            "output_highlights": {"rows": list(range(len(shown), len(grid)))},
-        })
-    if collect and grid:
-        example = next(((cell, output_state["preview"][gi][n_index + ci]) for gi, row in enumerate(grid)
-                        for ci, cell in enumerate(row[n_index:]) if isinstance(cell, list) and cell), None)
-        steps.append({
-            "message": f"Then {name}() combines each list into one value.",
-            "detail": f"{agg}({_fmt_val(example[0])}) = {_fmt_val(_display(example[1]))}" if example else None,
-        })
-        if steps[-1]["detail"] is None:
-            del steps[-1]["detail"]
-    steps.append({
-        "message": f"The group keys become the result's index, so {key!r} is now the row label, not a column.",
-        "output_highlights": {"columns": out_cols[:n_index]},
-    })
+        groups.append({"key": row[:n_index], "members": members, "size": len(members), "values": values})
+    value_columns = [v for v in ([selection] if isinstance(selection, str) else list(selection or []))]
+    if not value_columns:
+        value_columns = [c for c in data_cols if c in source.columns]
+    if agg in ('median', 'quantile'):
+        note = "For a median, pandas sorts the rows by group and takes the middle value of each group's run."
+    elif name in ('agg', 'aggregate', 'apply') and agg not in ('sum', 'mean', 'count', 'min', 'max', 'size'):
+        note = "pandas calls the function once for each group's values."
+    else:
+        note = ("pandas never builds these lists for a " + agg + ": it numbers the groups, then goes through the "
+                "rows once, adding each value into its group's running total" +
+                (" and count, and divides at the end." if agg == 'mean' else "."))
+    sort = getattr(groupby, '_sort', True)
+    order = ("Groups come out sorted by key (groupby sorts them unless sort=False)." if sort else
+             "Groups come out in the order each first appears (sort=False).")
+    steps = group_stages(key_names=keys, groups=groups, input_state=input_state, out_state=output_state,
+                         key_columns=keys, value_columns=value_columns, note=note, order_note=order)
+    steps[-1]["message"] += f" The group keys become the result's index, so {named} {'is' if len(keys) == 1 else 'are'} now row labels."
     return steps, explanation
 
 
@@ -845,6 +649,7 @@ def _pivot_table(frame, args, kwargs, input_state, output, output_state):
     col_keys = list(output.columns) if ck else [vk]
     grid = [output_state["preview"][r][:n_index] + [[] for _ in col_keys] for r in range(shown_rows)]
     steps = [{
+        "stage": "Lay out the grid",
         "message": f"pivot_table builds a grid: {grid_text}. Every cell starts empty.",
         "detail": (f"Rows: {_fmt_list([_json_safe(k) for k in row_keys])}"
                    + (f"   Columns: {_fmt_list([_json_safe(k) for k in col_keys])}" if ck else "")),
@@ -860,34 +665,27 @@ def _pivot_table(frame, args, kwargs, input_state, output, output_state):
         ri, cj = row_keys.index(rows_data[i]), col_keys.index(cols_data[i])
         grid[ri][n_index + cj] = grid[ri][n_index + cj] + [_json_safe(vals_data[i])]
         return ri, out_cols[n_index + cj]
-    if len(frame) <= 10:
-        for i in range(n_preview):
-            spot = place(i)
-            if spot is None:
-                continue
-            where = f"({_fmt_val(_json_safe(rows_data[i]))}, {_fmt_val(_json_safe(cols_data[i]))})" if ck else _fmt_val(_json_safe(rows_data[i]))
-            steps.append({
-                "message": f"Row {_fmt_val(_json_safe(frame.index[i]))}: its {vk} {_fmt_val(_json_safe(vals_data[i]))} goes into cell {where}.",
-                "input_highlights": {"rows": [i], "cells": [[i, vk]], "columns": [rk] + ([ck] if ck else [])},
-                "output_state": _like(output_state, [list(r) for r in grid]),
-                "output_highlights": {"cells": [[spot[0], spot[1]]]},
-            })
-    else:
-        for i in range(len(frame)):
-            place(i)
-        steps.append({
-            "message": f"Every row's {vk!r} goes into the cell for its {rk!r}" + (f" and {ck!r}." if ck else "."),
-            "output_state": _like(output_state, [list(r) for r in grid]),
-        })
+    # Every row's value lands in its cell at once: each cell gathers the values of its group
+    for i in range(len(frame)):
+        place(i)
+    steps.append({
+        "stage": "Gather each cell's values",
+        "message": f"Every row's {vk!r} goes into the cell for its {rk!r}" + (f" and {ck!r}." if ck else "."),
+        "input_highlights": {"columns": [rk, vk] + ([ck] if ck else [])},
+        "output_state": _like(output_state, [list(r) for r in grid]),
+        "note": ("pivot_table is a groupby on the row and column keys followed by unstack: each cell is "
+                 "one group, combined, then spread into the grid."),
+    })
     example = next(((cell, output_state["preview"][r][n_index + c]) for r, row in enumerate(grid)
                     for c, cell in enumerate(row[n_index:]) if cell), None)
-    step = {"message": f"Then {agg} combines each cell's list into one value."}
+    step = {"stage": "Combine each cell", "message": f"Then {agg} combines each cell's list into one value."}
     if example:
         step["detail"] = f"{agg}({_fmt_val(example[0])}) = {_fmt_val(_display(example[1]))}"
     steps.append(step)
     empty = [[r, out_cols[n_index + c]] for r, row in enumerate(grid) for c, cell in enumerate(row[n_index:]) if not cell]
     if empty:
         steps.append({
+            "stage": "Empty cells",
             "message": ("Cells that no row fell into have nothing to combine, so pandas marks them NaN "
                         "(missing)."),
             "output_highlights": {"cells": empty},

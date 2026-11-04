@@ -9,6 +9,7 @@ export {
   RUN_SHORTCUT,
   type NotebookCell,
   type CellType,
+  type CellLanguage,
   type EditorTheme,
 } from './NotebookCells';
 export { default as CellOutput } from './CellOutput';

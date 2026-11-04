@@ -1,0 +1,9 @@
+# Python packages for the SQL tracer tests (npm run test:tracers), under CPython 3.14.
+# Pinned to what the app loads in Pyodide 314.0.7 (its lockfile), so traces match the browser.
+duckdb==1.5.1
+# The trace contract check (packages/trace-schema/check_trace.py) and its dependencies
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
+referencing==0.37.0
+rpds-py==2026.9.1
+attrs==26.1.0

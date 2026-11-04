@@ -57,6 +57,86 @@
   border-radius: 6px;
 }
 
+/* The operation's stages, ① → ② → ③, the current one lit */
+.stage-rail {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.25rem;
+  counter-reset: none;
+}
+
+.stage {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.65rem 0.2rem 0.25rem;
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+}
+
+.stage + .stage::before {
+  content: '→';
+  margin: 0 0.35rem 0 -0.15rem;
+  color: var(--text-tertiary);
+  display: none;
+}
+
+.stage-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 50%;
+  background: var(--bg-panel-muted);
+  color: var(--text-secondary);
+}
+
+.stage.is-done {
+  color: var(--text-secondary);
+}
+
+.stage.is-current {
+  color: var(--text-primary);
+  font-weight: 600;
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.stage.is-current .stage-number {
+  background: var(--accent);
+  color: var(--accent-button-text);
+}
+
+/* How the library really does it, when that differs from the picture */
+.step-note {
+  margin: 0;
+  max-width: 44em;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+.step-note-label {
+  display: inline-block;
+  margin-right: 0.35rem;
+  padding: 0.05rem 0.45rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  background: var(--bg-panel-muted);
+  border-radius: 4px;
+}
+
 /* Explanation: the one large moment on the page */
 .slideshow-explanation {
   padding: 0.25rem 0 0.5rem;
@@ -91,7 +171,8 @@
   padding: 0.4rem 0.7rem;
   max-width: 100%;
   overflow-x: auto;
-  white-space: nowrap;
+  /* One line, scrolling sideways; a detail with line breaks (a query plan) keeps them */
+  white-space: pre;
 }
 
 .slideshow-visualization {
@@ -137,7 +218,7 @@
   color: var(--accent-hover);
 }
 
-/* Autoplay (presentation) */
+/* Play: walks through the frames on its own, at the pace chosen beside it */
 .autoplay-controls {
   display: flex;
   justify-content: center;
@@ -146,7 +227,16 @@
 }
 
 .autoplay-toggle {
-  min-width: 5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-width: 6.5rem;
+}
+
+.autoplay-icon {
+  font-size: 0.7rem;
+  letter-spacing: -0.1em;
 }
 
 .autoplay-toggle.is-playing {
@@ -192,6 +282,15 @@
   justify-content: flex-end;
 }
 
+/* Between Previous and Next: where you are (the dots), and Play */
+.controls-middle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
 .step-dots {
   display: flex;
   gap: 0.45rem;
@@ -222,6 +321,44 @@
 }
 
 /* Active dot stretches into a pill when the operation has sub-steps */
+/* A named step: its operation, as a chip */
+.dot.is-named {
+  width: auto;
+  height: auto;
+  min-height: 1.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0 0.55rem;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.dot.is-named:hover:not(.active) {
+  border: 1px solid var(--border-strong);
+  background: transparent;
+}
+
+.dot.is-named.active {
+  transform: none;
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-button-text);
+}
+
+.dot-name {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.dot.is-named.active:has(.dot-sub-label) {
+  height: auto;
+  padding: 0 0.55rem;
+}
+
 .dot.active:has(.dot-sub-label) {
   width: auto;
   height: 18px;
@@ -255,8 +392,23 @@
     padding-bottom: 0.75rem;
   }
 
+  /* The step counter on its own line, the operation's title under it */
+  .slideshow-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .step-operation-title code {
+    display: inline-block;
+    font-size: 0.85rem;
+    overflow-wrap: anywhere;
+  }
+
+  /* Text no bigger than the tables it explains */
   .explanation-text {
-    font-size: 1.3rem;
+    font-size: 1.05rem;
+    line-height: 1.4;
   }
 
   .explanation-detail {
@@ -278,9 +430,24 @@
     border-radius: var(--radius-card);
   }
 
-  .step-dots {
+  /* Dots and Play share the bar's top row, so Play stays reachable while scrolling */
+  .controls-middle {
     order: -1;
     flex: 1 1 100%;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .step-dots {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    min-width: 0;
+  }
+
+  .autoplay-toggle {
+    min-width: 0;
+    min-height: 2.5rem;
   }
 
   .dot {
@@ -315,3 +482,19 @@
   font-weight: 400;
 }
 
+
+/* Content that arrives fades in; the viz carries its own so it needs no host stylesheet */
+@keyframes viz-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.step-slideshow .fade-in {
+  animation: viz-fade-in 200ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .step-slideshow .fade-in {
+    animation: none;
+  }
+}

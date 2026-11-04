@@ -31,8 +31,21 @@ export default tseslint.config(
   },
   {
     // Functions passed to page.evaluate and addInitScript run in the browser
-    files: ['scripts/record-demos.mjs'],
+    files: ['scripts/record-demos.mjs', 'scripts/e2e.mjs'],
     languageOptions: { globals: { ...globals.node, ...globals.browser } },
+  },
+  {
+    // packages/viz ships on its own too (Roadmap: the %%dstutor widget), so it may not reach
+    // into the tutor shell, the runtime or the hub
+    files: ['packages/viz/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [{
+          group: ['@dstutor/notebook-ui', '@dstutor/notebook-ui/*', '@dstutor/runtime-pyodide', '@dstutor/runtime-pyodide/*', '**/apps/**', '**/notebook-ui/**', '**/runtime-pyodide/**'],
+          message: 'packages/viz must stay free of the tutor shell, the runtime and the hub.',
+        }],
+      }],
+    },
   },
   {
     files: ['packages/runtime-pyodide/src/sw.js'],

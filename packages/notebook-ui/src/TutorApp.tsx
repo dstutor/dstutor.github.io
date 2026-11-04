@@ -4,10 +4,10 @@
 import { useState, useEffect, useRef, useCallback, type ReactNode } from 'react';
 import type * as Monaco from 'monaco-editor';
 // Stylesheet order matters (later rules win): the cells', then the viz components', then the app's
-import NotebookCells, { type NotebookCell, type CellType } from './NotebookCells';
+import NotebookCells, { type NotebookCell, type CellType, type CellLanguage } from './NotebookCells';
 import { ipynbToJson, parseIpynb } from './ipynb';
 import { encodeNotebook, decodeNotebook } from './share';
-import { StepSlideshow, StepCard, framesFor, renderStepCanvases, saveStepsPdf, stepsZip, type Frame, type DetailLevel } from '@dstutor/viz';
+import { StepSlideshow, StepCard, framesFor, renderStepCanvases, saveStepsPdf, stepsZip, type Frame, type DetailLevel, type TableStyle } from '@dstutor/viz';
 import type { RunOutput, TraceRecord } from '@dstutor/trace-schema';
 import './TutorApp.css';
 import TracePanel from './TracePanel';
@@ -45,6 +45,10 @@ export interface TutorConfig {
   errorHint?: ReactNode;
   /** Register editor completions; userCode returns the source of every code cell */
   registerCompletions?: (monaco: typeof Monaco, userCode: () => string[]) => void;
+  /** How step tables print: the way the tutor's library prints a table (default datascience) */
+  tableStyle?: TableStyle;
+  /** The language code cells are written in (default Python); SQL cells run through the tracer */
+  language?: CellLanguage;
   /** localStorage key for the saved notebook; every tutor shares one origin, so make it unique */
   notebookStorageKey: string;
   /** An older key the notebook was saved under, read when notebookStorageKey has nothing */
@@ -105,6 +109,8 @@ const NOTEBOOK_WIDTH_STORAGE_KEY = 'notebookWidthPercent';
 
 export default function TutorApp({ config }: { config: TutorConfig }) {
   const { kernel, defaultCells, gallery, library, productName, dataNoun } = config;
+  /** What the status line says once the kernel can run cells (a tutor's language never changes) */
+  const readyRef = useRef(config.language === 'sql' ? 'Ready to run SQL!' : 'Ready to run Python code!');
   const [cells, setCells] = useState<NotebookCell[]>(() => defaultCells.map(c => newCell(c.source, c.type)));
   const [runningCellId, setRunningCellId] = useState<string | null>(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
@@ -387,7 +393,7 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
           if (pending.kind === 'cell') void runCellRef.current(pending.id);
           else void runAllRef.current(pending.visualize);
         } else {
-          setStatusMessage('Ready to run Python code!');
+          setStatusMessage(readyRef.current);
         }
       } catch (error) {
         // Stopped or restarted while loading: whoever stopped it starts the next load
@@ -446,7 +452,7 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
   const exportSteps = (kind: 'pdf' | 'images') => {
     if (!output.trace?.length) {
       setStatusMessage('Nothing to export');
-      setTimeout(() => setStatusMessage('Ready to run Python code!'), 2000);
+      setTimeout(() => setStatusMessage(readyRef.current), 2000);
       return;
     }
     setStatusMessage(kind === 'pdf' ? 'Generating PDF...' : 'Rendering step images...');
@@ -473,7 +479,7 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
         setStatusMessage('Failed to export');
       } finally {
         setIsExporting(false);
-        setTimeout(() => setStatusMessage('Ready to run Python code!'), 2500);
+        setTimeout(() => setStatusMessage(readyRef.current), 2500);
       }
     }, 200);
   };
@@ -497,7 +503,7 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
     const trace = sessionTraceRef.current;
     if (trace.length === 0) {
       setStatusMessage('Nothing to visualize yet: run some cells first');
-      setTimeout(() => setStatusMessage('Ready to run Python code!'), 3000);
+      setTimeout(() => setStatusMessage(readyRef.current), 3000);
       return;
     }
     setOutput({ stdout: '', stderr: '', trace });
@@ -506,7 +512,7 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
     setStatusMessage(sessionTraceTruncatedRef.current
       ? `Visualized the first ${trace.length} operations (the rest were not recorded)`
       : `Visualized ${trace.length} operation${trace.length !== 1 ? 's' : ''}`);
-    setTimeout(() => setStatusMessage('Ready to run Python code!'), 3000);
+    setTimeout(() => setStatusMessage(readyRef.current), 3000);
   }, [switchMobileView]);
 
   /** Wrap up a run: remember its (cumulative) trace, and show it only if asked */
@@ -519,12 +525,12 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
     if (result.error) {
       switchMobileView('notebook');
       setStatusMessage('Execution error, see the output under the cell');
-      setTimeout(() => setStatusMessage('Ready to run Python code!'), 3000);
+      setTimeout(() => setStatusMessage(readyRef.current), 3000);
     } else if (visualize) {
       showSessionTrace();
     } else {
       setStatusMessage(label);
-      setTimeout(() => setStatusMessage('Ready to run Python code!'), 3000);
+      setTimeout(() => setStatusMessage(readyRef.current), 3000);
     }
   }, [switchMobileView, showSessionTrace]);
 
@@ -587,7 +593,7 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
       setCellOutput(id, { stdout: '', stderr: '', error: message });
       switchMobileView('notebook');
       setStatusMessage('Execution failed, see the output under the cell');
-      setTimeout(() => setStatusMessage('Ready to run Python code!'), 3000);
+      setTimeout(() => setStatusMessage(readyRef.current), 3000);
     } finally {
       endRun(token);
     }
@@ -628,7 +634,7 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
       setOutput({ stdout: '', stderr: '', error: message });
       switchMobileView('notebook');
       setStatusMessage('Execution failed, see the output under the cell');
-      setTimeout(() => setStatusMessage('Ready to run Python code!'), 3000);
+      setTimeout(() => setStatusMessage(readyRef.current), 3000);
     } finally {
       endRun(token);
     }
@@ -829,7 +835,7 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
         setPyodideStatus('ready');
       }
       setStatusMessage('Kernel restarted');
-      setTimeout(() => setStatusMessage('Ready to run Python code!'), 2000);
+      setTimeout(() => setStatusMessage(readyRef.current), 2000);
       return true;
     } catch {
       pyodideStatusRef.current = 'error';
@@ -859,7 +865,7 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
         await kernel.init();
         pyodideStatusRef.current = 'ready';
         setPyodideStatus('ready');
-        setStatusMessage('Ready to run Python code!');
+        setStatusMessage(readyRef.current);
       } catch {
         pyodideStatusRef.current = 'error';
         setPyodideStatus('error');
@@ -885,11 +891,11 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
       const loaded = parseIpynb(await file.text(), () => newCell('').id);
       openNotebook(loaded, file.name.replace(/\.ipynb$/i, ''));
       setStatusMessage(`Opened ${file.name}`);
-      setTimeout(() => setStatusMessage('Ready to run Python code!'), 3000);
+      setTimeout(() => setStatusMessage(readyRef.current), 3000);
     } catch (e) {
       console.error('Failed to open notebook:', e);
       setStatusMessage(`Could not open ${file.name}: ${e instanceof Error ? e.message : 'not a notebook'}`);
-      setTimeout(() => setStatusMessage('Ready to run Python code!'), 4000);
+      setTimeout(() => setStatusMessage(readyRef.current), 4000);
     }
   };
 
@@ -897,7 +903,7 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
   const handleExportIpynb = () => {
     triggerDownload(new Blob([ipynbToJson(cells)], { type: 'application/x-ipynb+json' }), `${downloadBaseName()}.ipynb`);
     setStatusMessage('Notebook downloaded');
-    setTimeout(() => setStatusMessage('Ready to run Python code!'), 2000);
+    setTimeout(() => setStatusMessage(readyRef.current), 2000);
   };
 
   /**
@@ -1209,6 +1215,7 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
               onEditorWillMount={handleEditorWillMount}
               editorTheme={theme === 'jupyter' ? 'data8-light' : 'data8-dark'}
               errorHints={config.errorHint}
+              language={config.language}
             />
           </div>
         </div>
@@ -1242,6 +1249,7 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
           onFrameChange={handleFrameChange}
           detail={detail}
           onDetailChange={setDetail}
+          tableStyle={config.tableStyle}
         />
       </div>
 
@@ -1256,7 +1264,7 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
             </button>
           </div>
           <div className="presentation-body">
-            <StepSlideshow trace={output.trace} detail={detail} autoplay />
+            <StepSlideshow trace={output.trace} detail={detail} tableStyle={config.tableStyle} />
           </div>
         </div>
       )}
@@ -1275,7 +1283,7 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
           }}
         >
           {framesFor(output.trace, detail).map((frame, i) => (
-            <StepCard key={i} frame={frame} />
+            <StepCard key={i} frame={frame} still tableStyle={config.tableStyle} />
           ))}
         </div>
       )}

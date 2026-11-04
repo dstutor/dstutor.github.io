@@ -1,0 +1,224 @@
+{
+  "categories": [
+    {
+      "id": "filtering",
+      "name": "Filtering",
+      "description": "Keep the rows you need"
+    },
+    {
+      "id": "columns",
+      "name": "Columns",
+      "description": "Choose and compute columns"
+    },
+    {
+      "id": "sorting",
+      "name": "Sorting",
+      "description": "Put rows in order"
+    },
+    {
+      "id": "grouping",
+      "name": "Grouping",
+      "description": "Summarize groups of rows"
+    },
+    {
+      "id": "combining",
+      "name": "Combining",
+      "description": "Join tables and whole queries"
+    }
+  ],
+  "examples": [
+    {
+      "id": "filter-rows",
+      "title": "Filtering Rows",
+      "description": "Keep only the rows that match a condition",
+      "category": "filtering",
+      "operations": [
+        "WHERE"
+      ],
+      "markdown": "## WHERE\n\n`WHERE` works its condition out for every row, true or false, and keeps the rows where it is true.",
+      "cells": [
+        "-- An ice cream shop's menu\nCREATE OR REPLACE TABLE cones (Flavor VARCHAR, Color VARCHAR, Price DOUBLE);\nINSERT INTO cones VALUES\n    ('strawberry', 'pink', 3.55),\n    ('chocolate', 'light brown', 4.75),\n    ('vanilla', 'white', 4.25),\n    ('chocolate', 'dark brown', 5.25),\n    ('strawberry', 'pink', 3.95),\n    ('mint', 'green', 4.50);\nSELECT * FROM cones;",
+        "-- Only the chocolate cones\nSELECT * FROM cones WHERE Flavor = 'chocolate';"
+      ]
+    },
+    {
+      "id": "two-conditions",
+      "title": "Two Conditions",
+      "description": "Combine conditions with AND and OR",
+      "category": "filtering",
+      "operations": [
+        "WHERE"
+      ],
+      "markdown": "## AND, OR\n\n`AND` needs both conditions to be true; `OR` needs either.",
+      "cells": [
+        "-- An ice cream shop's menu\nCREATE OR REPLACE TABLE cones (Flavor VARCHAR, Color VARCHAR, Price DOUBLE);\nINSERT INTO cones VALUES\n    ('strawberry', 'pink', 3.55),\n    ('chocolate', 'light brown', 4.75),\n    ('vanilla', 'white', 4.25),\n    ('chocolate', 'dark brown', 5.25),\n    ('strawberry', 'pink', 3.95),\n    ('mint', 'green', 4.50);\nSELECT * FROM cones;",
+        "-- Cones over $4 that are not chocolate\nSELECT * FROM cones\nWHERE Price > 4 AND Flavor <> 'chocolate';"
+      ]
+    },
+    {
+      "id": "select-columns",
+      "title": "Choosing Columns",
+      "description": "List the columns you want, or work new ones out",
+      "category": "columns",
+      "operations": [
+        "SELECT"
+      ],
+      "markdown": "## SELECT\n\n`SELECT` lists the result's columns. A column can be worked out from others; `AS` names it.",
+      "cells": [
+        "-- An ice cream shop's menu\nCREATE OR REPLACE TABLE cones (Flavor VARCHAR, Color VARCHAR, Price DOUBLE);\nINSERT INTO cones VALUES\n    ('strawberry', 'pink', 3.55),\n    ('chocolate', 'light brown', 4.75),\n    ('vanilla', 'white', 4.25),\n    ('chocolate', 'dark brown', 5.25),\n    ('strawberry', 'pink', 3.95),\n    ('mint', 'green', 4.50);\nSELECT * FROM cones;",
+        "SELECT Flavor, Price * 100 AS cents FROM cones;"
+      ]
+    },
+    {
+      "id": "distinct",
+      "title": "Distinct Rows",
+      "description": "Remove rows that repeat",
+      "category": "columns",
+      "operations": [
+        "SELECT DISTINCT"
+      ],
+      "markdown": "## DISTINCT\n\n`DISTINCT` keeps one copy of each different row. Two pink strawberry cones become one.",
+      "cells": [
+        "-- An ice cream shop's menu\nCREATE OR REPLACE TABLE cones (Flavor VARCHAR, Color VARCHAR, Price DOUBLE);\nINSERT INTO cones VALUES\n    ('strawberry', 'pink', 3.55),\n    ('chocolate', 'light brown', 4.75),\n    ('vanilla', 'white', 4.25),\n    ('chocolate', 'dark brown', 5.25),\n    ('strawberry', 'pink', 3.95),\n    ('mint', 'green', 4.50);\nSELECT * FROM cones;",
+        "SELECT DISTINCT Flavor, Color FROM cones;"
+      ]
+    },
+    {
+      "id": "order-by",
+      "title": "Sorting",
+      "description": "Put rows in order of a column",
+      "category": "sorting",
+      "operations": [
+        "ORDER BY"
+      ],
+      "markdown": "## ORDER BY\n\n`ORDER BY` sorts the rows; `DESC` puts the largest first.",
+      "cells": [
+        "-- An ice cream shop's menu\nCREATE OR REPLACE TABLE cones (Flavor VARCHAR, Color VARCHAR, Price DOUBLE);\nINSERT INTO cones VALUES\n    ('strawberry', 'pink', 3.55),\n    ('chocolate', 'light brown', 4.75),\n    ('vanilla', 'white', 4.25),\n    ('chocolate', 'dark brown', 5.25),\n    ('strawberry', 'pink', 3.95),\n    ('mint', 'green', 4.50);\nSELECT * FROM cones;",
+        "SELECT * FROM cones ORDER BY Price DESC;"
+      ]
+    },
+    {
+      "id": "limit",
+      "title": "Top Three",
+      "description": "Sort, then keep the first rows",
+      "category": "sorting",
+      "operations": [
+        "ORDER BY",
+        "LIMIT"
+      ],
+      "markdown": "## LIMIT\n\n`LIMIT` keeps the first rows of the result. With `ORDER BY` first, that is the top three.",
+      "cells": [
+        "-- An ice cream shop's menu\nCREATE OR REPLACE TABLE cones (Flavor VARCHAR, Color VARCHAR, Price DOUBLE);\nINSERT INTO cones VALUES\n    ('strawberry', 'pink', 3.55),\n    ('chocolate', 'light brown', 4.75),\n    ('vanilla', 'white', 4.25),\n    ('chocolate', 'dark brown', 5.25),\n    ('strawberry', 'pink', 3.95),\n    ('mint', 'green', 4.50);\nSELECT * FROM cones;",
+        "-- The three priciest cones\nSELECT * FROM cones\nORDER BY Price DESC\nLIMIT 3;"
+      ]
+    },
+    {
+      "id": "group-average",
+      "title": "Group and Average",
+      "description": "One row per group, with its average",
+      "category": "grouping",
+      "operations": [
+        "GROUP BY",
+        "AVG"
+      ],
+      "markdown": "## GROUP BY\n\n`GROUP BY` gathers the rows with the same flavor. Each aggregate in `SELECT` (here `AVG`) is worked out for each group.",
+      "cells": [
+        "-- An ice cream shop's menu\nCREATE OR REPLACE TABLE cones (Flavor VARCHAR, Color VARCHAR, Price DOUBLE);\nINSERT INTO cones VALUES\n    ('strawberry', 'pink', 3.55),\n    ('chocolate', 'light brown', 4.75),\n    ('vanilla', 'white', 4.25),\n    ('chocolate', 'dark brown', 5.25),\n    ('strawberry', 'pink', 3.95),\n    ('mint', 'green', 4.50);\nSELECT * FROM cones;",
+        "SELECT Flavor, AVG(Price) AS avg_price\nFROM cones\nGROUP BY Flavor;"
+      ]
+    },
+    {
+      "id": "group-count",
+      "title": "Counting Rows",
+      "description": "How many rows each group has",
+      "category": "grouping",
+      "operations": [
+        "GROUP BY",
+        "COUNT"
+      ],
+      "markdown": "## COUNT(*)\n\n`COUNT(*)` counts the rows in each group.",
+      "cells": [
+        "-- An ice cream shop's menu\nCREATE OR REPLACE TABLE cones (Flavor VARCHAR, Color VARCHAR, Price DOUBLE);\nINSERT INTO cones VALUES\n    ('strawberry', 'pink', 3.55),\n    ('chocolate', 'light brown', 4.75),\n    ('vanilla', 'white', 4.25),\n    ('chocolate', 'dark brown', 5.25),\n    ('strawberry', 'pink', 3.95),\n    ('mint', 'green', 4.50);\nSELECT * FROM cones;",
+        "SELECT Flavor, COUNT(*) AS cones\nFROM cones\nGROUP BY Flavor;"
+      ]
+    },
+    {
+      "id": "having",
+      "title": "Filtering Groups",
+      "description": "HAVING keeps the groups that match",
+      "category": "grouping",
+      "operations": [
+        "GROUP BY",
+        "HAVING"
+      ],
+      "markdown": "## HAVING\n\n`WHERE` filters rows before they are grouped; `HAVING` filters the groups after.",
+      "cells": [
+        "-- An ice cream shop's menu\nCREATE OR REPLACE TABLE cones (Flavor VARCHAR, Color VARCHAR, Price DOUBLE);\nINSERT INTO cones VALUES\n    ('strawberry', 'pink', 3.55),\n    ('chocolate', 'light brown', 4.75),\n    ('vanilla', 'white', 4.25),\n    ('chocolate', 'dark brown', 5.25),\n    ('strawberry', 'pink', 3.95),\n    ('mint', 'green', 4.50);\nSELECT * FROM cones;",
+        "-- Flavors with more than one cone\nSELECT Flavor, COUNT(*) AS cones\nFROM cones\nGROUP BY Flavor\nHAVING COUNT(*) > 1;"
+      ]
+    },
+    {
+      "id": "whole-table",
+      "title": "Summing Up a Table",
+      "description": "Aggregates without GROUP BY",
+      "category": "grouping",
+      "operations": [
+        "COUNT",
+        "AVG"
+      ],
+      "markdown": "## The whole table as one group\n\nWith no `GROUP BY`, aggregates combine every row into one.",
+      "cells": [
+        "-- An ice cream shop's menu\nCREATE OR REPLACE TABLE cones (Flavor VARCHAR, Color VARCHAR, Price DOUBLE);\nINSERT INTO cones VALUES\n    ('strawberry', 'pink', 3.55),\n    ('chocolate', 'light brown', 4.75),\n    ('vanilla', 'white', 4.25),\n    ('chocolate', 'dark brown', 5.25),\n    ('strawberry', 'pink', 3.95),\n    ('mint', 'green', 4.50);\nSELECT * FROM cones;",
+        "SELECT COUNT(*) AS cones, AVG(Price) AS avg_price, MAX(Price) AS top_price\nFROM cones;"
+      ]
+    },
+    {
+      "id": "join",
+      "title": "Joining Tables",
+      "description": "Match rows of two tables on a key",
+      "category": "combining",
+      "operations": [
+        "JOIN"
+      ],
+      "markdown": "## JOIN\n\n`JOIN ... ON` matches each cone with the freezer row of the same flavor. An inner join keeps only flavors found in both.",
+      "cells": [
+        "-- An ice cream shop's menu\nCREATE OR REPLACE TABLE cones (Flavor VARCHAR, Color VARCHAR, Price DOUBLE);\nINSERT INTO cones VALUES\n    ('strawberry', 'pink', 3.55),\n    ('chocolate', 'light brown', 4.75),\n    ('vanilla', 'white', 4.25),\n    ('chocolate', 'dark brown', 5.25),\n    ('strawberry', 'pink', 3.95),\n    ('mint', 'green', 4.50);\nSELECT * FROM cones;",
+        "-- How many tubs of each flavor are in the freezer\nCREATE OR REPLACE TABLE stock (Flavor VARCHAR, Tubs INTEGER);\nINSERT INTO stock VALUES ('chocolate', 3), ('mint', 1), ('rocky road', 2);\nSELECT * FROM stock;",
+        "SELECT * FROM cones\nJOIN stock ON cones.Flavor = stock.Flavor;"
+      ]
+    },
+    {
+      "id": "left-join",
+      "title": "Left Join",
+      "description": "Keep every row of the left table",
+      "category": "combining",
+      "operations": [
+        "LEFT JOIN"
+      ],
+      "markdown": "## LEFT JOIN\n\nA `LEFT JOIN` keeps every cone; flavors with nothing in the freezer get NULL for `Tubs`. `USING (Flavor)` joins on the column both tables share.",
+      "cells": [
+        "-- An ice cream shop's menu\nCREATE OR REPLACE TABLE cones (Flavor VARCHAR, Color VARCHAR, Price DOUBLE);\nINSERT INTO cones VALUES\n    ('strawberry', 'pink', 3.55),\n    ('chocolate', 'light brown', 4.75),\n    ('vanilla', 'white', 4.25),\n    ('chocolate', 'dark brown', 5.25),\n    ('strawberry', 'pink', 3.95),\n    ('mint', 'green', 4.50);\nSELECT * FROM cones;",
+        "-- How many tubs of each flavor are in the freezer\nCREATE OR REPLACE TABLE stock (Flavor VARCHAR, Tubs INTEGER);\nINSERT INTO stock VALUES ('chocolate', 3), ('mint', 1), ('rocky road', 2);\nSELECT * FROM stock;",
+        "SELECT Flavor, Price, Tubs\nFROM cones LEFT JOIN stock USING (Flavor);"
+      ]
+    },
+    {
+      "id": "logical-order",
+      "title": "The Order SQL Runs In",
+      "description": "Every clause, step by step",
+      "category": "combining",
+      "operations": [
+        "WHERE",
+        "GROUP BY",
+        "HAVING",
+        "ORDER BY",
+        "LIMIT"
+      ],
+      "markdown": "## The order SQL runs in\n\nA query is written SELECT, FROM, WHERE, GROUP BY, HAVING, ORDER BY, LIMIT, but it runs FROM, WHERE, GROUP BY, HAVING, SELECT, ORDER BY, LIMIT. The steps follow the order it runs in.",
+      "cells": [
+        "-- An ice cream shop's menu\nCREATE OR REPLACE TABLE cones (Flavor VARCHAR, Color VARCHAR, Price DOUBLE);\nINSERT INTO cones VALUES\n    ('strawberry', 'pink', 3.55),\n    ('chocolate', 'light brown', 4.75),\n    ('vanilla', 'white', 4.25),\n    ('chocolate', 'dark brown', 5.25),\n    ('strawberry', 'pink', 3.95),\n    ('mint', 'green', 4.50);\nSELECT * FROM cones;",
+        "SELECT Flavor, AVG(Price) AS avg_price\nFROM cones\nWHERE Price > 4\nGROUP BY Flavor\nHAVING COUNT(*) > 1 OR AVG(Price) > 4.4\nORDER BY avg_price DESC\nLIMIT 2;"
+      ]
+    }
+  ]
+}

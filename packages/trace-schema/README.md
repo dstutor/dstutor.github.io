@@ -30,16 +30,33 @@ A **trace** is a list of records, one per traced operation, in the order they ra
 
 **TableState**: `num_rows` (the whole table), `num_columns`, `columns`, and `preview`, the first
 rows with one value per column. `index_columns` says how many of the leading columns are row
-labels, such as a pandas index: they are shown, but not counted as columns. `error` is set when the table could not be read. `kind: 'array'`
-marks a single array shown as one column.
+labels, such as a pandas index: they are shown, but not counted as columns. `column_types`
+gives each column's type as its library prints it (polars `str`, `f64`; DuckDB `varchar`,
+`double`), for libraries whose tables show types. `error` is set when the table could not be
+read. `kind: 'array'` marks a single array shown as one column.
 
 **SubStep**: a `message` replacing the explanation for that frame, an optional monospace
 `detail`, `input_highlights` and `output_highlights`, and optionally an `output_state` (an
 intermediate result shown instead of `output`), an `output_label`, and secondary tables
 `aux_table` (another input, such as the right side of a join) and `aux_output`.
 
-**Highlights**: `rows` and `rows_removed` (preview row indices), `columns` (labels) and `cells`
-(`[row, label]` pairs).
+**Highlights**: `rows` and `rows_removed` (preview row indices), `columns` (labels), `cells`
+(`[row, label]` pairs) and `row_colors` (a colour slot 0-7 or null for every preview row, so
+rows of one join key or group share a colour).
+
+A **SubStep** can also name its `stage` (frames of one stage share it; the step shows its stages
+as a rail), add a `note` (how the library really does it, when that differs from the picture),
+and carry a `panel`, a picture for a stage that is not a table:
+
+- `keys`: a join's distinct key values, `left_only`, `both`, `right_only`, and which regions
+  the join `keeps`;
+- `pairs`: per key, rows on the `left` and `right` and the `rows` it puts in the result;
+- `groups`: one card per group with its `key`, `rows` and each aggregated column's `values`,
+  `result` and `formula`;
+- `order`: for each result row, where it was in the input (`from`), with `ties`;
+- `plan`: how the library ran it, as lists of steps with their row counts.
+
+Keys and groups carry the colour slot (`color`) their rows have in `row_colors`.
 
 **Values** are plain JSON. NaN, infinities and the like are not JSON, so a tracer sends `null`
 for them, or, in a table's preview, `{"shown": "NaN"}`: the text its library prints for the
@@ -51,6 +68,8 @@ way). Anything else that is not JSON, such as a function, is sent as its string 
 `check_trace.py` checks these too, because the visualization relies on them:
 
 - `num_columns` equals the number of `columns`, and every preview row has one value per column.
+- `column_types`, when present, has one type per column.
+- `row_colors`, when present, has one entry per preview row of the table it highlights.
 - A preview never has more rows than `num_rows`.
 - Highlights point at preview rows and columns that exist, in the table they highlight. A frame's
   `output_highlights` refer to its `output_state`, or to the record's `output` when it has none.

@@ -11,6 +11,8 @@ import CellOutput from './CellOutput';
 import './NotebookCells.css';
 
 export type CellType = 'code' | 'markdown';
+/** What code cells are written in; Monaco highlights each */
+export type CellLanguage = 'python' | 'sql';
 
 /** One cell of the notebook */
 export interface NotebookCell {
@@ -59,6 +61,8 @@ interface NotebookCellsProps {
   highlight?: { cellId: string; start: number; end: number } | null;
   onEditorWillMount?: (monaco: typeof import('monaco-editor')) => void;
   editorTheme?: EditorTheme;
+  /** The language code cells are written in (Monaco's highlighting): Python, or SQL */
+  language?: CellLanguage;
   /** Library-specific checklist shown under a cell's error (e.g. which import to start with) */
   errorHints?: ReactNode;
 }
@@ -220,6 +224,7 @@ interface CodeCellProps {
   onInsertBelow: (type: CellType) => void;
   onMount: (editor: MonacoEditor.IStandaloneCodeEditor) => void;
   errorHints?: ReactNode;
+  language: CellLanguage;
 }
 
 function CodeCell({
@@ -244,6 +249,7 @@ function CodeCell({
   onInsertBelow,
   onMount,
   errorHints,
+  language,
 }: CodeCellProps) {
   const [editorHeight, setEditorHeight] = useState(60);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -352,7 +358,7 @@ function CodeCell({
           ) : (
           <Editor
             height={editorHeight}
-            defaultLanguage="python"
+            defaultLanguage={language}
             value={cell.source}
             beforeMount={onEditorWillMount}
             onChange={(value) => onChange(value || '')}
@@ -397,6 +403,8 @@ function CodeCell({
               readOnly: isRunning || readOnly,
               tabSize: 4,
               wordWrap: 'on',
+              // Wrap at spaces and after commas, not inside 4.75 or pl.col(...) as the default does
+              wordWrapBreakAfterCharacters: ' \t})]?|&,;',
               padding: { top: 10, bottom: 10 },
             }}
           />
@@ -543,6 +551,7 @@ export default function NotebookCells({
   onEditorWillMount,
   editorTheme = 'data8-light',
   errorHints,
+  language = 'python',
 }: NotebookCellsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorsRef = useRef(new Map<string, MonacoEditor.IStandaloneCodeEditor>());
@@ -814,9 +823,10 @@ export default function NotebookCells({
             highlightLines={highlight && highlight.cellId === cell.id ? { start: highlight.start, end: highlight.end } : null}
             richEditor={monacoAvailable === true}
             editorTheme={editorTheme}
-            fontSize={isNarrowScreen ? 16 : 14}
+            fontSize={isNarrowScreen ? 13 : 14}
             onEditorWillMount={onEditorWillMount}
             errorHints={errorHints}
+            language={language}
             onRun={() => runCell(cell.id)}
             onMount={(editor) => {
               editorsRef.current.set(cell.id, editor);

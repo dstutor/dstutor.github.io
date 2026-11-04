@@ -8,10 +8,11 @@
  * from editorAvailability.ts so a load failure here never takes the rest of the app down.
  */
 // monaco-editor 0.56+ entry points: the editor core, every editor feature (suggest, find,
-// folding, ...), and just the Python language definition
+// folding, ...), and the Python and SQL language definitions
 import * as monaco from 'monaco-editor/editor';
 import 'monaco-editor/features/register.all';
 import 'monaco-editor/languages/definitions/python/register';
+import 'monaco-editor/languages/definitions/sql/register';
 import editorWorker from 'monaco-editor/editor/editor.worker.js?worker';
 import { loader } from '@monaco-editor/react';
 

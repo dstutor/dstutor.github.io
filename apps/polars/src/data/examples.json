@@ -1,0 +1,239 @@
+{
+  "categories": [
+    {
+      "id": "filtering",
+      "name": "Filtering",
+      "description": "Keep the rows you need"
+    },
+    {
+      "id": "sorting",
+      "name": "Sorting",
+      "description": "Put rows in order"
+    },
+    {
+      "id": "grouping",
+      "name": "Grouping",
+      "description": "Summarize groups of rows"
+    },
+    {
+      "id": "combining",
+      "name": "Combining",
+      "description": "Join tables and chain steps"
+    },
+    {
+      "id": "columns",
+      "name": "Columns",
+      "description": "Choose and compute columns"
+    },
+    {
+      "id": "lazy",
+      "name": "Lazy",
+      "description": "Plan a query, then run it"
+    }
+  ],
+  "examples": [
+    {
+      "id": "filter-rows",
+      "title": "Filtering Rows",
+      "description": "Keep only the rows that match a condition",
+      "category": "filtering",
+      "operations": [
+        "filter"
+      ],
+      "markdown": "## Filtering rows\n\n`pl.col('Flavor') == 'chocolate'` is an expression: polars works it out for every row at once, giving a column of True and False. `filter` keeps the rows where it is True.",
+      "cells": [
+        "import polars as pl",
+        "# An ice cream shop's menu\ncones = pl.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "# Only the chocolate cones\nchocolate = cones.filter(pl.col('Flavor') == 'chocolate')\nchocolate"
+      ]
+    },
+    {
+      "id": "filter-two-conditions",
+      "title": "Two Conditions",
+      "description": "Combine conditions with & and |",
+      "category": "filtering",
+      "operations": [
+        "filter"
+      ],
+      "markdown": "## Two conditions at once\n\n`&` means both must be True, `|` means either. Each condition needs its own parentheses.",
+      "cells": [
+        "import polars as pl",
+        "# An ice cream shop's menu\ncones = pl.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "# Cones over $4 that are not chocolate\npricey = cones.filter((pl.col('Price') > 4) & (pl.col('Flavor') != 'chocolate'))\npricey"
+      ]
+    },
+    {
+      "id": "sort-rows",
+      "title": "Sorting Rows",
+      "description": "Put rows in order of a column",
+      "category": "sorting",
+      "operations": [
+        "sort"
+      ],
+      "markdown": "## Sorting\n\n`sort` puts the rows in order of a column. polars has no index, so a row's position is its only label.",
+      "cells": [
+        "import polars as pl",
+        "# An ice cream shop's menu\ncones = pl.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "# Most expensive first\nby_price = cones.sort('Price', descending=True)\nby_price"
+      ]
+    },
+    {
+      "id": "group-mean",
+      "title": "Group and Average",
+      "description": "One row per group, with its mean",
+      "category": "grouping",
+      "operations": [
+        "group_by",
+        "agg"
+      ],
+      "markdown": "## Grouping\n\n`group_by` gathers the rows with the same flavor; `agg` says what to work out for each group. `maintain_order=True` keeps the groups in the order they first appear.",
+      "cells": [
+        "import polars as pl",
+        "# An ice cream shop's menu\ncones = pl.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "# Average price of each flavor\navg = cones.group_by('Flavor', maintain_order=True).agg(pl.col('Price').mean())\navg"
+      ]
+    },
+    {
+      "id": "group-len",
+      "title": "Counting Rows",
+      "description": "How many rows each group has",
+      "category": "grouping",
+      "operations": [
+        "group_by",
+        "len"
+      ],
+      "markdown": "## Counting\n\n`len()` counts the rows in each group.",
+      "cells": [
+        "import polars as pl",
+        "# An ice cream shop's menu\ncones = pl.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "# How many cones of each flavor\ncounts = cones.group_by('Flavor', maintain_order=True).len()\ncounts"
+      ]
+    },
+    {
+      "id": "group-several",
+      "title": "Several Aggregations",
+      "description": "Name each result with alias",
+      "category": "grouping",
+      "operations": [
+        "group_by",
+        "agg"
+      ],
+      "markdown": "## Several results per group\n\n`agg` takes as many expressions as you like. `alias` names the column each one makes.",
+      "cells": [
+        "import polars as pl",
+        "# An ice cream shop's menu\ncones = pl.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "# Cheapest and priciest cone of each flavor\nrange_ = cones.group_by('Flavor', maintain_order=True).agg(\n    pl.col('Price').min().alias('cheapest'),\n    pl.col('Price').max().alias('priciest'),\n)\nrange_"
+      ]
+    },
+    {
+      "id": "join-inner",
+      "title": "Joining Tables",
+      "description": "Match rows of two tables on a key",
+      "category": "combining",
+      "operations": [
+        "join"
+      ],
+      "markdown": "## Joining\n\n`join` matches each cone with the freezer row of the same flavor. An inner join keeps only flavors found in both.",
+      "cells": [
+        "import polars as pl",
+        "# An ice cream shop's menu\ncones = pl.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "# How many of each flavor are in the freezer\nstock = pl.DataFrame({\n    'Flavor': ['chocolate', 'mint', 'rocky road'],\n    'Tubs': [3, 1, 2],\n})\nstock",
+        "in_stock = cones.join(stock, on='Flavor')\nin_stock"
+      ]
+    },
+    {
+      "id": "join-left",
+      "title": "Left Join",
+      "description": "Keep every row of the left table",
+      "category": "combining",
+      "operations": [
+        "join"
+      ],
+      "markdown": "## A left join\n\n`how='left'` keeps every cone; flavors with nothing in the freezer get null for `Tubs`.",
+      "cells": [
+        "import polars as pl",
+        "# An ice cream shop's menu\ncones = pl.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "# How many of each flavor are in the freezer\nstock = pl.DataFrame({\n    'Flavor': ['chocolate', 'mint', 'rocky road'],\n    'Tubs': [3, 1, 2],\n})\nstock",
+        "everything = cones.join(stock, on='Flavor', how='left')\neverything"
+      ]
+    },
+    {
+      "id": "with-columns",
+      "title": "Adding a Column",
+      "description": "Work out a new column from others",
+      "category": "columns",
+      "operations": [
+        "with_columns"
+      ],
+      "markdown": "## A new column\n\n`with_columns` works an expression out for the whole column at once. `alias` names it.",
+      "cells": [
+        "import polars as pl",
+        "# An ice cream shop's menu\ncones = pl.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "# A 10% sale\nsale = cones.with_columns((pl.col('Price') * 0.9).alias('Sale'))\nsale"
+      ]
+    },
+    {
+      "id": "select-columns",
+      "title": "Selecting Columns",
+      "description": "Keep some columns, compute others",
+      "category": "columns",
+      "operations": [
+        "select"
+      ],
+      "markdown": "## Choosing columns\n\n`select` makes a table from the columns and expressions you list, and nothing else.",
+      "cells": [
+        "import polars as pl",
+        "# An ice cream shop's menu\ncones = pl.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "# Flavor and the price in cents\ncents = cones.select('Flavor', (pl.col('Price') * 100).round(0).alias('Cents'))\ncents"
+      ]
+    },
+    {
+      "id": "pivot",
+      "title": "Pivot",
+      "description": "Spread values into a grid",
+      "category": "grouping",
+      "operations": [
+        "pivot"
+      ],
+      "markdown": "## Pivot\n\nEach flavor becomes a row and each color a column; each cell is the mean price of the cones that fall into it.",
+      "cells": [
+        "import polars as pl",
+        "# An ice cream shop's menu\ncones = pl.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "grid = cones.pivot(on='Color', index='Flavor', values='Price', aggregate_function='mean')\ngrid"
+      ]
+    },
+    {
+      "id": "lazy-query",
+      "title": "A Lazy Query",
+      "description": "Build a plan, then collect() it",
+      "category": "lazy",
+      "operations": [
+        "lazy",
+        "collect"
+      ],
+      "markdown": "## Lazy queries\n\n`lazy()` makes a LazyFrame: each method adds to a plan and nothing runs yet. `collect()` optimizes the plan and runs it. The steps show the table after each part of the plan.",
+      "cells": [
+        "import polars as pl",
+        "# An ice cream shop's menu\ncones = pl.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "summary = (\n    cones.lazy()\n    .filter(pl.col('Price') > 4)\n    .group_by('Flavor', maintain_order=True)\n    .agg(pl.col('Price').max())\n    .sort('Price')\n    .collect()\n)\nsummary"
+      ]
+    },
+    {
+      "id": "chain",
+      "title": "Chaining Operations",
+      "description": "Filter, add a column and sort in one expression",
+      "category": "combining",
+      "operations": [
+        "filter",
+        "with_columns",
+        "sort"
+      ],
+      "markdown": "## A chain\n\nEach method works on the result of the one before. Step through to see the table after each one.",
+      "cells": [
+        "import polars as pl",
+        "# An ice cream shop's menu\ncones = pl.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "deals = (\n    cones.filter(pl.col('Price') > 4)\n    .with_columns((pl.col('Price') * 0.9).alias('Sale'))\n    .sort('Sale')\n)\ndeals"
+      ]
+    }
+  ]
+}

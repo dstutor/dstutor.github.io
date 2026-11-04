@@ -166,3 +166,7 @@ venv/
 
 # Assembled GitHub Pages output (npm run build)
 site/
+
+# Local notes for Claude Code: project instructions and planning, kept out of the repo
+CLAUDE.md
+PLAN.md

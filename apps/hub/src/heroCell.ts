@@ -11,18 +11,26 @@ const LIBRARY_KEY = 'dstutor-hero-library';
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const KEYWORDS = new Set(['from', 'import', 'True', 'False', 'None', 'and', 'or', 'not', 'in', 'is', 'lambda', 'def', 'return', 'if', 'else', 'for']);
+/** SQL keywords, matched in any case */
+const SQL_KEYWORDS = new Set(['SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'NOT', 'NULL', 'TRUE', 'FALSE', 'AS', 'GROUP', 'BY', 'ORDER',
+  'HAVING', 'LIMIT', 'OFFSET', 'JOIN', 'LEFT', 'ON', 'USING', 'DISTINCT', 'ASC', 'DESC', 'IS', 'IN', 'LIKE', 'BETWEEN']);
 
 const escapeHtml = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-/** Jupyter-style highlighting for the overlay behind the textarea */
-function highlight(code: string): string {
-  const token = /(#[^\n]*)|('(?:\\.|[^'\\\n])*'?|"(?:\\.|[^"\\\n])*"?)|\b(\d+\.?\d*|\.\d+)\b|\b([A-Za-z_]\w*)\b|(==|!=|<=|>=|[=<>+\-*/%])/g;
+/** Jupyter-style highlighting for the overlay behind the textarea, for Python or SQL */
+function highlight(code: string, language: 'python' | 'sql'): string {
+  const sql = language === 'sql';
+  // SQL: -- comments, 'text' with '' inside, and "names" (not strings, so not colored as one)
+  const token = sql
+    ? /(--[^\n]*)|('(?:''|[^'\n])*'?)|("(?:""|[^"\n])*"?)|\b(\d+\.?\d*|\.\d+)\b|\b([A-Za-z_]\w*)\b|(==|!=|<>|<=|>=|[=<>+\-*/%])/g
+    : /(#[^\n]*)|('(?:\\.|[^'\\\n])*'?|"(?:\\.|[^"\\\n])*"?)|()\b(\d+\.?\d*|\.\d+)\b|\b([A-Za-z_]\w*)\b|(==|!=|<=|>=|[=<>+\-*/%])/g;
   let html = '';
   let last = 0;
   for (const m of code.matchAll(token)) {
     html += escapeHtml(code.slice(last, m.index));
-    const [text, comment, str, num, word, op] = m;
-    const cls = comment ? 'tok-comment' : str ? 'tok-str' : num ? 'tok-num' : op ? 'tok-op' : word && KEYWORDS.has(word) ? 'tok-kw' : '';
+    const [text, comment, str, , num, word, op] = m;
+    const keyword = word && (sql ? SQL_KEYWORDS.has(word.toUpperCase()) : KEYWORDS.has(word));
+    const cls = comment ? 'tok-comment' : str ? 'tok-str' : num ? 'tok-num' : op ? 'tok-op' : keyword ? 'tok-kw' : '';
     html += cls ? `<span class="${cls}">${escapeHtml(text)}</span>` : escapeHtml(text);
     last = m.index + text.length;
   }
@@ -97,7 +105,7 @@ export function setupHeroCell(): void {
   // The script drives the row states from here on; without it the page shows the finished step
   demo.classList.add('is-animated');
   const syncHighlight = () => {
-    highlighted.innerHTML = highlight(code.value);
+    highlighted.innerHTML = highlight(code.value, library.language);
   };
 
   /** New text fades in rather than snapping, so the lines above the tables do not flicker */
@@ -258,7 +266,9 @@ export function setupHeroCell(): void {
     if (run.kind === 'error' || !outcome || 'error' in outcome) {
       setPrompt(count);
       const message = run.kind === 'error' ? run.message : outcome && 'error' in outcome ? outcome.error : '';
-      showOutput('error', `<pre>${escapeHtml(message)}</pre>`);
+      // DuckDB ends with the line and a caret under the spot: kept unwrapped so the caret lines up
+      const [text, place] = message.split(/\n\n(?=LINE \d+: )/);
+      showOutput('error', `<pre>${escapeHtml(text)}</pre>${place ? `<pre class="nb-out-place">${escapeHtml(place)}</pre>` : ''}`);
       finished(false);
       return;
     }

@@ -1,4 +1,4 @@
-# Opens one PR per version bump, so each bump lands as its own commit (see CLAUDE.md).
+# Opens one PR per version bump, so each bump lands as its own commit.
 version: 2
 updates:
   - package-ecosystem: npm

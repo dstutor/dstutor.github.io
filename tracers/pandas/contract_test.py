@@ -17,6 +17,7 @@ import unittest
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, '..', '..'))
 sys.path.insert(0, os.path.join(ROOT, 'packages', 'trace-schema'))
+sys.path.insert(0, os.path.join(ROOT, 'tracers', 'shared'))
 from check_trace import trace_problems  # noqa: E402
 
 EXAMPLES = os.path.join(ROOT, 'apps', 'pandas', 'src', 'data', 'examples.json')
@@ -164,5 +165,15 @@ class ContractTest(unittest.TestCase):
         self.assertEqual(TRACED_OPERATIONS - seen, set(), 'add a notebook that runs these')
 
 
+def emit(names):
+    """Print {name: {trace, error}} as JSON for the named notebooks (scripts/e2e.mjs compares the
+    browser's step counts with these)."""
+    results = run_notebooks()
+    print(json.dumps({name: results[name] for name in names}, allow_nan=True))
+
+
 if __name__ == '__main__':
-    unittest.main()
+    if len(sys.argv) > 2 and sys.argv[1] == '--emit':
+        emit(sys.argv[2:])
+    else:
+        unittest.main()

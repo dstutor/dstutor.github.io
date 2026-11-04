@@ -23,11 +23,155 @@ export interface Highlights {
   columns?: string[];
   /** Individual cells as [previewRowIndex, columnName] pairs */
   cells?: [number, string][];
+  /**
+   * A colour slot (0-7) for each preview row, or null: rows of the same join key or group share a
+   * slot, and the stage's panel labels each slot with its key
+   */
+  row_colors?: (ColorSlot | null)[];
 }
 
+/**
+ * One of eight colours the visualization gives keys and groups, always shown with a label
+ * @asType integer
+ * @minimum 0
+ * @maximum 7
+ */
+export type ColorSlot = number;
+
+/** A key or group value as a labelled chip in its colour */
+export interface KeyChip {
+  value: JsonValue;
+  color?: ColorSlot;
+}
+
+/** A join's first stage: the distinct key values on each side, as a Venn of keys */
+export interface KeysPanel {
+  kind: 'keys';
+  /** What is compared, e.g. "Flavor" or "Flavor = Name" */
+  key: string;
+  /** The two tables' names */
+  left: string;
+  right: string;
+  left_only: KeyChip[];
+  both: KeyChip[];
+  right_only: KeyChip[];
+  /** The regions this join keeps rows from */
+  keeps: ('left_only' | 'both' | 'right_only')[];
+}
+
+/** How rows pair up: for each key, how many rows each side has and how many rows it makes */
+export interface PairsPanel {
+  kind: 'pairs';
+  pairs: {
+    key: KeyChip;
+    /**
+     * Rows with this key on the left (whole table)
+     * @asType integer
+     * @minimum 0
+     */
+    left: number;
+    /**
+     * Rows with this key on the right (whole table)
+     * @asType integer
+     * @minimum 0
+     */
+    right: number;
+    /**
+     * Rows this key puts in the result
+     * @asType integer
+     * @minimum 0
+     */
+    rows: number;
+  }[];
+  /**
+   * Keys not shown
+   * @asType integer
+   * @minimum 0
+   */
+  more?: number;
+  /**
+   * Rows in the result
+   * @asType integer
+   * @minimum 0
+   */
+  total: number;
+}
+
+/** Rows sorted into groups: one card per group with its values and, once combined, the result */
+export interface GroupsPanel {
+  kind: 'groups';
+  /** The key columns */
+  keys: string[];
+  groups: {
+    key: JsonValue[];
+    color?: ColorSlot;
+    /**
+     * Rows in the group (whole table)
+     * @asType integer
+     * @minimum 0
+     */
+    rows: number;
+    /** Each aggregated column: the group's values, and its result once combined */
+    values: { column: string; values: JsonValue[]; result?: JsonValue; formula?: string }[];
+  }[];
+  /**
+   * Groups not shown
+   * @asType integer
+   * @minimum 0
+   */
+  more?: number;
+}
+
+/** A sort's new order: where each result row was in the input */
+export interface OrderPanel {
+  kind: 'order';
+  /** For each result row in order, its row label or position in the input */
+  from: JsonValue[];
+  /** For each result row, its value of the first sort key */
+  values?: JsonValue[];
+  /** Runs of result rows that tie on the first sort key, as [first, last] positions */
+  ties?: [number, number][];
+  /**
+   * Result rows not shown
+   * @asType integer
+   * @minimum 0
+   */
+  more?: number;
+}
+
+/** How the library actually ran it: one or more lists of plan steps, first to last */
+export interface PlanPanel {
+  kind: 'plan';
+  plans: {
+    title: string;
+    steps: {
+      name: string;
+      detail?: string;
+      /**
+       * Rows out of this step, when the library reports them
+       * @asType integer
+       * @minimum 0
+       */
+      rows?: number;
+    }[];
+  }[];
+}
+
+/** A stage's picture when it is not a table */
+export type Panel = KeysPanel | PairsPanel | GroupsPanel | OrderPanel | PlanPanel;
+
 export interface SubStep {
+  /**
+   * The stage this frame belongs to, in a few words ("Which keys match"); the step shows its
+   * stages as a rail. Frames of one stage share the name.
+   */
+  stage?: string;
   /** Replaces record.explanation for this frame */
   message: string;
+  /** How the library actually does this, when that differs from the picture (one sentence) */
+  note?: string;
+  /** A picture for this stage other than a table, shown where the result table would be */
+  panel?: Panel;
   /** Monospace detail line, e.g. "sum([3.55, 5.25]) = 8.8" */
   detail?: string;
   input_highlights?: Highlights;
@@ -100,6 +244,13 @@ export interface TableState {
    * @minimum 0
    */
   index_columns?: number;
+  /**
+   * Each column's type as its library names it, one per column: polars' `str` and `f64`,
+   * DuckDB's `varchar` and `double`, pandas' `float64`. Tables of libraries that print types
+   * (polars, DuckDB) show them; for the others they only decide how values print (pandas gives
+   * a float64 column one number of decimals).
+   */
+  column_types?: string[];
   /** Set when the table could not be read; the rest is then best effort */
   error?: string;
   /** 'array' when the result is an array shown as one column (apply), not a real table */

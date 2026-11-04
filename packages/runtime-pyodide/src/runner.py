@@ -85,6 +85,10 @@ def run_cell(code, tracer, namespace):
     result = None
     with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
         try:
+            # A tracer for a language other than Python (SQL) turns the cell into Python first
+            to_python = getattr(tracer, 'source_to_python', None)
+            if to_python is not None:
+                code = to_python(code)
             # IPython line magics (%matplotlib inline, %%time, ...) have no meaning here; blank
             # them out but keep the line count so tracebacks still point at the right line
             code = '\n'.join('' if line.lstrip().startswith('%') else line for line in code.split('\n'))
@@ -102,9 +106,13 @@ def run_cell(code, tracer, namespace):
                 if value is not None:
                     result = repr(value)
         except BaseException as e:
-            te = traceback.TracebackException.from_exception(e)
-            te.stack = traceback.StackSummary.from_list([f for f in te.stack if f.filename not in HIDDEN_FILENAMES])
-            error = ''.join(te.format())
+            # A tracer may print its library's own message (DuckDB's names the line and column)
+            describe = getattr(tracer, 'format_error', None)
+            error = describe(e) if describe is not None else None
+            if error is None:
+                te = traceback.TracebackException.from_exception(e)
+                te.stack = traceback.StackSummary.from_list([f for f in te.stack if f.filename not in HIDDEN_FILENAMES])
+                error = ''.join(te.format())
     return {
         "stdout": stdout.getvalue(),
         "stderr": stderr.getvalue(),

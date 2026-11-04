@@ -10,6 +10,8 @@ import types
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+# The rewriting the pandas and polars tracers share; the runtime loads it as its own module
+sys.path.insert(0, os.path.join(HERE, '..', 'shared'))
 
 
 def load_tracer():
@@ -91,8 +93,11 @@ class OperationTest(unittest.TestCase):
         self.assertEqual(step['output']['columns'], ['Flavor', 'Price'])
         # The group keys became the index: one data column, Price
         self.assertEqual(step['output']['index_columns'], 1)
-        chocolate = next(f for f in step['sub_steps'] if f['message'].startswith("Group 'chocolate'"))
-        self.assertEqual(chocolate['input_highlights']['rows'], [1, 3])
+        sort_into, combine, result = step['sub_steps']
+        self.assertEqual([f['stage'] for f in step['sub_steps']], ['Sort rows into groups', 'Combine each group', 'One row per group'])
+        # Rows coloured by group: groups come out sorted (chocolate, mint, strawberry, vanilla)
+        self.assertEqual(sort_into['input_highlights']['row_colors'], [2, 0, 3, 0, 2, 1])
+        self.assertEqual(result['output_highlights']['row_colors'], [0, 1, 2, 3])
 
     def test_merge_shows_the_right_table(self):
         merged, function = trace("r = pd.DataFrame({'Flavor': ['chocolate', 'mint'], 'Stars': [5, 3]})\n"
@@ -118,15 +123,15 @@ class OperationTest(unittest.TestCase):
         [step] = trace("cones.pivot_table(index='Flavor', columns='Color', values='Price', aggfunc='mean')")
         self.assertEqual(step['output']['columns'][0], 'Flavor')
         frames = step['sub_steps']
-        # The empty grid, one frame per row, the aggregation, then why some cells are NaN
-        self.assertEqual(len(frames), 1 + 6 + 1 + 1)
+        # The empty grid, every value into its cell at once, the aggregation, then why some cells are NaN
+        self.assertEqual([f['stage'] for f in frames], ['Lay out the grid', "Gather each cell's values", 'Combine each cell', 'Empty cells'])
         columns = frames[0]['output_state']['columns']
         self.assertTrue(all(cell == [] for row in frames[0]['output_state']['preview'] for cell in row[1:]))
-        self.assertEqual(frames[2]['message'], "Row 1: its Price 4.75 goes into cell ('chocolate', 'light brown').")
-        chocolate = frames[2]['output_state']['preview'][0]
+        chocolate = frames[1]['output_state']['preview'][0]
         self.assertEqual(chocolate[columns.index('light brown')], [4.75])
-        self.assertEqual(frames[7]['detail'][:5], 'mean(')
-        self.assertIn('NaN', frames[8]['message'])
+        self.assertIn('groupby', frames[1]['note'])
+        self.assertEqual(frames[2]['detail'][:5], 'mean(')
+        self.assertIn('NaN', frames[3]['message'])
         # pandas prints the empty combinations as NaN, and so does the step
         self.assertIn({'shown': 'NaN'}, step['output']['preview'][0])
 
@@ -144,32 +149,44 @@ class OperationTest(unittest.TestCase):
         [step] = trace("r = pd.DataFrame({'Flavor': ['mint'], 'Stars': [3]})\ncones.merge(r, on='Flavor', how='left')")
         self.assertEqual(step['output']['preview'][0][4], {'shown': 'NaN'})
 
-    def test_groupby_collects_each_group_before_combining(self):
+    def test_groupby_shows_each_group_then_its_arithmetic(self):
         [step] = trace("cones.groupby('Flavor')['Price'].mean()")
-        chocolate = next(f for f in step['sub_steps'] if f['message'].startswith("Group 'chocolate'"))
-        self.assertIn([4.75, 5.25], chocolate['output_state']['preview'][0])
-        combine = next(f for f in step['sub_steps'] if f['message'].startswith('Then mean()'))
-        self.assertEqual(combine['detail'], 'mean([4.75, 5.25]) = 5')
+        sort_into, combine, _ = step['sub_steps']
+        chocolate = sort_into['panel']['groups'][0]
+        self.assertEqual((chocolate['key'], chocolate['rows'], chocolate['values'][0]['values']), (['chocolate'], 2, [4.75, 5.25]))
+        self.assertEqual(combine['panel']['groups'][0]['values'][0]['formula'], 'mean(4.75, 5.25) = 5')
+        # What pandas really does for a mean: one pass, a running total per group
+        self.assertIn('running total', combine['note'])
 
     def test_merge_matches_one_key_at_a_time(self):
         [step] = trace("r = pd.DataFrame({'Flavor': ['chocolate', 'mint', 'cookie dough'], 'Stars': [5, 3, 4]})\n"
                        "cones.merge(r, on='Flavor')")
-        messages = [f['message'] for f in step['sub_steps']]
-        self.assertIn("Key 'chocolate': 2 left rows × 1 right row → 2 rows, each with the columns of both tables.", messages)
-        dropped = step['sub_steps'][-1]
-        self.assertEqual(dropped['input_highlights']['rows_removed'], [0, 2, 4])
-        self.assertEqual(dropped['aux_table']['highlights']['rows_removed'], [2])
+        keys, pairs, result = step['sub_steps']
+        venn = keys['panel']
+        self.assertEqual([c['value'] for c in venn['both']], ['chocolate', 'mint'])
+        self.assertEqual([c['value'] for c in venn['left_only']], ['strawberry', 'vanilla'])
+        self.assertEqual([c['value'] for c in venn['right_only']], ['cookie dough'])
+        self.assertEqual(venn['keeps'], ['both'])
+        self.assertEqual((keys['panel']['left'], keys['aux_table']['label']), ('cones', 'r'))
+        chocolate = next(p for p in pairs['panel']['pairs'] if p['key']['value'] == 'chocolate')
+        self.assertEqual((chocolate['left'], chocolate['right'], chocolate['rows']), (2, 1, 2))
+        self.assertEqual(pairs['panel']['total'], 3)
+        self.assertEqual(pairs['input_highlights']['rows_removed'], [0, 2, 4])
+        self.assertEqual(pairs['aux_table']['highlights']['rows_removed'], [2])
+        # The result's rows carry their key's colour
+        self.assertEqual(len(result['output_highlights']['row_colors']), 3)
 
-    def test_sort_places_rows_in_order(self):
+    def test_sort_works_out_the_new_order_then_moves_every_row(self):
         [step] = trace("cones.sort_values('Price')")
-        self.assertEqual(step['sub_steps'][1]['message'], 'Row 0 comes first: Price = 3.55.')
-        self.assertEqual(step['sub_steps'][1]['output_highlights'], {'rows': [0]})
+        self.assertEqual([f['stage'] for f in step['sub_steps']], ['Read the sort key', 'Work out the new order', 'Move every row at once'])
+        self.assertEqual(step['sub_steps'][1]['panel']['from'], [0, 4, 2, 5, 1, 3])
+        self.assertIn('argsort', step['sub_steps'][1]['note'])
 
-    def test_assign_computes_the_new_column_row_by_row(self):
+    def test_assign_works_the_whole_column_out_at_once(self):
         assign, setitem = trace("sale = cones.assign(Sale=cones['Price'] * 0.9)\ncones['Tax'] = cones['Price'] * 0.1")
         self.assertEqual(assign['sub_steps'][0]['message'], "Sale = cones['Price'] * 0.9")
         self.assertEqual(assign['sub_steps'][0]['input_highlights'], {'columns': ['Price']})
-        self.assertEqual(assign['sub_steps'][1]['message'], 'Row 0: Sale = 3.195')
+        self.assertEqual([f['stage'] for f in assign['sub_steps']], ['Work out the column', 'Result'])
         # df['Tax'] = ... is not a call to assign, so it is not titled assign()
         self.assertEqual(setitem['label'], "set column 'Tax'")
         self.assertNotIn('label', assign)

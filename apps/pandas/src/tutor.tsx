@@ -20,6 +20,8 @@ export const tutor: TutorConfig = {
   productName: 'DataFrame Tutor',
   dataNoun: 'DataFrame',
   kernel: runtime,
+  // Step tables print the way pandas prints a table
+  tableStyle: 'pandas',
   defaultCells: [
     { type: 'markdown', source: DEFAULT_MARKDOWN },
     { type: 'code', source: 'import pandas as pd' },

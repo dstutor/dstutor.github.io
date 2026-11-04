@@ -15,9 +15,10 @@
     "lint": "eslint .",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "test:tracers": "cd tracers/datascience && ${PYTHON:-python3} -m unittest discover -p '*_test.py' && cd ../pandas && ${PYTHON:-python3} -m unittest discover -p '*_test.py'",
+    "test:tracers": "node scripts/test-tracers.mjs",
     "check": "npm run lint && npm run typecheck && npm test && npm run test:tracers",
     "build": "npm run build --workspaces --if-present && node scripts/assemble.mjs",
+    "test:e2e": "node scripts/e2e.mjs",
     "preview": "npm run build && vite preview --outDir site --port 4173",
     "record:demos": "npm run build && node scripts/record-demos.mjs"
   },

@@ -1,58 +1,71 @@
+/* A step's tables, read like notebook output: Before, the operation, then After, each table
+   printed the way the tutor's library prints it (.table-pandas, .table-polars, .table-duckdb,
+   .table-datascience). No panel around them: they sit on the page like a cell's output. */
 .data-transformation {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  gap: 1.25rem;
-  padding: 1.25rem;
-  background: var(--bg-panel-muted);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-card);
+  /* Before takes the room it needs (up to most of the width), After the rest */
+  grid-template-columns: fit-content(62%) auto minmax(0, 1fr);
+  gap: 1rem 1.1rem;
+  align-items: start;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.25s ease;
 }
 
 .data-transformation.animated {
   opacity: 1;
 }
 
-/* Before / After sections */
+/* Before / After */
 .transform-section {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.45rem;
   min-width: 0;
 }
 
 .section-header {
   display: flex;
-  flex-wrap: wrap;
   align-items: baseline;
-  justify-content: space-between;
-  gap: 0.15rem 0.75rem;
-  padding: 0 0.15rem;
+  gap: 0.75rem;
   min-width: 0;
 }
 
 .section-title {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
   font-weight: 600;
-  font-size: 0.875rem;
-  color: var(--text-primary);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
 }
 
-.section-info {
+.aux-header {
+  margin-top: 0.75rem;
+}
+
+/* A table and its size, the way the library prints both */
+.table-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.table-size {
+  font-family: var(--font-sans);
   font-size: 0.75rem;
   color: var(--text-tertiary);
   font-variant-numeric: tabular-nums;
-  white-space: nowrap;
 }
 
-/* Data table */
+.table-polars .table-size,
+.table-duckdb .table-size {
+  font-family: var(--font-mono);
+}
+
 .data-table-wrapper {
-  background: var(--bg-panel);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-control);
   overflow: auto;
   max-height: 380px;
-  min-height: 100px;
 }
 
 /* A shadow on the edge a wide table continues past, so hidden columns are not a surprise */
@@ -65,25 +78,23 @@
 .data-table-frame::after {
   content: '';
   position: absolute;
-  top: 1px;
-  bottom: 1px;
+  top: 0;
+  bottom: 0;
   z-index: 2;
-  width: 20px;
+  width: 18px;
   pointer-events: none;
   opacity: 0;
   transition: opacity 150ms ease;
 }
 
 .data-table-frame::before {
-  left: 1px;
-  border-radius: var(--radius-control) 0 0 var(--radius-control);
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.16), transparent);
+  left: 0;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.14), transparent);
 }
 
 .data-table-frame::after {
-  right: 1px;
-  border-radius: 0 var(--radius-control) var(--radius-control) 0;
-  background: linear-gradient(to left, rgba(0, 0, 0, 0.16), transparent);
+  right: 0;
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.14), transparent);
 }
 
 .data-table-frame.more-left::before,
@@ -95,21 +106,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 5rem;
   overflow: hidden;
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-control);
 }
 
 .empty-table-placeholder {
   text-align: center;
-  padding: 1.5rem;
+  padding: 1rem;
   color: var(--text-tertiary);
 }
 
-.empty-icon {
-  display: none;
-}
-
 .empty-text {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 500;
   color: var(--text-secondary);
   margin-bottom: 0.15rem;
@@ -120,69 +130,217 @@
   color: var(--text-tertiary);
 }
 
+/* The table itself. Jupyter prints pandas, polars and datascience tables the same way: right
+   aligned, a rule under the header, striped rows, the index in bold. */
 .data-table.compact {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  font-family: var(--font-mono);
+  border-collapse: collapse;
+  font-family: var(--font-sans);
   font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
   color: var(--text-primary);
 }
 
-.data-table.compact th {
-  background: var(--bg-table-header);
-  padding: 0.45rem 0.7rem;
-  text-align: left;
-  font-family: var(--font-sans);
-  font-weight: 600;
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  border-bottom: 2px solid var(--accent);
+.data-table.compact thead {
   position: sticky;
   top: 0;
   z-index: 1;
+}
+
+.data-table.compact th {
+  padding: 0.35rem 0.6rem;
+  text-align: right;
+  font-weight: 700;
+  color: var(--text-primary);
+  background: var(--bg-panel);
   white-space: nowrap;
+}
+
+.data-table.compact thead tr:last-child th {
+  border-bottom: 1px solid var(--table-rule);
 }
 
 .data-table.compact td {
-  padding: 0.4rem 0.7rem;
-  border-bottom: 1px solid var(--border-subtle);
-  white-space: nowrap;
-}
-
-.data-table.compact tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.data-table.compact th.num,
-.data-table.compact td.num {
+  padding: 0.35rem 0.6rem;
   text-align: right;
-  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  /* The strike-through is always there, transparent until a row is removed, so it fades in */
+  text-decoration-line: line-through;
+  text-decoration-color: transparent;
+  transition: background-color 300ms ease, color 300ms ease, opacity 220ms ease, box-shadow 200ms ease,
+    text-decoration-color 300ms ease;
 }
 
-/* Row labels (a pandas index): bold and muted like pandas prints them, set off from the data
-   columns, and left-aligned even when they are numbers */
+/* Jupyter's stripes, at the lowest priority so any highlight wins; DuckDB's box has none */
+:where(.table-block:not(.table-duckdb) .data-table.compact tbody tr:nth-child(odd)) td {
+  background-color: var(--table-stripe);
+}
+
+/* Row labels (a pandas index): bold, as pandas prints them */
 .data-table.compact th.index-cell,
 .data-table.compact td.index-cell {
-  text-align: left;
-  border-right: 1px solid var(--border-subtle);
+  font-weight: 700;
 }
 
-.data-table.compact td.index-cell {
-  color: var(--text-secondary);
+/* NaN, null and the like, printed the way their library prints them, set back from real data */
+.data-table.compact td.shown-value {
+  color: var(--text-tertiary);
+}
+
+/* polars: a type under each column name, strings in quotes (formatColumn) */
+.table-polars .data-table.compact tr.type-row th {
+  font-weight: 400;
+  color: var(--text-tertiary);
+}
+
+/* DuckDB: its box, in monospace: names and types centered, text left, numbers right */
+.table-duckdb .data-table.compact {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  border: 1px solid var(--table-rule);
+}
+
+.table-duckdb .data-table.compact th {
+  text-align: center;
+  border-left: 1px solid var(--border-subtle);
+}
+
+.table-duckdb .data-table.compact td {
+  text-align: left;
+  border-left: 1px solid var(--border-subtle);
+}
+
+.table-duckdb .data-table.compact td.num {
+  text-align: right;
+}
+
+.table-duckdb .data-table.compact tr.type-row th {
+  font-weight: 400;
+  color: var(--text-tertiary);
+}
+
+/* Rows coloured by their join key or group (row_colors), with a bar of the colour at the start
+   so the colour reads even where a highlight sits on top */
+.data-table.compact tbody tr.row-keyed td {
+  background-color: color-mix(in srgb, var(--key, var(--text-tertiary)) 18%, var(--bg-panel));
+}
+
+.data-table.compact tbody tr.row-keyed td:first-child {
+  box-shadow: inset 3px 0 0 var(--key, var(--text-tertiary));
+}
+
+/* Highlights. One color per cell, never two mixed: a highlighted column is a light fill, but in a
+   row that is kept (green) or removed (red) the row's color wins and the column shows as two
+   edges, so a kept or removed row reads the same all the way across. */
+.data-table.compact th.hl-col-header {
+  background-color: var(--hl-cell);
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.data-table.compact tr.type-row th.hl-col-header {
+  background-color: var(--hl-col);
+}
+
+.data-table.compact tbody tr td.hl-col {
+  background-color: var(--hl-col);
+}
+
+.data-table.compact tbody tr.hl-row td {
+  background-color: var(--hl-row);
+}
+
+.data-table.compact tbody tr.hl-row-removed td {
+  background-color: var(--hl-remove);
+  color: var(--hl-remove-text);
+  text-decoration-color: currentColor;
+}
+
+.data-table.compact tbody tr.hl-row td.hl-col,
+.data-table.compact tbody tr.hl-row-removed td.hl-col {
+  box-shadow: inset 2px 0 0 var(--hl-cell), inset -2px 0 0 var(--hl-cell);
+}
+
+/* A row coloured by its key keeps that colour in the highlighted (key) column too: that column is
+   where the colour matters most */
+.data-table.compact tbody tr.row-keyed:not(.hl-row-removed) td.hl-col {
+  background-color: color-mix(in srgb, var(--key, var(--text-tertiary)) 30%, var(--bg-panel));
+  box-shadow: inset 2px 0 0 var(--hl-cell), inset -2px 0 0 var(--hl-cell);
   font-weight: 600;
 }
 
-/* NaN, inf and the like, printed the way their library prints them, set back from real data */
-.data-table.compact td.shown-value {
-  color: var(--text-tertiary);
-  font-style: italic;
+.data-table.compact tbody tr.row-keyed:not(.hl-row-removed) td.hl-col:first-child {
+  box-shadow: inset 3px 0 0 var(--key, var(--text-tertiary)), inset -2px 0 0 var(--hl-cell);
 }
 
-/* Arrays: a vertical stack of item blocks, each showing its 0-based position and value.
-   No header row, so it reads as a list of values rather than a table. */
+.data-table.compact tbody tr td.hl-cell {
+  background-color: var(--hl-cell);
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+  font-weight: 600;
+}
+
+/* Legacy column diff (select / drop / with_column) */
+.data-table.compact .removed-column,
+.data-table.compact .removed-cell {
+  background-color: var(--hl-remove);
+  color: var(--hl-remove-text);
+}
+
+.data-table.compact .removed-column {
+  text-decoration: line-through;
+}
+
+.data-table.compact .added-column {
+  background-color: var(--hl-cell);
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.data-table.compact tbody tr td.added-cell {
+  background-color: var(--hl-col);
+}
+
+/* Rows that arrive in a result slide in, one after another (the ones already there stay put) */
+@keyframes viz-row-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.data-table.compact tr.row-enters {
+  animation: viz-row-enter 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--row, 0) * 60ms);
+}
+
+.table-more {
+  padding: 0.4rem;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+button.table-more-button {
+  display: block;
+  width: 100%;
+  min-height: 0;
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  border-radius: 0;
+  background: transparent;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+button.table-more-button:hover {
+  color: var(--text-primary);
+  background: var(--bg-sunken);
+}
+
+/* Arrays: a vertical stack of item blocks, each showing its 0-based position and value */
 .array-view {
-  background: var(--bg-panel);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-control);
   padding: 0.6rem 0.75rem 0.7rem;
@@ -281,100 +439,14 @@
   color: var(--text-tertiary);
 }
 
-/* Sub-step highlights */
-.data-table.compact th.hl-col-header {
-  background: var(--hl-cell);
-  color: var(--text-primary);
-  border-bottom-color: var(--accent);
-}
-
-.data-table.compact td.hl-col {
-  background: var(--hl-col);
-}
-
-.data-table.compact tr.hl-row td {
-  background: var(--hl-row);
-}
-
-.data-table.compact tr.hl-row td.hl-col {
-  background: var(--hl-row);
-  box-shadow: inset 0 0 0 9999px var(--hl-col);
-}
-
-.data-table.compact tr.hl-row-removed td {
-  background: var(--hl-remove);
-  color: var(--hl-remove-text);
-  text-decoration: line-through;
-}
-
-.data-table.compact td.hl-cell {
-  background: var(--hl-cell);
-  box-shadow: inset 0 0 0 1.5px var(--accent);
-  font-weight: 600;
-}
-
-.aux-header {
-  margin-top: 0.5rem;
-}
-
-/* Legacy column diff (select / drop / with_column) */
-.removed-column {
-  background: var(--hl-remove) !important;
-  color: var(--hl-remove-text) !important;
-  text-decoration: line-through;
-}
-
-.removed-cell {
-  background: var(--hl-remove) !important;
-  color: var(--text-tertiary) !important;
-  opacity: 0.7;
-}
-
-.added-column {
-  background: var(--hl-cell) !important;
-  color: var(--text-primary) !important;
-  border-bottom-color: var(--accent) !important;
-}
-
-.added-cell {
-  background: var(--hl-col) !important;
-}
-
-.table-more {
-  padding: 0.45rem;
-  text-align: center;
-  font-family: var(--font-sans);
-  font-size: 0.75rem;
-  color: var(--text-tertiary);
-  background: var(--bg-table-header);
-  border-top: 1px solid var(--border-subtle);
-}
-
-button.table-more-button {
-  display: block;
-  width: 100%;
-  min-height: 0;
-  border: none;
-  border-top: 1px solid var(--border-subtle);
-  border-radius: 0;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
-
-button.table-more-button:hover {
-  color: var(--text-primary);
-  background: var(--bg-sunken);
-}
-
-/* Transform arrow */
+/* The operation, between the two tables */
 .transform-arrow-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  min-width: 6rem;
-  padding-top: 1.75rem;
+  gap: 0.4rem;
+  min-width: 4rem;
+  padding-top: 2.4rem;
 }
 
 .transform-arrow-label {
@@ -386,11 +458,14 @@ button.table-more-button:hover {
   padding: 0.25rem 0.6rem;
   border-radius: 6px;
   border: 1px solid var(--accent-muted);
-  white-space: nowrap;
+  /* Short titles stay on one line; a long one (a SQL clause) wraps instead of squeezing the tables */
+  max-width: 8.5rem;
+  text-align: center;
+  overflow-wrap: break-word;
 }
 
 .transform-arrow {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   line-height: 1;
   color: var(--accent);
 }
@@ -425,8 +500,70 @@ button.table-more-button:hover {
   color: var(--text-primary);
 }
 
-/* Responsive: the panel can be narrow on a wide screen (resizer dragged right), so the
-   Before/After layout follows the panel's width via a container query, not the viewport's */
+/* Cel stands in a gutter beside the Before table, level with the row the frame is about or at
+   the header when the frame is about a whole column (see celPlan.ts), and glides between frames */
+.data-transformation {
+  --cel-gutter: 2.1rem;
+}
+
+/* One gutter for the whole step, so every table (Before, a join's right table, After when
+   stacked) starts at the same edge; Cel stands in it beside the Before table */
+.data-transformation.has-cel {
+  padding-left: var(--cel-gutter);
+}
+
+.cel-lane {
+  position: relative;
+  min-width: 0;
+}
+
+.cel-lane > .cel-guide {
+  position: absolute;
+  top: 0;
+  left: calc(0.1rem - var(--cel-gutter));
+  font-size: 1.4rem;
+  transition: transform 520ms cubic-bezier(0.3, 0.9, 0.3, 1.1);
+  will-change: transform;
+}
+
+/* A column worked out for every row at once (a condition's True/False, a new column): all its
+   cells arrive together, not one row at a time */
+@keyframes viz-column-fill {
+  from {
+    color: transparent;
+    background-color: var(--hl-cell);
+  }
+}
+
+.data-table.compact td.column-fills {
+  animation: viz-column-fill 700ms ease-out 150ms both;
+}
+
+/* Exports draw the frame where it ends */
+.is-still .data-table.compact td,
+.is-still .cel-lane > .cel-guide {
+  transition: none;
+}
+
+.is-still .data-table.compact tr.row-enters,
+.is-still .data-table.compact td.column-fills {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .data-table.compact td,
+  .cel-lane > .cel-guide {
+    transition: none;
+  }
+
+  .data-table.compact tr.row-enters,
+  .data-table.compact td.column-fills {
+    animation: none;
+  }
+}
+
+/* The panel can be narrow on a wide screen (resizer dragged right), so the Before/After layout
+   follows the panel's width via a container query, not the viewport's */
 .slideshow-visualization {
   container-type: inline-size;
 }
@@ -436,37 +573,12 @@ button.table-more-button:hover {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  /* Stacked layout: keep the label/badges upright and only turn the arrow downward */
+  /* Stacked: the operation sits between the tables, its arrow pointing down */
   .transform-arrow-container {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 0.5rem 0.75rem;
-    min-width: 0;
-    padding-top: 0;
-  }
-
-  .transform-arrow {
-    rotate: 90deg;
-  }
-
-  .transform-changes {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.35rem;
-  }
-}
-
-/* Same stacking for narrow viewports where the container query would not apply */
-@media (max-width: 1024px) {
-  .data-transformation {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .transform-arrow-container {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 0.5rem 0.75rem;
+    gap: 0.4rem 0.75rem;
     min-width: 0;
     padding-top: 0;
   }
@@ -485,17 +597,29 @@ button.table-more-button:hover {
 
 @media (max-width: 768px) {
   .data-transformation {
-    padding: 0.9rem;
-    gap: 0.9rem;
+    gap: 0.75rem;
   }
 
   .data-table-wrapper {
-    max-height: 300px;
+    max-height: 320px;
     -webkit-overflow-scrolling: touch;
+  }
+
+  /* Same size as the notebook's text on a phone, with room to tap */
+  .data-table.compact {
+    font-size: 0.8125rem;
   }
 
   .data-table.compact th,
   .data-table.compact td {
-    padding: 0.35rem 0.55rem;
+    padding: 0.4rem 0.55rem;
+  }
+
+  .data-transformation {
+    --cel-gutter: 1.8rem;
+  }
+
+  .cel-lane > .cel-guide {
+    font-size: 1.2rem;
   }
 }

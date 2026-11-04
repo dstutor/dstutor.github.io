@@ -33,4 +33,27 @@ describe('trace.schema.json', () => {
     expect(validate([{ ...trace[0], step_id: 1.5 }])).toBe(false);
     expect(validate([{ ...trace[0], input: { ...trace[0].input, preview: 'rows' } }])).toBe(false);
   });
+
+  it('accepts stages, notes, row colours and panels', () => {
+    const { trace } = JSON.parse(readFileSync(SNAPSHOTS + 'filter-rows.json', 'utf8'));
+    const rows = trace[0].input.preview.length;
+    const sub = {
+      stage: 'Which keys match',
+      message: 'm',
+      note: 'how it runs',
+      input_highlights: { row_colors: Array.from({ length: rows }, (_, i) => (i % 2 ? null : 1)) },
+      panel: { kind: 'keys', key: 'Flavor', left: 'cones', right: 'stock', left_only: [{ value: 'mint', color: 0 }], both: [], right_only: [], keeps: ['both'] },
+    };
+    expect(validate([{ ...trace[0], sub_steps: [sub] }])).toBe(true);
+    // A colour slot is one of eight
+    expect(validate([{ ...trace[0], sub_steps: [{ ...sub, input_highlights: { row_colors: [9] } }] }])).toBe(false);
+    expect(validate([{ ...trace[0], sub_steps: [{ ...sub, panel: { kind: 'venn' } }] }])).toBe(false);
+  });
+
+  it('accepts column types as strings, and only as strings', () => {
+    const { trace } = JSON.parse(readFileSync(SNAPSHOTS + 'filter-rows.json', 'utf8'));
+    const types = trace[0].input.columns.map(() => 'str');
+    expect(validate([{ ...trace[0], input: { ...trace[0].input, column_types: types } }])).toBe(true);
+    expect(validate([{ ...trace[0], input: { ...trace[0].input, column_types: [1] } }])).toBe(false);
+  });
 });

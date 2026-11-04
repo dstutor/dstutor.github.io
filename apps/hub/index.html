@@ -56,10 +56,10 @@
               <a href="/pandas/"><span class="lib-logo"><img class="on-light" src="./src/logos/pandas.svg" alt="" /><img class="on-dark" src="./src/logos/pandas-dark.svg" alt="" /></span><span class="nav-menu-text"><span class="nav-menu-name">pandas</span><span class="nav-menu-desc">DataFrames</span></span></a>
             </li>
             <li>
-              <span class="nav-menu-soon"><span class="lib-logo"><img src="./src/logos/polars.svg" alt="" /></span><span class="nav-menu-text"><span class="nav-menu-name">polars <span class="soon">soon</span></span><span class="nav-menu-desc">DataFrames and lazy queries</span></span></span>
+              <a href="/polars/"><span class="lib-logo"><img src="./src/logos/polars.svg" alt="" /></span><span class="nav-menu-text"><span class="nav-menu-name">polars</span><span class="nav-menu-desc">DataFrames and lazy queries</span></span></a>
             </li>
             <li>
-              <span class="nav-menu-soon"><span class="lib-logo"><img src="./src/logos/duckdb.svg" alt="" /></span><span class="nav-menu-text"><span class="nav-menu-name">SQL <span class="soon">soon</span></span><span class="nav-menu-desc">Queries on DuckDB</span></span></span>
+              <a href="/sql/"><span class="lib-logo"><img src="./src/logos/duckdb.svg" alt="" /></span><span class="nav-menu-text"><span class="nav-menu-name">SQL</span><span class="nav-menu-desc">Queries on DuckDB</span></span></a>
             </li>
           </ul>
         </div>
@@ -107,11 +107,11 @@
             <button type="button" role="radio" aria-checked="false" data-library="pandas">
               <span class="lib-logo"><img class="on-light" src="./src/logos/pandas.svg" alt="" /><img class="on-dark" src="./src/logos/pandas-dark.svg" alt="" /></span>pandas
             </button>
-            <button type="button" role="radio" aria-checked="false" data-library="polars" disabled>
-              <span class="lib-logo"><img src="./src/logos/polars.svg" alt="" /></span>polars<span class="soon">soon</span>
+            <button type="button" role="radio" aria-checked="false" data-library="polars">
+              <span class="lib-logo"><img src="./src/logos/polars.svg" alt="" /></span>polars
             </button>
-            <button type="button" role="radio" aria-checked="false" data-library="sql" disabled>
-              <span class="lib-logo"><img src="./src/logos/duckdb.svg" alt="" /></span>SQL<span class="soon">soon</span>
+            <button type="button" role="radio" aria-checked="false" data-library="sql">
+              <span class="lib-logo"><img src="./src/logos/duckdb.svg" alt="" /></span>SQL
             </button>
           </div>
           <div class="nb-gutter">
@@ -206,7 +206,7 @@ chocolate = cones.where('Flavor', 'chocolate')</textarea>
             </a>
           </li>
           <li>
-            <div class="tutor">
+            <a class="tutor" href="/polars/">
               <div class="tutor-banner banner-polars">
                 <img src="./src/logos/polars.svg" alt="" height="64" />
               </div>
@@ -216,12 +216,12 @@ chocolate = cones.where('Flavor', 'chocolate')</textarea>
                 <code class="tutor-code">cones.filter(
     pl.col(<span class="tok-str">'Flavor'</span>) <span class="tok-op">==</span> <span class="tok-str">'chocolate'</span>
 )</code>
-                <span class="pill">Coming soon</span>
+                <span class="pill pill-live">Open<svg class="arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5" /></svg></span>
               </div>
-            </div>
+            </a>
           </li>
           <li>
-            <div class="tutor">
+            <a class="tutor" href="/sql/">
               <div class="tutor-banner banner-duckdb">
                 <img src="./src/logos/duckdb.svg" alt="" height="64" />
               </div>
@@ -230,9 +230,9 @@ chocolate = cones.where('Flavor', 'chocolate')</textarea>
                 <span class="tutor-desc">Queries on DuckDB</span>
                 <code class="tutor-code"><span class="tok-kw">SELECT</span> <span class="tok-op">*</span> <span class="tok-kw">FROM</span> cones
 <span class="tok-kw">WHERE</span> Flavor <span class="tok-op">=</span> <span class="tok-str">'chocolate'</span></code>
-                <span class="pill">Coming soon</span>
+                <span class="pill pill-live">Open<svg class="arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5" /></svg></span>
               </div>
-            </div>
+            </a>
           </li>
         </ul>
       </section>

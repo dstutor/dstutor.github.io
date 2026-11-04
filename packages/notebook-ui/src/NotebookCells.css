@@ -433,8 +433,8 @@
 
 @media (max-width: 768px) {
   .notebook-cells-container {
-    --prompt-width: 3.4rem;
-    padding: 0.75rem 0.75rem 1.5rem;
+    --prompt-width: 2.9rem;
+    padding: 0.75rem 0.5rem 1.5rem;
   }
 
   .cell-row {
@@ -463,6 +463,21 @@
   .markdown-input {
     font-size: 16px; /* prevents iOS Safari from zooming the page on focus */
   }
+}
+
+/* Code is set smaller on a phone so lines fit, but iOS Safari zooms the page into any text field
+   under 16px when it is focused; Monaco types into a hidden textarea, which keeps 16px */
+@media (max-width: 768px) {
+  .monaco-editor textarea.inputarea,
+  .monaco-editor .native-edit-context {
+    font-size: 16px !important;
+  }
+}
+
+/* Monaco's iPad "show keyboard" button sits on top of the code; tapping a cell opens the
+   keyboard anyway */
+.monaco-editor .iPadShowKeyboard {
+  display: none !important;
 }
 
 /* The statement behind the visualization's current step */

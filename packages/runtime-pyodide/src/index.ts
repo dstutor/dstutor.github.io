@@ -23,9 +23,17 @@ export interface RuntimeConfig {
    * Source of the tracer module. It must define install() (start recording; called before
    * every traced run, so it must be idempotent), reset() (forget recorded steps), get_trace(),
    * is_trace_truncated() and set_cell_statements(statements). A tracer that rewrites code also
-   * defines transform(tree), which gets each cell's parsed AST and returns the tree to run.
+   * defines transform(tree), which gets each cell's parsed AST and returns the tree to run. A
+   * tracer for another language (SQL) defines source_to_python(code), which turns a cell into
+   * the Python that runs it, and may define format_error(error), which returns the message to
+   * show for an error (or None for a Python traceback).
    */
   tracer: string;
+  /**
+   * Modules the tracer imports, by name (e.g. dstutor_rewriting, the rewriting the pandas and
+   * polars tracers share), loaded before it and hidden from tracebacks like it.
+   */
+  modules?: Record<string, string>;
   /** Python run once in the notebook namespace after install, e.g. `from datascience import *` */
   setup?: string;
 }

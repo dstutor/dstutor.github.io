@@ -88,6 +88,8 @@ def _state_problems(where, state):
         problems.append(f'{where}: preview has {len(state["preview"])} rows but num_rows is {state["num_rows"]}')
     if state.get('index_columns', 0) > width:
         problems.append(f'{where}: index_columns {state["index_columns"]} but only {width} columns')
+    if 'column_types' in state and len(state['column_types']) != width:
+        problems.append(f'{where}: {len(state["column_types"])} column_types for {width} columns')
     return problems
 
 
@@ -107,4 +109,6 @@ def _highlight_problems(where, highlights, state):
     bad_cells = [cell for cell in highlights.get('cells', []) if not (0 <= cell[0] < rows and cell[1] in columns)]
     if bad_cells:
         problems.append(f'{where}: cells {bad_cells} outside the table')
+    if 'row_colors' in highlights and len(highlights['row_colors']) != rows:
+        problems.append(f'{where}: {len(highlights["row_colors"])} row_colors for {rows} preview rows')
     return problems
