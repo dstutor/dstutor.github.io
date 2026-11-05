@@ -13,6 +13,7 @@ import './TutorApp.css';
 import TracePanel from './TracePanel';
 import ExamplesGallery from './ExamplesGallery';
 import Cel from './Cel';
+import TutorSwitcher from './TutorSwitcher';
 import type { Example, Gallery } from './gallery';
 
 /** The Python runtime a tutor runs cells in (createRuntime() from @dstutor/runtime-pyodide) */
@@ -49,6 +50,12 @@ export interface TutorConfig {
   tableStyle?: TableStyle;
   /** The language code cells are written in (default Python); SQL cells run through the tracer */
   language?: CellLanguage;
+  /**
+   * What runs the cells, as the status line names it (default Python): the SQL tutor says DuckDB,
+   * with engineNote (shown on hover) saying it runs on Python in the browser
+   */
+  engine?: string;
+  engineNote?: string;
   /** localStorage key for the saved notebook; every tutor shares one origin, so make it unique */
   notebookStorageKey: string;
   /** An older key the notebook was saved under, read when notebookStorageKey has nothing */
@@ -111,6 +118,8 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
   const { kernel, defaultCells, gallery, library, productName, dataNoun } = config;
   /** What the status line says once the kernel can run cells (a tutor's language never changes) */
   const readyRef = useRef(config.language === 'sql' ? 'Ready to run SQL!' : 'Ready to run Python code!');
+  /** What runs the cells, for the status line: Python, or DuckDB in the SQL tutor */
+  const engineRef = useRef(config.engine ?? 'Python');
   const [cells, setCells] = useState<NotebookCell[]>(() => defaultCells.map(c => newCell(c.source, c.type)));
   const [runningCellId, setRunningCellId] = useState<string | null>(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
@@ -131,7 +140,7 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
   const sessionTraceTruncatedRef = useRef(false);
   const [isRunning, setIsRunning] = useState(false);
   const [pyodideStatus, setPyodideStatus] = useState<PyodideStatus>('loading');
-  const [statusMessage, setStatusMessage] = useState('Initializing Pyodide...');
+  const [statusMessage, setStatusMessage] = useState(`Starting ${config.engine ?? 'Python'}...`);
   const [showGallery, setShowGallery] = useState(false);
   const [currentExample, setCurrentExample] = useState<string>('');
   const [mobileView, setMobileView] = useState<MobileView>('notebook');
@@ -383,7 +392,7 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
   useEffect(() => {
     const init = async () => {
       try {
-        setStatusMessage('Loading Python (about 10 s)...');
+        setStatusMessage(`Loading ${engineRef.current} in your browser (about 10 s)...`);
         await kernel.init();
         pyodideStatusRef.current = 'ready';
         setPyodideStatus('ready');
@@ -549,13 +558,13 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
   const deferIfLoading = useCallback((pending: PendingRun) => {
     if (pyodideStatusRef.current !== 'loading') return false;
     pendingRunRef.current = pending;
-    setStatusMessage('Python is still loading; this will run as soon as it is ready');
+    setStatusMessage(`${engineRef.current} is still loading; this will run as soon as it is ready`);
     return true;
   }, []);
 
   const beginRun = useCallback(() => {
     if (pyodideStatusRef.current !== 'ready') {
-      setStatusMessage('Python is not available. Try reloading the page.');
+      setStatusMessage(`${engineRef.current} is not available. Try reloading the page.`);
       return null;
     }
     if (isRunningRef.current) return null;
@@ -693,6 +702,10 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
     });
     return pasted.id;
   }, []);
+
+  // The selected cell, which the toolbar's cell-type dropdown shows and changes
+  const [selectedCellId, setSelectedCellId] = useState<string | null>(null);
+  const selectedCell = cells.find(c => c.id === selectedCellId) ?? null;
 
   const handleSetCellType = useCallback((id: string, type: CellType) => {
     setCells(prev => prev.map(c => {
@@ -859,7 +872,7 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
     kernel.stop();
     pyodideStatusRef.current = 'loading';
     setPyodideStatus('loading');
-    setStatusMessage('Interrupted. Reloading Python...');
+    setStatusMessage(`Interrupted. Reloading ${engineRef.current}...`);
     (async () => {
       try {
         await kernel.init();
@@ -931,8 +944,23 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
     }
   }, [switchMobileView, kernel]);
 
-  // Back to the starter notebook (what you see on first visit)
+  // Back to the starter notebook (what you see on first visit), or a notebook with one empty cell
   const handleResetNotebook = () => openNotebook(defaultCells.map(c => newCell(c.source, c.type)), '');
+  const handleBlankNotebook = () => openNotebook([newCell('', 'code')], '');
+
+  // "Try this" from the empty visualization: add the code as a cell, then run and visualize the
+  // notebook once that cell is in it (Run all reads the cells of the render it was made in)
+  const [runQueued, setRunQueued] = useState(false);
+  useEffect(() => {
+    if (!runQueued) return;
+    setRunQueued(false);
+    void runAllRef.current(true);
+  }, [runQueued, cells]);
+  const handleTryThis = useCallback(() => {
+    setCells(prev => [...prev, newCell(config.tryThis, 'code')]);
+    setNotebookVersion(v => v + 1);
+    setRunQueued(true);
+  }, [config.tryThis]);
 
   const handleSelectExample = (example: Example) => openNotebook(exampleCells(example), example.title);
 
@@ -952,13 +980,13 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
       ) : (
       <header className="header">
         <div className="header-left">
-          <a className="brand" href="/" title="All tutors">
-            <Cel state="brand" className="brand-cel" />
-            <div className="brand-title">
+          <div className="brand-title">
+            <a className="brand" href="/" title="All tutors">
+              <Cel state="brand" className="brand-cel" />
               <span className="brand-name">Data Science Tutor</span>
-              <code className="brand-code">{library}</code>
-            </div>
-          </a>
+            </a>
+            <TutorSwitcher library={library} />
+          </div>
           {currentExample && (
             <span className="current-example" title={currentExample}>{currentExample}</span>
           )}
@@ -986,6 +1014,7 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
               aria-expanded={showExportMenu}
               title="Open or save the notebook, export the visualization"
             >
+              <svg className="button-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" /><path d="M14 3v6h6" /></svg>
               File
               <svg className="caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
             </button>
@@ -1002,6 +1031,24 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
             />
             {showExportMenu && (
               <div className="export-menu-list rise-in" role="menu">
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="export-menu-item"
+                  onClick={() => { setShowExportMenu(false); handleBlankNotebook(); }}
+                  title="A new notebook with one empty cell"
+                >
+                  <span>New blank notebook</span>
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="export-menu-item"
+                  onClick={() => { setShowExportMenu(false); handleResetNotebook(); }}
+                  title="The notebook you see on first visit: how to use it, and a small table to try"
+                >
+                  <span>New starter notebook</span>
+                </button>
                 <button
                   type="button"
                   role="menuitem"
@@ -1059,6 +1106,7 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
               onKeyDown={closeShareOnEscape}
               title="Copy a link to this notebook"
             >
+              <svg className="button-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7" /><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7" /></svg>
               {sharePopover?.copied ? 'Copied' : 'Share'}
             </button>
             {sharePopover && (
@@ -1090,7 +1138,9 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
           <button
             className="examples-button"
             onClick={() => setShowGallery(true)}
+            title="Open a ready-made notebook for one operation"
           >
+            <svg className="button-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></svg>
             Examples
           </button>
         </div>
@@ -1184,9 +1234,23 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
               >
                 <span className="btn-icon" aria-hidden="true">↻▶</span>
               </button>
+              {/* The selected cell's type, as in Jupyter's toolbar */}
+              <select
+                className="cell-type-select"
+                aria-label="Cell type of the selected cell"
+                title="The selected cell's type (y / m to switch)"
+                value={selectedCell?.type ?? ''}
+                disabled={!selectedCell || embed}
+                onChange={(e) => {
+                  if (selectedCell) handleSetCellType(selectedCell.id, e.target.value as CellType);
+                }}
+              >
+                {!selectedCell && <option value="">Cell type</option>}
+                <option value="code">{config.language === 'sql' ? 'SQL' : 'Code'}</option>
+                <option value="markdown">Markdown</option>
+              </select>
             </div>
-            <span className={`status ${pyodideStatus}`} role="status" title={statusMessage}>
-              <Cel state={pyodideStatus === 'error' ? 'error' : pyodideStatus === 'loading' || isRunning ? 'running' : 'done'} />
+            <span className={`status ${pyodideStatus}`} role="status" title={pyodideStatus === 'loading' && config.engineNote ? `${statusMessage} ${config.engineNote}` : statusMessage}>
               <span className="status-text">{statusMessage}</span>
             </span>
           </div>
@@ -1203,6 +1267,7 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
               onCopyCell={handleCopyCell}
               onPasteCell={handlePasteCell}
               onSetCellType={handleSetCellType}
+              onSelectionChange={setSelectedCellId}
               onMoveCell={handleMoveCell}
               onMergeCell={handleMergeCell}
               onSplitCell={handleSplitCell}
@@ -1250,6 +1315,13 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
           detail={detail}
           onDetailChange={setDetail}
           tableStyle={config.tableStyle}
+          cellName={config.language === 'sql' ? 'SQL cell' : 'code cell'}
+          language={config.language ?? 'python'}
+          library={library}
+          onRunAll={handleRunAllAndVisualize}
+          onOpenExamples={() => setShowGallery(true)}
+          onTryThis={handleTryThis}
+          running={isRunning}
         />
       </div>
 
@@ -1295,6 +1367,7 @@ export default function TutorApp({ config }: { config: TutorConfig }) {
           dataNoun={dataNoun}
           onSelectExample={handleSelectExample}
           onReset={handleResetNotebook}
+          onBlank={handleBlankNotebook}
           onClose={() => setShowGallery(false)}
         />
       )}

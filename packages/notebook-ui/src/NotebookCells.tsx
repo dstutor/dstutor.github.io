@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useCallback, type ReactNode } from 'react';
+import { useRef, useEffect, useState, useCallback, type ReactNode, createContext, useContext } from 'react';
 import { Editor } from '@monaco-editor/react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
@@ -63,6 +63,8 @@ interface NotebookCellsProps {
   editorTheme?: EditorTheme;
   /** The language code cells are written in (Monaco's highlighting): Python, or SQL */
   language?: CellLanguage;
+  /** Told whenever the selected cell changes (the toolbar's cell-type dropdown follows it) */
+  onSelectionChange?: (id: string | null) => void;
   /** Library-specific checklist shown under a cell's error (e.g. which import to start with) */
   errorHints?: ReactNode;
 }
@@ -180,17 +182,21 @@ function cursorOffset(root: HTMLElement): number {
 /** Monaco instances by the wrapper element they live in, for cursorOffset() */
 const editorForRoot = new WeakMap<HTMLElement, MonacoEditor.IStandaloneCodeEditor>();
 
+/** What a code cell is called: "Code", or "SQL" in the SQL tutor */
+const CodeLabel = createContext('Code');
+
 interface InsertRowProps {
   onInsert: (type: CellType) => void;
   disabled: boolean;
 }
 
 function InsertRow({ onInsert, disabled }: InsertRowProps) {
+  const codeLabel = useContext(CodeLabel);
   return (
     <div className="cell-insert">
-      <button type="button" className="insert-btn" onClick={() => onInsert('code')} disabled={disabled} title="Insert a code cell below (b)">
+      <button type="button" className="insert-btn" onClick={() => onInsert('code')} disabled={disabled} title={`Insert a ${codeLabel === 'Code' ? 'code' : codeLabel} cell below (b)`}>
         <PlusIcon />
-        <span>Code</span>
+        <span>{codeLabel}</span>
       </button>
       <button type="button" className="insert-btn" onClick={() => onInsert('markdown')} disabled={disabled} title="Insert a markdown cell below">
         <PlusIcon />
@@ -353,7 +359,7 @@ function CodeCell({
               spellCheck={false}
               autoCapitalize="off"
               autoCorrect="off"
-              aria-label="Code"
+              aria-label={language === 'sql' ? 'SQL' : 'Code'}
             />
           ) : (
           <Editor
@@ -552,6 +558,7 @@ export default function NotebookCells({
   editorTheme = 'data8-light',
   errorHints,
   language = 'python',
+  onSelectionChange,
 }: NotebookCellsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorsRef = useRef(new Map<string, MonacoEditor.IStandaloneCodeEditor>());
@@ -562,6 +569,11 @@ export default function NotebookCells({
   /** Bumped whenever an editor mounts, so a pending focus can be retried once its editor exists */
   const [mountTick, setMountTick] = useState(0);
   const chordRef = useRef<{ key: string; at: number } | null>(null);
+  const selectionChangeRef = useRef(onSelectionChange);
+  selectionChangeRef.current = onSelectionChange;
+  useEffect(() => {
+    selectionChangeRef.current?.(selectedId);
+  }, [selectedId]);
   const isNarrowScreen = useIsNarrowScreen();
   const monacoAvailable = useMonacoAvailable();
   const anyRunning = runningCellId !== null;
@@ -796,8 +808,9 @@ export default function NotebookCells({
   }, [selectedId, indexOf, runCell, runAndInsert, runAndAdvance, enterEditMode, selectRelative, insertAt, onSetCellType, onCopyCell, deleteCell, onPasteCell, enterCommandMode, onUndoDelete, onInterrupt, onRestartKernel, onMoveCell, onMergeCell, readOnly]);
 
   return (
-    // The container is the focus target for command mode; its keys act on the selected cell.
-    // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex, jsx-a11y/no-noninteractive-element-interactions
+    <CodeLabel.Provider value={language === 'sql' ? 'SQL' : 'Code'}>
+    {/* The container is the focus target for command mode; its keys act on the selected cell. */}
+    {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex, jsx-a11y/no-noninteractive-element-interactions */}
     <div className={`notebook-cells-container ${readOnly ? 'is-readonly' : ''}`} ref={containerRef} tabIndex={0} onKeyDown={handleCommandKey} role="list" aria-label="Notebook cells">
       {cells.map((cell, index) => {
         const selected = cell.id === selectedId;
@@ -867,5 +880,6 @@ export default function NotebookCells({
         <span><kbd>0</kbd><kbd>0</kbd> restart kernel</span>
       </div>
     </div>
+    </CodeLabel.Provider>
   );
 }

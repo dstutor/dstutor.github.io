@@ -150,12 +150,13 @@
   width: 100%;
 }
 
+/* The same face and size family as the rest of the page: at very large sizes the system font
+   switches to its display cut, which reads as a different typeface */
 .explanation-text {
   font-family: var(--font-sans);
-  font-size: 1.55rem;
-  font-weight: 400;
-  line-height: 1.3;
-  letter-spacing: -0.005em;
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.45;
   color: var(--text-primary);
   max-width: 36em;
   text-wrap: pretty;

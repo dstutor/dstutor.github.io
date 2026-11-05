@@ -239,24 +239,70 @@ chocolate = cones.where('Flavor', 'chocolate')</textarea>
 
       <section id="features" class="features" aria-labelledby="features-heading">
         <h2 id="features-heading">Every tutor is a notebook</h2>
-        <!-- Clips of the real tutor, recorded by scripts/record-demos.mjs (npm run record:demos);
-             main.ts plays each one while it is on screen -->
+        <p class="section-note">Each card is recorded in a different tutor, on its own small dataset.</p>
+        <!-- Clips of the real tutors at a laptop's size, recorded by scripts/record-demos.mjs
+             (npm run record:demos). main.ts loops each one, like a GIF, while it is on screen; its
+             button pauses it. Without the script, they have controls. -->
         <ul class="feature-grid">
-          <li>
-            <video class="feature-clip" src="./src/demos/notebook.mp4" poster="./src/demos/notebook.jpg" muted loop playsinline preload="none" aria-label="Clicking Run all: each cell runs in turn and the last one shows the filtered table"></video>
-            <strong>Cells share state</strong><span>Load a table in one cell and reshape it over the next five, like Jupyter.</span>
+          <li class="feature">
+            <div class="feature-window">
+              <div class="feature-bar">
+                <span class="feature-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="feature-url">dstutor.org/datascience/</span>
+                <button type="button" class="feature-pause" aria-label="Pause the clip" hidden>
+                  <svg class="icon-pause" viewBox="0 0 20 20" aria-hidden="true"><path d="M6.5 4.5v11M13.5 4.5v11" /></svg>
+                  <svg class="icon-play" viewBox="0 0 20 20" aria-hidden="true"><path d="M6.5 4.5v11l9-5.5z" /></svg>
+                </button>
+              </div>
+              <video class="feature-clip" src="./src/demos/notebook.mp4" poster="./src/demos/notebook.jpg" muted loop playsinline controls preload="none" aria-label="The datascience tutor: Run all runs each cell in turn and shows a penguins table, then a new cell, penguins.group('species'), is typed and run with Shift+Enter"></video>
+            </div>
+            <strong class="feature-title">A Jupyter notebook in your browser</strong>
+            <span class="feature-text">Cells that share state, Shift+Enter, Markdown and <code>.ipynb</code>. The code runs in the page: nothing to install.</span>
           </li>
-          <li>
-            <video class="feature-clip" src="./src/demos/steps.mp4" poster="./src/demos/steps.jpg" muted loop playsinline preload="none" aria-label="Clicking Next steps through a where() filter, frame by frame"></video>
-            <strong>Step through it</strong><span>Each operation becomes before-and-after tables you can play frame by frame.</span>
+          <li class="feature">
+            <div class="feature-window">
+              <div class="feature-bar">
+                <span class="feature-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="feature-url">dstutor.org/pandas/</span>
+                <button type="button" class="feature-pause" aria-label="Pause the clip" hidden>
+                  <svg class="icon-pause" viewBox="0 0 20 20" aria-hidden="true"><path d="M6.5 4.5v11M13.5 4.5v11" /></svg>
+                  <svg class="icon-play" viewBox="0 0 20 20" aria-hidden="true"><path d="M6.5 4.5v11l9-5.5z" /></svg>
+                </button>
+              </div>
+              <video class="feature-clip" src="./src/demos/steps.mp4" poster="./src/demos/steps.jpg" muted loop playsinline controls preload="none" aria-label="The pandas tutor: Run all and visualize puts the steps beside the code, then Next goes through a left merge of flights and airports: a Venn diagram of which airports match, how rows pair, and the result"></video>
+            </div>
+            <strong class="feature-title">Step through it, beside your code</strong>
+            <span class="feature-text">Each operation becomes a few stages next to the line that ran it: which keys a merge matches, how rows pair, the result.</span>
           </li>
-          <li>
-            <video class="feature-clip" src="./src/demos/present.mp4" poster="./src/demos/present.jpg" muted loop playsinline preload="none" aria-label="Clicking Present fills the window with the step, then stepping through it"></video>
-            <strong>Present mode</strong><span>Fill the screen for lecture.</span>
+          <li class="feature">
+            <div class="feature-window">
+              <div class="feature-bar">
+                <span class="feature-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="feature-url">dstutor.org/sql/</span>
+                <button type="button" class="feature-pause" aria-label="Pause the clip" hidden>
+                  <svg class="icon-pause" viewBox="0 0 20 20" aria-hidden="true"><path d="M6.5 4.5v11M13.5 4.5v11" /></svg>
+                  <svg class="icon-play" viewBox="0 0 20 20" aria-hidden="true"><path d="M6.5 4.5v11l9-5.5z" /></svg>
+                </button>
+              </div>
+              <video class="feature-clip" src="./src/demos/present.mp4" poster="./src/demos/present.jpg" muted loop playsinline controls preload="none" aria-label="The SQL tutor in the Berkeley theme: the notebook and a GROUP BY step on bike rides side by side, then Present fills the window with the step, which is stepped through before Exit returns to the notebook"></video>
+            </div>
+            <strong class="feature-title">Present mode</strong>
+            <span class="feature-text">Teach from the notebook, then fill the screen with the step for lecture and step through it there.</span>
           </li>
-          <li>
-            <video class="feature-clip" src="./src/demos/share.mp4" poster="./src/demos/share.jpg" muted loop playsinline preload="none" aria-label="Clicking Share copies a link that carries the notebook"></video>
-            <strong>Share and save</strong><span>Send a link that carries the notebook, or open and save <code>.ipynb</code>.</span>
+          <li class="feature">
+            <div class="feature-window">
+              <div class="feature-bar">
+                <span class="feature-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="feature-url">dstutor.org/polars/</span>
+                <button type="button" class="feature-pause" aria-label="Pause the clip" hidden>
+                  <svg class="icon-pause" viewBox="0 0 20 20" aria-hidden="true"><path d="M6.5 4.5v11M13.5 4.5v11" /></svg>
+                  <svg class="icon-play" viewBox="0 0 20 20" aria-hidden="true"><path d="M6.5 4.5v11l9-5.5z" /></svg>
+                </button>
+              </div>
+              <video class="feature-clip" src="./src/demos/share.mp4" poster="./src/demos/share.jpg" muted loop playsinline controls preload="none" aria-label="The polars tutor: Share copies a link that carries a notebook about planets, then the File menu shows opening and saving .ipynb"></video>
+            </div>
+            <strong class="feature-title">Share and save</strong>
+            <span class="feature-text">Copy a link that carries the whole notebook, or open and save <code>.ipynb</code> and export the steps as PDF or PNGs.</span>
           </li>
         </ul>
       </section>

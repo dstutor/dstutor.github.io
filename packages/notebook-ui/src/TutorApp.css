@@ -39,8 +39,8 @@
 
 .brand-title {
   display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.6rem;
   white-space: nowrap;
 }
 
@@ -130,16 +130,46 @@
   text-overflow: ellipsis;
 }
 
-.status .cel {
-  font-size: 1.15rem;
+/* The state dot, as the old app drew it: green when ready, grey (pulsing) while loading, red
+   when Python could not load */
+.status::before {
+  content: '';
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-tertiary);
 }
 
 .status.ready {
   color: var(--text-secondary);
 }
 
+.status.ready::before {
+  background: var(--success);
+}
+
+.status.loading::before {
+  animation: status-pulse 1.4s ease-in-out infinite;
+}
+
 .status.error {
   color: var(--danger);
+}
+
+.status.error::before {
+  background: var(--danger);
+}
+
+@keyframes status-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status.loading::before {
+    animation: none;
+  }
 }
 
 /* Export dropdown */
@@ -335,10 +365,159 @@
   border-color: var(--danger);
 }
 
+/* The selected cell's type, beside the kernel buttons, as in Jupyter's toolbar. Drawn like the
+   toolbar's buttons (size, text, border), with its own small caret instead of the browser's */
+.cell-type-select {
+  appearance: none;
+  height: 30px;
+  padding: 0 1.6rem 0 0.6rem;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background-color: var(--bg-button);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.55rem center;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+.cell-type-select:hover:not(:disabled) {
+  background-color: var(--bg-sunken);
+  border-color: var(--text-tertiary);
+}
+
+.cell-type-select:focus-visible {
+  outline: 2px solid var(--outline-focus);
+  outline-offset: 3px;
+}
+
+.cell-type-select:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .export-button,
 .share-button,
 .examples-button {
   color: var(--text-primary);
+  font-weight: 600;
+  gap: 0.4rem;
+}
+
+.button-icon {
+  flex: none;
+  opacity: 0.85;
+}
+
+/* Examples is where most people start, so it stands out: filled, in ipywidgets' "success" green
+   (a darker shade, so white text on it is readable) */
+.examples-button {
+  color: var(--examples-fg);
+  background: var(--examples-bg);
+  border-color: var(--examples-bg);
+}
+
+.examples-button .button-icon {
+  opacity: 1;
+}
+
+.examples-button:hover:not(:disabled) {
+  background: var(--examples-hover);
+  border-color: var(--examples-hover);
+}
+
+/* The library chip: a menu of every tutor (TutorSwitcher.tsx) */
+.tutor-switcher {
+  position: relative;
+}
+
+button.tutor-switcher-button {
+  min-height: 0;
+  gap: 0.3rem;
+  padding: 0.2rem 0.45rem;
+  border: 1px solid var(--accent-muted);
+  cursor: pointer;
+}
+
+button.tutor-switcher-button:hover {
+  background: var(--accent-muted);
+  border-color: var(--accent);
+}
+
+.tutor-switcher-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 30;
+  width: 19rem;
+  padding: 0.35rem;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  box-shadow: 0 8px 24px rgba(20, 20, 19, 0.12);
+  white-space: normal;
+}
+
+.tutor-switcher-title {
+  padding: 0.3rem 0.55rem 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.tutor-switcher-menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tutor-switcher-menu li a {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: 0.15rem 0.6rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 6px;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.tutor-switcher-menu li a:hover {
+  background: var(--bg-sunken);
+}
+
+.tutor-switcher-menu li a.is-current {
+  background: var(--accent-soft);
+}
+
+.tutor-switcher-name {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.tutor-switcher-about {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.tutor-switcher-here {
+  font-size: 0.7rem;
+  color: var(--accent-hover);
+}
+
+.tutor-switcher-home {
+  display: block;
+  margin-top: 0.25rem;
+  padding: 0.45rem 0.55rem 0.3rem;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
 }
 
 /* ------------------------------------------------------------------
@@ -497,12 +676,95 @@
 
 .empty-state h3 {
   font-family: var(--font-sans);
-  font-size: 2rem;
-  font-weight: 500;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.3;
   color: var(--text-primary);
-  margin-bottom: 0.75rem;
+  margin: 0 0 0.4rem;
+}
+
+/* Before anything has run: what will appear here, and three ways to start */
+.start-state {
+  margin-top: 2.5rem;
+}
+
+.start-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+}
+
+.start-head p {
+  margin-bottom: 1.25rem;
+}
+
+.start-cel {
+  flex: none;
+  font-size: 2.2rem;
+  margin-top: 0.1rem;
+}
+
+.start-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 1.75rem;
+}
+
+.start-run {
+  font-weight: 600;
+  color: var(--primary-fg);
+  background: var(--primary-bg);
+  border-color: var(--primary-bg);
+}
+
+.start-run:hover:not(:disabled) {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.start-examples {
+  font-weight: 600;
+}
+
+.example-hint-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.example-hint .example-hint-head strong {
+  display: inline;
+  padding: 0;
+  border: none;
+}
+
+.example-hint-lang {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.example-hint pre.highlighted-code {
+  background: var(--editor-bg);
+}
+
+button.example-hint-add {
+  display: flex;
+  width: 100%;
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  border-radius: 0;
+  background: transparent;
+  font-weight: 600;
+  color: var(--accent-hover);
+}
+
+button.example-hint-add:hover:not(:disabled) {
+  background: var(--accent-soft);
 }
 
 .empty-state p {
@@ -720,6 +982,10 @@
     min-height: 2.5rem;
   }
 
+  .cell-type-select {
+    height: 2.5rem;
+  }
+
   /* Stop and the restarts are icons: they keep their size instead of taking a row each */
   .notebook-toolbar button.icon-button {
     flex: 0 0 2.75rem;
@@ -843,7 +1109,9 @@
   z-index: 200;
   display: flex;
   flex-direction: column;
-  background: var(--bg-panel);
+  /* The panel colour over the page's own background: Berkeley's panel colour is translucent, and
+     the notebook must not show through the presentation */
+  background: linear-gradient(var(--bg-panel), var(--bg-panel)), var(--bg-app);
   outline: none;
 }
 

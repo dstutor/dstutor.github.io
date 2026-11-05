@@ -7,6 +7,8 @@ interface ExamplesGalleryProps {
   /** What the examples operate on, e.g. 'Table' */
   dataNoun: string;
   onSelectExample: (example: Example) => void;
+  /** A notebook with one empty cell */
+  onBlank?: () => void;
   /** Restore the starter notebook */
   onReset: () => void;
   onClose: () => void;
@@ -14,7 +16,7 @@ interface ExamplesGalleryProps {
 
 const CLOSE_MS = 140;
 
-export default function ExamplesGallery({ gallery, dataNoun, onSelectExample, onReset, onClose }: ExamplesGalleryProps) {
+export default function ExamplesGallery({ gallery, dataNoun, onSelectExample, onReset, onBlank, onClose }: ExamplesGalleryProps) {
   const { examples, categories } = gallery;
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [closing, setClosing] = useState(false);
@@ -74,9 +76,27 @@ export default function ExamplesGallery({ gallery, dataNoun, onSelectExample, on
                 </div>
               </div>
               <div className="example-info">
+                <h3>Starter notebook</h3>
+                <p>The notebook you see on first visit: how to use it, and a small table to try things on.</p>
+                <div className="example-category">New notebook</div>
+              </div>
+            </button>
+          )}
+          {selectedCategory === 'all' && onBlank && (
+            <button
+              type="button"
+              className="example-card example-card-reset"
+              onClick={() => requestClose(onBlank)}
+            >
+              <div className="example-thumbnail">
+                <div className="operation-badges">
+                  <span className="operation-badge">empty</span>
+                </div>
+              </div>
+              <div className="example-info">
                 <h3>Blank notebook</h3>
-                <p>The starter notebook you see on first visit, with instructions and a small table to edit.</p>
-                <div className="example-category">Reset</div>
+                <p>One empty cell and nothing else, to write your own from scratch.</p>
+                <div className="example-category">New notebook</div>
               </div>
             </button>
           )}

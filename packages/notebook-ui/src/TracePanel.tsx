@@ -1,7 +1,9 @@
 import type { ReactNode, RefObject } from 'react';
 import type { RunOutput } from '@dstutor/trace-schema';
 import type { Frame, DetailLevel, TableStyle } from '@dstutor/viz';
-import { StepSlideshow } from '@dstutor/viz';
+import { Cel, StepSlideshow } from '@dstutor/viz';
+import HighlightedCode from './HighlightedCode';
+import type { CellLanguage } from './NotebookCells';
 
 interface TracePanelProps {
   output: RunOutput;
@@ -22,9 +24,21 @@ interface TracePanelProps {
   onDetailChange?: (detail: DetailLevel) => void;
   /** How step tables print, as the tutor's library prints them */
   tableStyle?: TableStyle;
+  /** What a code cell is called: "code cell", or "SQL cell" in the SQL tutor */
+  cellName?: string;
+  /** What the cells are written in, to colour "Try this" */
+  language?: CellLanguage;
+  /** The library, as the header names it */
+  library?: string;
+  /** The empty panel's ways to start: run everything, open the gallery, or add "Try this" and run it */
+  onRunAll?: () => void;
+  onOpenExamples?: () => void;
+  onTryThis?: () => void;
+  /** A run is in progress */
+  running?: boolean;
 }
 
-export default function TracePanel({ output, dataNoun, tracedNote, tryThis, slideshowRef, version = 0, onPresent, onFrameChange, detail = 'all', onDetailChange, tableStyle }: TracePanelProps) {
+export default function TracePanel({ output, dataNoun, tracedNote, tryThis, slideshowRef, version = 0, onPresent, onFrameChange, detail = 'all', onDetailChange, tableStyle, cellName = 'code cell', language = 'python', library, onRunAll, onOpenExamples, onTryThis, running = false }: TracePanelProps) {
   const hasTrace = output.trace && output.trace.length > 0;
   const hasOutput = output.stdout || output.stderr || output.error;
 
@@ -58,16 +72,44 @@ export default function TracePanel({ output, dataNoun, tracedNote, tryThis, slid
               <h3>No {dataNoun.toLowerCase()} operations to show.</h3>
               <div className="trace-note">
                 <strong>The code ran, but nothing was traced</strong>
-                {tracedNote} Any printed output or errors appear under the code cell.
+                {tracedNote} Any printed output or errors appear under the {cellName}.
               </div>
             </div>
           ) : (
-            <div className="empty-state">
-              <h3>See what each {dataNoun} operation does, one step at a time.</h3>
-              <p>Run the code cell and this panel walks through every operation, showing the table before and after. Pick something from Examples to start, or write your own.</p>
+            <div className="empty-state start-state">
+              <div className="start-head">
+                <Cel state="brand" className="start-cel" />
+                <div>
+                  <h3>Run your cells to see their steps here</h3>
+                  <p>
+                    Each {dataNoun} operation they use shows up here in stages, from the table it starts with to the
+                    result, one stage at a time.
+                  </p>
+                </div>
+              </div>
+              <div className="start-actions">
+                {onRunAll && (
+                  <button type="button" className="start-run" onClick={onRunAll} disabled={running}>
+                    <span className="btn-icon" aria-hidden="true">▶▶</span> Run all &amp; visualize
+                  </button>
+                )}
+                {onOpenExamples && (
+                  <button type="button" className="start-examples" onClick={onOpenExamples}>
+                    Browse examples
+                  </button>
+                )}
+              </div>
               <div className="example-hint">
-                <strong>Try this</strong>
-                <pre>{tryThis}</pre>
+                <div className="example-hint-head">
+                  <strong>Or try this</strong>
+                  {library && <code className="example-hint-lang">{library}</code>}
+                </div>
+                <HighlightedCode code={tryThis} language={language} />
+                {onTryThis && (
+                  <button type="button" className="example-hint-add" onClick={onTryThis} disabled={running}>
+                    + Add it as a {cellName} and run it
+                  </button>
+                )}
               </div>
             </div>
           )}

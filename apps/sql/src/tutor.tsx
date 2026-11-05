@@ -5,7 +5,7 @@ import { gallery } from './examples';
 
 const DEFAULT_MARKDOWN = `## How to use this notebook
 
-- **Cells:** Click a cell's margin to select it, press **Enter** to edit and **Esc** to get back. In this mode single keys act on the selected cell, like Jupyter: **a**/**b** add a cell above/below, **d d** deletes, **m**/**y** switch it to markdown/code, **z** undoes a delete.
+- **Cells:** Click a cell's margin to select it, press **Enter** to edit and **Esc** to get back. In this mode single keys act on the selected cell, like Jupyter: **a**/**b** add a cell above/below, **d d** deletes, **m**/**y** switch it to markdown/SQL, **z** undoes a delete.
 - **Running:** Cells are SQL, run on DuckDB. **Ctrl+Enter** (**Cmd+Enter** on Mac) runs a cell; **Shift+Enter** runs it and moves on. The result of a cell's last query is shown beneath it. **Run all** runs every cell top to bottom; **Restart** forgets every table.
 - **Visualize:** **Run all & visualize** runs everything and shows each query clause by clause, in the order SQL runs them: FROM, WHERE, GROUP BY, HAVING, SELECT, ORDER BY, LIMIT. Use the arrows to step through, **Export** to save a PDF, or **Share** to copy a permanent link.`;
 
@@ -25,6 +25,8 @@ export const tutor: TutorConfig = {
   productName: 'Query Tutor',
   dataNoun: 'query',
   language: 'sql',
+  engine: 'DuckDB',
+  engineNote: 'DuckDB runs on Python in your browser (Pyodide): the first visit downloads about 20 MB, kept for next time.',
   kernel: runtime,
   // Step tables print the way DuckDB prints a table
   tableStyle: 'duckdb',

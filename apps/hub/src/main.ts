@@ -62,22 +62,42 @@ function setupTutorsMenu(): void {
   });
 }
 
-// The feature cards' clips play while on screen and pause when not. With reduced motion they
-// stay on their poster, the finished result.
+// The feature cards' clips loop like GIFs while they are on screen and stop when not. Each card's
+// button (or a click on its clip) pauses and resumes it. With reduced motion none plays until the
+// reader presses its play button.
 function setupFeatureClips(): void {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const clips = [...document.querySelectorAll<HTMLVideoElement>('.feature-clip')];
-  const observer = new IntersectionObserver(
-    (entries) => {
-      for (const { target, isIntersecting } of entries) {
-        const video = target as HTMLVideoElement;
-        if (isIntersecting) video.play().catch(() => {});
-        else video.pause();
-      }
-    },
-    { threshold: 0.5 },
-  );
-  clips.forEach((clip) => observer.observe(clip));
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  for (const card of document.querySelectorAll<HTMLElement>('.feature')) {
+    const video = card.querySelector<HTMLVideoElement>('.feature-clip');
+    const button = card.querySelector<HTMLButtonElement>('.feature-pause');
+    if (!video || !button) continue;
+    const title = card.querySelector('.feature-title')?.textContent ?? 'this feature';
+    // The script plays it; native controls were only for a page without it
+    video.removeAttribute('controls');
+    button.hidden = false;
+    let onScreen = false;
+    let paused = reduced;
+    const sync = () => {
+      if (onScreen && !paused) video.play().catch(() => {});
+      else video.pause();
+      button.classList.toggle('is-paused', paused);
+      button.setAttribute('aria-label', `${paused ? 'Play' : 'Pause'} the clip: ${title}`);
+    };
+    const toggle = () => {
+      paused = !paused;
+      sync();
+    };
+    button.addEventListener('click', toggle);
+    video.addEventListener('click', toggle);
+    new IntersectionObserver(
+      ([entry]) => {
+        onScreen = entry.isIntersecting;
+        sync();
+      },
+      { threshold: 0.5 },
+    ).observe(video);
+    sync();
+  }
 }
 
 setupThemeToggle();
