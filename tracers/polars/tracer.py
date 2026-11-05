@@ -8,7 +8,10 @@ pl.col('Price') > 4 are shown as written. polars has no index, so rows are shown
 values JSON cannot hold are shown the way polars prints them (null, NaN, inf).
 
 Eager steps: filter, with_columns, select, sort, group_by(...) with agg() or a shortcut (sum,
-mean, len, ...), join and pivot. Lazy: every method called on a LazyFrame is remembered on the
+mean, len, ...), join and pivot; and the rest of Data 100's reference sheet that returns a table or
+a Series: head, tail, slice and df[...] by position, df['col'] and get_column, drop, rename,
+null_count, drop_nulls, fill_null, unique, group_by(...).head/tail, and the Series methods
+value_counts, is_in, is_null, sort, unique, fill_null and cast. Lazy: every method called on a LazyFrame is remembered on the
 LazyFrame it returns; collect() runs the chain one step at a time to get the table after each
 step and records those as steps, then a collect() step with polars' optimized plan.
 docs/visualizing-steps.md has the design.
@@ -24,7 +27,7 @@ import math
 import re
 
 from dstutor_rewriting import (
-    MAX_GROUP_STEPS, MAX_ROWS_PREVIEW, Log, Rewriter, group_stages, join_stages, table_name,
+    MAX_GROUP_STEPS, MAX_ROWS_PREVIEW, Log, Rewriter, color_slots, group_stages, join_stages, key_of, table_name,
     display as _display, fmt_list as _fmt_list, fmt_val as _fmt_val, like as _like,
     make_state as _make_state, plural as _plural, truncation_note as _truncation_note,
 )
@@ -32,11 +35,19 @@ from dstutor_rewriting import (
 # A lazy chain longer than this is shown as its collect() alone
 MAX_LAZY_STEPS = 12
 
-DATAFRAME_METHODS = {'filter', 'with_columns', 'select', 'sort', 'join', 'pivot'}
+# Rows by position, columns left out or renamed, nulls and repeats: what Data 100's reference
+# sheet lists besides the operations above
+ROW_AND_COLUMN_METHODS = {'head', 'tail', 'slice', 'drop', 'rename', 'unique', 'null_count', 'drop_nulls',
+                          'fill_null'}
+DATAFRAME_METHODS = {'filter', 'with_columns', 'select', 'sort', 'join', 'pivot', 'get_column'} | ROW_AND_COLUMN_METHODS
 GROUPBY_AGGREGATIONS = {'agg', 'sum', 'mean', 'median', 'min', 'max', 'len', 'count', 'first', 'last',
                         'n_unique', 'std', 'var'}
-LAZY_METHODS = {'filter', 'with_columns', 'select', 'sort', 'join', 'group_by'} | GROUPBY_AGGREGATIONS
-REWRITTEN_METHODS = DATAFRAME_METHODS | GROUPBY_AGGREGATIONS | {'group_by', 'collect'}
+# group_by(...).head(n) keeps rows rather than combining them
+GROUPBY_ROWS = {'head', 'tail'}
+SERIES_METHODS = {'value_counts', 'sort', 'unique', 'is_in', 'is_null', 'fill_null', 'cast'}
+LAZY_METHODS = ({'filter', 'with_columns', 'select', 'sort', 'join', 'group_by'} | ROW_AND_COLUMN_METHODS
+                | GROUPBY_AGGREGATIONS | GROUPBY_ROWS)
+REWRITTEN_METHODS = DATAFRAME_METHODS | GROUPBY_AGGREGATIONS | GROUPBY_ROWS | SERIES_METHODS | {'group_by', 'collect'}
 
 _log = Log()
 _enabled = False
@@ -49,6 +60,8 @@ def install():
     """Make the rewritten code's helper available and start recording. Idempotent."""
     global _enabled
     builtins._dstutor_method = _method
+    builtins._dstutor_getitem = _getitem
+    builtins._dstutor_setitem = _setitem
     _enabled = True
 
 
@@ -77,7 +90,8 @@ def set_cell_statements(statements):
 
 def transform(tree):
     """Rewrite a parsed cell so the operations it runs are traced. Returns the new tree."""
-    return Rewriter(REWRITTEN_METHODS, subscripts=False).rewrite(tree)
+    # Subscripts too: df[1:3, ['Flavor', 'Price']] takes rows and columns by position
+    return Rewriter(REWRITTEN_METHODS).rewrite(tree)
 
 
 def run(code):
@@ -113,6 +127,10 @@ def _is_groupby(obj):
     return type(obj).__name__ == 'GroupBy' and _is_frame(getattr(obj, 'df', None))
 
 
+def _is_series(obj):
+    return isinstance(obj, _polars().Series)
+
+
 def _method(receiver, name, line, sources=None, arg_sources=None, receiver_source=''):
     bound = getattr(receiver, name)
     if not _enabled:
@@ -121,22 +139,46 @@ def _method(receiver, name, line, sources=None, arg_sources=None, receiver_sourc
     if _is_lazy(receiver):
         return _lazy_method(receiver, name, bound, line, sources, arg_sources)
     if not ((name in DATAFRAME_METHODS and _is_frame(receiver))
-            or (name in GROUPBY_AGGREGATIONS and _is_groupby(receiver))):
+            or (name in GROUPBY_AGGREGATIONS | GROUPBY_ROWS and _is_groupby(receiver))
+            or (name in SERIES_METHODS and _is_series(receiver))):
         return bound
 
     def traced(*args, **kwargs):
-        input_state = _state(receiver.df if _is_groupby(receiver) else receiver)
+        input_state = (_state(receiver.df) if _is_groupby(receiver) else
+                       _series_state(receiver) if _is_series(receiver) else _state(receiver))
         result = bound(*args, **kwargs)
         try:
             names = {'left': table_name(receiver_source, 'left'),
-                     'right': table_name(arg_sources[0] if arg_sources else '', 'right')}
+                     'right': table_name(arg_sources[0] if arg_sources else '', 'right'),
+                     'receiver': receiver_source}
             record = _describe(name, receiver, args, kwargs, arg_sources, sources, input_state, result, names)
-            record["site"] = _log.site(line)
-            _log.add(record)
+            # None: nothing to show, as for a head() that keeps every row
+            if record is not None:
+                record["site"] = _log.site(line)
+                _log.add(record)
         except Exception:
             pass
         return result
     return traced
+
+
+def _getitem(container, key, key_source, line, receiver_source=''):
+    result = container[key]
+    if not (_enabled and _is_frame(container)):
+        return result
+    try:
+        record = _subscript(container, key, key_source, receiver_source, result)
+        if record is not None:
+            record["site"] = _log.site(line)
+            _log.add(record)
+    except Exception:
+        pass
+    return result
+
+
+def _setitem(container, key, value, key_source, line, value_source=''):
+    # polars has no column assignment to show (with_columns is the way); do exactly what it does
+    container[key] = value
 
 
 # ---------------------------------------------------------------------------------------------
@@ -192,7 +234,8 @@ def _record_lazy(lazy, result, line):
             try:
                 args = [_eager(a) for a in args]
                 kwargs = {k: _eager(v) for k, v in kwargs.items()}
-                if name == 'group_by' and i + 1 < len(chain) and chain[i + 1][0] in GROUPBY_AGGREGATIONS:
+                if (name == 'group_by' and i + 1 < len(chain)
+                        and chain[i + 1][0] in GROUPBY_AGGREGATIONS | GROUPBY_ROWS):
                     # group_by(...).agg(...) is one step, as it is when eager
                     agg, agg_args, agg_kwargs, agg_arg_sources, agg_sources, step_line = chain[i + 1]
                     receiver = current.group_by(*args, **kwargs)
@@ -208,6 +251,10 @@ def _record_lazy(lazy, result, line):
                     break
             except Exception:
                 break
+            if record is None:
+                # A step that changed nothing (a head() that keeps every row)
+                current = output
+                continue
             record["explanation"] += " (Worked out when collect() ran.)"
             record["site"] = _log.site(step_line)
             _log.add(record)
@@ -303,6 +350,24 @@ def _state(df):
         return {"error": str(e), "num_rows": 0, "num_columns": 0, "columns": [], "preview": []}
 
 
+def _series_state(s):
+    """A Series as a one-column TableState: polars prints it as a column with its name and type."""
+    try:
+        return {
+            "num_rows": s.len(),
+            "num_columns": 1,
+            "columns": [s.name],
+            "preview": [[_cell(v)] for v in s.head(MAX_ROWS_PREVIEW).to_list()],
+            "column_types": [_type_name(s.dtype)],
+        }
+    except Exception as e:
+        return {"error": str(e), "num_rows": 0, "num_columns": 0, "columns": [], "preview": []}
+
+
+def _any_state(value):
+    return _series_state(value) if _is_series(value) else _state(value)
+
+
 def _types(df):
     """Each column's type the way polars prints it under the column name: str, f64, list[f64]."""
     return [_type_name(t) for t in df.dtypes]
@@ -363,7 +428,7 @@ def _record(operation, args, kwargs, arg_sources, sources, input_state, output, 
         "kwargs": {k: sources.get(k) or _fmt_val(v) if isinstance(v, (str, int, float, bool)) else sources.get(k, '')
                    for k, v in kwargs.items()},
         "input": input_state,
-        "output": _state(output),
+        "output": _any_state(output),
         "explanation": explanation,
         "sub_steps": steps,
     }
@@ -373,14 +438,23 @@ def _record(operation, args, kwargs, arg_sources, sources, input_state, output, 
 
 
 def _describe(name, receiver, args, kwargs, arg_sources, sources, input_state, output, names=None):
-    """The record for one call (without its site), walkthrough included when there is one."""
+    """The record for one call (without its site), walkthrough included when there is one; None
+    when the call changed nothing worth a step."""
     if _is_groupby(receiver):
+        if name in GROUPBY_ROWS:
+            return _group_rows(receiver, name, args, kwargs, arg_sources, sources, input_state, output)
         return _group_by(receiver, name, args, kwargs, arg_sources, sources, input_state, output)
+    if _is_series(receiver):
+        return _series_step(name, receiver, args, kwargs, arg_sources, sources, input_state, output,
+                            (names or {}).get('receiver', ''))
     if name == 'join':
         names = names or {'left': 'left', 'right': table_name(arg_sources[0] if arg_sources else '', 'right')}
         return _join(receiver, args, kwargs, arg_sources, sources, input_state, output, names)
+    if name in ('head', 'tail', 'slice'):
+        return _by_position(name, receiver, args, kwargs, arg_sources, sources, input_state, output)
     walk = {'filter': _filter, 'with_columns': _with_columns, 'select': _select, 'sort': _sort,
-            'pivot': _pivot}[name]
+            'pivot': _pivot, 'drop': _drop, 'rename': _rename, 'unique': _unique, 'null_count': _null_count,
+            'drop_nulls': _drop_nulls, 'fill_null': _fill_null, 'get_column': _get_column}[name]
     return walk(receiver, args, kwargs, arg_sources, sources, input_state, output)
 
 
@@ -655,6 +729,17 @@ def _join(df, args, kwargs, arg_sources, sources, input_state, output, names):
     left_keys = _key_name(kwargs.get('left_on', on))
     right_keys = _key_name(kwargs.get('right_on', on))
     explanation = f"Joined ({how}): {_plural(output.height, 'row')}."
+    if how == 'cross' and _is_frame(other):
+        left, right = names.get('left', 'left'), names.get('right', 'right')
+        steps = [{
+            "stage": "Pair every row with every row",
+            "message": (f"A cross join has no key: each of the {_plural(df.height, 'row')} of {left} pairs with each of "
+                        f"the {_plural(other.height, 'row')} of {right}, so {df.height} × {other.height} = "
+                        f"{_plural(output.height, 'row')}."),
+            "aux_table": {"label": right, "state": _state(other)},
+        }]
+        explanation = f"Cross join: {df.height} × {other.height} = {_plural(output.height, 'row')}."
+        return _record('join', args, kwargs, arg_sources, sources, input_state, output, explanation, steps)
     if (not _is_frame(other) or len(left_keys) != 1 or len(right_keys) != 1
             or left_keys[0] not in df.columns or right_keys[0] not in other.columns
             or how not in ('inner', 'left', 'right', 'full', 'semi', 'anti')):
@@ -751,3 +836,485 @@ def _pivot(df, args, kwargs, arg_sources, sources, input_state, output):
             "output_highlights": {"cells": empty},
         })
     return _record('pivot', args, kwargs, arg_sources, sources, input_state, output, explanation, steps)
+
+
+# ---------------------------------------------------------------------------------------------
+# Rows by position, columns left out or renamed, nulls and repeats, and Series: the rest of what
+# Data 100's reference sheet lists. Each is a frame or two: they choose rows and columns, or
+# fill and count, rather than work values out.
+
+NULL = {"shown": "null"}
+
+
+def _call(name, args, kwargs, arg_sources, sources):
+    """The call as written: head(3), unique(subset='Flavor')."""
+    parts = [arg_sources[i] if i < len(arg_sources) and arg_sources[i] else _fmt_val(a) for i, a in enumerate(args)]
+    parts += [f"{k}={sources.get(k) or _fmt_val(v)}" for k, v in kwargs.items()]
+    return f"{name}({', '.join(parts)})"
+
+
+def _positions(df, take):
+    """The input positions of the rows take() keeps, in the order it returns them, or None."""
+    try:
+        return take(df.with_row_index('__dstutor_row'))['__dstutor_row'].to_list()
+    except Exception:
+        return None
+
+
+def _positions_text(positions):
+    if not positions:
+        return "no rows"
+    if len(positions) == 1:
+        return f"the row at position {positions[0]}"
+    if positions == list(range(positions[0], positions[0] + len(positions))):
+        return f"the rows at positions {positions[0]} to {positions[-1]}"
+    return f"the rows at positions {_fmt_list(positions)}"
+
+
+def _names_text(names, word='column'):
+    quoted = [repr(n) for n in names]
+    joined = quoted[0] if len(quoted) == 1 else ', '.join(quoted[:-1]) + ' and ' + quoted[-1]
+    return f"the {word}{'' if len(names) == 1 else 's'} {joined}"
+
+
+def _row_highlights(input_state, kept):
+    n_preview = len(input_state["preview"])
+    kept = set(kept)
+    return {"rows": [i for i in range(n_preview) if i in kept],
+            "rows_removed": [i for i in range(n_preview) if i not in kept]}
+
+
+def _by_position(name, df, args, kwargs, arg_sources, sources, input_state, output):
+    """head(n), tail(n), slice(offset, length): the rows kept by their position."""
+    if output.height == df.height:
+        # Every row kept: nothing happened, just as showing the table is not a step
+        return None
+    left_out = df.height - output.height
+    n = output.height
+    what = (_plural(n, 'row') if name == 'slice' else
+            f"the {'first' if name == 'head' else 'last'} {'row' if n == 1 else _plural(n, 'row')}")
+    explanation = f"Kept {what}; left out {left_out}."
+    kept = _positions(df, lambda d: getattr(d, name)(*args, **kwargs))
+    if kept is None:
+        return _record(name, args, kwargs, arg_sources, sources, input_state, output, explanation, None)
+    steps = [{
+        "stage": "Take rows by position",
+        "message": (f"{_call(name, args, kwargs, arg_sources, sources)} keeps {what}: {_positions_text(kept)}, "
+                    f"counting from 0. The other {_plural(left_out, 'row')} (struck through) "
+                    f"{'is' if left_out == 1 else 'are'} left out."
+                    + _truncation_note(input_state)),
+        "input_highlights": _row_highlights(input_state, kept),
+    }]
+    return _record(name, args, kwargs, arg_sources, sources, input_state, output, explanation, steps)
+
+
+def _all_rows(rows_key):
+    return rows_key is None or (isinstance(rows_key, slice) and rows_key == slice(None))
+
+
+def _names_columns(key):
+    return isinstance(key, str) or (isinstance(key, (list, tuple)) and bool(key) and all(isinstance(k, str) for k in key))
+
+
+def _subscript(df, key, key_source, receiver_source, result):
+    """df[...]: one column as a Series, or rows and columns by position. A single value is no step."""
+    if not (_is_frame(result) or _is_series(result)):
+        return None
+    label = f"{receiver_source}[{key_source}]" if receiver_source.isidentifier() else f"[{key_source}]"
+    input_state = _state(df)
+    if isinstance(key, tuple) and len(key) == 2 and not _names_columns(key):
+        rows_key, cols_key = key
+    elif _names_columns(key):
+        rows_key, cols_key = None, key
+    else:
+        rows_key, cols_key = key, None
+    if _is_series(result) and isinstance(cols_key, str) and _all_rows(rows_key):
+        return _take_column(df, result.name, label, input_state, result, operation='[]')
+    columns = list(result.columns) if _is_frame(result) else [result.name]
+    chosen = columns if columns != list(df.columns) else []
+    kept = None if _all_rows(rows_key) else _positions(df, lambda d: d[rows_key])
+    if not _all_rows(rows_key) and kept is None:
+        return None
+    n_rows = result.height if _is_frame(result) else result.len()
+    parts = []
+    if kept is not None:
+        parts.append(f"{_positions_text(kept)} (counting from 0)")
+    if chosen:
+        parts.append(_names_text(chosen))
+    if not parts:
+        return None
+    message = f"{label} takes {' and '.join(parts)}."
+    if isinstance(rows_key, slice) and rows_key.stop is not None:
+        message += " As in a Python slice, the row at the end position is left out."
+    if kept is not None and not chosen:
+        left_out = df.height - n_rows
+        message += (f" Every column is kept; the other {_plural(left_out, 'row')} (struck through) "
+                    f"{'is' if left_out == 1 else 'are'} left out.")
+    elif chosen and kept is None:
+        message += " Every row is kept."
+    highlights = _row_highlights(input_state, kept) if kept is not None else {}
+    if chosen:
+        highlights["columns"] = chosen
+    stage = ("Take rows and columns" if kept is not None and chosen else
+             "Take rows by position" if kept is not None else "Take columns")
+    steps = [{"stage": stage, "message": message + _truncation_note(input_state), "input_highlights": highlights}]
+    explanation = f"Took {_plural(n_rows, 'row')} and {_plural(len(columns), 'column')}."
+    record = _record('[]', [], {}, [], {}, input_state, result, explanation, steps, label=label)
+    record["args"] = [key_source]
+    return record
+
+
+def _take_column(df, column, label, input_state, result, operation):
+    steps = [{
+        "stage": "Take one column",
+        "message": (f"{label} is the column {column!r} on its own: a Series of {_plural(result.len(), 'value')}. "
+                    "A DataFrame is a table of Series, one per column."),
+        "input_highlights": {"columns": [column]},
+        "output_label": "Series",
+    }]
+    explanation = f"Took the column {column!r} as a Series."
+    return _record(operation, [], {}, [], {}, input_state, result, explanation, steps, label=label)
+
+
+def _get_column(df, args, kwargs, arg_sources, sources, input_state, output):
+    column = output.name
+    record = _take_column(df, column, _call('get_column', args, kwargs, arg_sources, sources), input_state, output,
+                          operation='get_column')
+    record.pop("label", None)
+    return record
+
+
+def _drop(df, args, kwargs, arg_sources, sources, input_state, output):
+    dropped = [c for c in df.columns if c not in output.columns]
+    if not dropped:
+        return None
+    explanation = f"Dropped {_plural(len(dropped), 'column')}."
+    steps = [{
+        "stage": "Leave columns out",
+        "message": (f"drop leaves out {_names_text(dropped)}. The other {_plural(output.width, 'column')} "
+                    f"and all {_plural(df.height, 'row')} stay as they are."),
+        "input_highlights": {"columns": dropped},
+    }]
+    return _record('drop', args, kwargs, arg_sources, sources, input_state, output, explanation, steps)
+
+
+def _rename(df, args, kwargs, arg_sources, sources, input_state, output):
+    pairs = [(a, b) for a, b in zip(df.columns, output.columns) if a != b]
+    if not pairs:
+        return None
+    changes = ', '.join(f"{a!r} → {b!r}" for a, b in pairs)
+    explanation = f"Renamed {_plural(len(pairs), 'column')}: {changes}."
+    steps = [{
+        "stage": "Rename columns",
+        "message": f"rename changes {'a name' if len(pairs) == 1 else 'names'}: {changes}. The values and the rows stay as they are.",
+        "input_highlights": {"columns": [a for a, _ in pairs]},
+        "output_highlights": {"columns": [b for _, b in pairs]},
+    }]
+    return _record('rename', args, kwargs, arg_sources, sources, input_state, output, explanation, steps)
+
+
+def _null_cells(state, columns=None):
+    """[row, column] of each null in the preview (NaN is a float value, not null)."""
+    return [[r, c] for r, row in enumerate(state["preview"]) for c, v in zip(state["columns"], row)
+            if v == NULL and (columns is None or c in columns)]
+
+
+def _nan_note(state):
+    has_nan = any(v == {"shown": "NaN"} for row in state["preview"] for v in row)
+    return " NaN is a number (not a number, from a calculation), not a missing value, so it is not a null." if has_nan else ""
+
+
+def _find_nulls(state, columns=None, prefix=""):
+    cells = _null_cells(state, columns)
+    where = f" in {_names_text(columns)}" if columns and len(columns) < len(state["columns"]) else ""
+    return {
+        "stage": "Find the nulls",
+        "message": (prefix + f"First every value{where} is checked for null, the missing-value marker: "
+                    f"{_plural(len(cells), 'null')} in the rows shown." + _nan_note(state) + _truncation_note(state)),
+        "input_highlights": {"cells": cells, **({"columns": list(columns)} if where else {})},
+    }
+
+
+def _null_count(df, args, kwargs, arg_sources, sources, input_state, output):
+    counts = list(output.row(0)) if output.height else []
+    total = sum(counts)
+    explanation = f"Counted the nulls in each column: {_plural(total, 'null')} in all."
+    per_column = ', '.join(f"{c} {n}" for c, n in zip(output.columns, counts))
+    steps = [
+        _find_nulls(input_state),
+        {
+            "stage": "Count each column",
+            "message": f"Then they are counted column by column, giving a one-row table: {per_column}.",
+            "output_highlights": {"columns": [c for c, n in zip(output.columns, counts) if n]},
+        },
+    ]
+    return _record('null_count', args, kwargs, arg_sources, sources, input_state, output, explanation, steps)
+
+
+def _subset(df, args, kwargs):
+    subset = kwargs.get('subset', args[0] if args else None)
+    if subset is None:
+        return list(df.columns)
+    names = [subset] if isinstance(subset, str) else list(subset) if isinstance(subset, (list, tuple)) else None
+    return names if names and all(isinstance(n, str) and n in df.columns for n in names) else None
+
+
+def _drop_nulls(df, args, kwargs, arg_sources, sources, input_state, output):
+    pl = _polars()
+    removed = df.height - output.height
+    explanation = f"Dropped {_plural(removed, 'row')} with a null; kept {output.height}."
+    columns = _subset(df, args, kwargs)
+    if columns is None:
+        return _record('drop_nulls', args, kwargs, arg_sources, sources, input_state, output, explanation, None)
+    has_null = df.select(pl.any_horizontal([pl.col(c).is_null() for c in columns]).alias('__dstutor_null'))[
+        '__dstutor_null'].to_list()
+    if sum(has_null) != removed:
+        return _record('drop_nulls', args, kwargs, arg_sources, sources, input_state, output, explanation, None)
+    kept = [i for i, n in enumerate(has_null) if not n]
+    cells = _null_cells(input_state, columns)
+    steps = [
+        _find_nulls(input_state, columns),
+        {
+            "stage": "Drop rows with a null",
+            "message": (f"Then every row with a null{'' if len(columns) == df.width else ' there'} is dropped: "
+                        f"{output.height} kept, {removed} (struck through) dropped." + _truncation_note(input_state)),
+            "input_highlights": {**_row_highlights(input_state, kept), "cells": cells},
+        },
+    ]
+    return _record('drop_nulls', args, kwargs, arg_sources, sources, input_state, output, explanation, steps)
+
+
+FILL_STRATEGIES = {'forward': "the nearest value above it", 'backward': "the nearest value below it",
+                   'mean': "its column's mean", 'min': "its column's smallest value", 'max': "its column's largest value",
+                   'zero': "0", 'one': "1"}
+
+
+def _fill_with(args, kwargs, arg_sources, sources):
+    strategy = kwargs.get('strategy', args[1] if len(args) > 1 else None)
+    if strategy is not None:
+        return FILL_STRATEGIES.get(strategy, f"the {strategy} strategy")
+    if 'value' in kwargs:
+        return sources.get('value') or _fmt_val(kwargs['value'])
+    if args:
+        return arg_sources[0] if arg_sources and arg_sources[0] else _fmt_val(args[0])
+    return "the value given"
+
+
+def _filled(input_state, out_state, cells):
+    out_columns = out_state["columns"]
+    return [[r, c] for r, c in cells
+            if c in out_columns and r < len(out_state["preview"]) and out_state["preview"][r][out_columns.index(c)] != NULL]
+
+
+def _fill_null(df, args, kwargs, arg_sources, sources, input_state, output):
+    with_what = _fill_with(args, kwargs, arg_sources, sources)
+    before = df.null_count().row(0)
+    after = output.null_count().row(0)
+    filled_total = sum(before) - sum(after)
+    explanation = f"Filled {_plural(filled_total, 'null')} with {with_what}."
+    out_state = _state(output)
+    cells = _null_cells(input_state)
+    filled = _filled(input_state, out_state, cells)
+    stayed = [c for c, n in zip(df.columns, after) if n]
+    stay_note = ""
+    if stayed and not kwargs.get('strategy') and not (len(args) > 1 and args[1]):
+        stay_note = (f" The nulls in {_names_text(stayed)} stay: {with_what} does not fit "
+                     f"{'its type' if len(stayed) == 1 else 'their types'}, so fill_null leaves "
+                     f"{'that column' if len(stayed) == 1 else 'those columns'} alone.")
+    steps = [
+        _find_nulls(input_state),
+        {
+            "stage": "Fill them in",
+            "message": (f"Then each null is replaced by {with_what}, every column at once: "
+                        f"{_plural(filled_total, 'null')} filled.{stay_note}"),
+            "input_highlights": {"cells": cells},
+            "output_highlights": {"cells": filled},
+        },
+    ]
+    return _record('fill_null', args, kwargs, arg_sources, sources, input_state, output, explanation, steps)
+
+
+def _row_keys(df, columns):
+    """Each row's values in columns, as a hashable key (null and NaN included)."""
+    return [tuple(key_of(_cell(v)) for v in row) for row in df.select(columns).rows()]
+
+
+def _unique(df, args, kwargs, arg_sources, sources, input_state, output):
+    removed = df.height - output.height
+    explanation = f"Kept {_plural(output.height, 'distinct row')}; dropped {removed} repeated."
+    columns = _subset(df, args, kwargs)
+    keep = kwargs.get('keep', 'any')
+    if columns is None or keep not in ('any', 'first', 'last', 'none'):
+        return _record('unique', args, kwargs, arg_sources, sources, input_state, output, explanation, None)
+    keys = _row_keys(df, columns)
+    counts = {}
+    for k in keys:
+        counts[k] = counts.get(k, 0) + 1
+    # Which input row each result row is: the same values in every column, earliest first
+    whole = _row_keys(df, list(df.columns))
+    where = {}
+    for i, k in enumerate(whole):
+        where.setdefault(k, []).append(i)
+    kept = []
+    for k in _row_keys(output, list(df.columns)):
+        if where.get(k):
+            kept.append(where[k].pop(0 if keep != 'last' else -1))
+    if len(kept) != output.height:
+        return _record('unique', args, kwargs, arg_sources, sources, input_state, output, explanation, None)
+    repeated = [k for k in dict.fromkeys(keys) if counts[k] > 1]
+    slots = color_slots(repeated)
+    n_preview = len(input_state["preview"])
+    row_colors = [slots.get(keys[i]) for i in range(n_preview)]
+    over = f" in {_names_text(columns)}" if len(columns) < df.width else ""
+    which = {'any': "one of each (any one: polars does not promise which)", 'first': "the first of each",
+             'last': "the last of each", 'none': "only the rows that have no copy"}[keep]
+    order = ("" if kwargs.get('maintain_order') else
+             " Without maintain_order=True, polars may return the rows in any order.")
+    steps = [
+        {
+            "stage": "Find repeated rows",
+            "message": (f"Rows with the same values{over} are copies; each set of copies shares a colour: "
+                        f"{_plural(len(repeated), 'set')} of copies." + _truncation_note(input_state)),
+            "input_highlights": {"row_colors": row_colors, **({"columns": columns} if over else {})},
+        },
+        {
+            "stage": "Keep one of each",
+            "message": f"unique keeps {which}: {output.height} kept, {removed} (struck through) dropped.{order}",
+            "input_highlights": {**_row_highlights(input_state, kept), "row_colors": row_colors},
+            "note": "polars puts each row's values in a hash table and keeps a row only the first time its values come up.",
+        },
+    ]
+    return _record('unique', args, kwargs, arg_sources, sources, input_state, output, explanation, steps)
+
+
+def _group_rows(groupby, name, args, kwargs, arg_sources, sources, input_state, output):
+    """group_by(...).head(n) / .tail(n): the first or last rows of each group, not combined."""
+    df = groupby.df
+    by = list(groupby.by)
+    keys = [_expr_name(b) if not isinstance(b, str) else b for b in by]
+    n = kwargs.get('n', args[0] if args else 5)
+    first = 'first' if name == 'head' else 'last'
+    rows_text = f"{first} row" if n == 1 else f"{first} {_plural(n, 'row')}"
+    label = f"group_by().{name}()"
+    explanation = f"Kept the {rows_text} of each group: {_plural(output.height, 'row')}."
+    if getattr(groupby, 'named_by', None) or not keys or not all(k in df.columns for k in keys):
+        return _record('group_by', args, kwargs, arg_sources, sources, input_state, output, explanation, None, label)
+    kept = _positions(df, lambda d: getattr(d.group_by(*by, maintain_order=True), name)(*args, **kwargs))
+    if kept is None or len(kept) != output.height:
+        return _record('group_by', args, kwargs, arg_sources, sources, input_state, output, explanation, None, label)
+    key_rows = _row_keys(df, keys)
+    out_keys = _row_keys(output, keys)
+    slots = color_slots(list(dict.fromkeys(out_keys)))
+    n_preview = len(input_state["preview"])
+    row_colors = [slots.get(key_rows[i]) for i in range(n_preview)]
+    n_groups = len(set(key_rows))
+    named = ', '.join(map(repr, keys))
+    order = ("Groups come out in the order each first appears (maintain_order=True)." if groupby.maintain_order else
+             "Without maintain_order=True, the groups come out in no particular order.")
+    steps = [
+        {
+            "stage": "Sort rows into groups",
+            "message": (f"Rows with the same {named} go into one group, one colour each: {_plural(n_groups, 'group')}."
+                        + _truncation_note(input_state)),
+            "input_highlights": {"columns": keys, "row_colors": row_colors},
+        },
+        {
+            "stage": f"Keep the {first} rows of each",
+            "message": (f"{name}({n}) keeps each group's {rows_text}, in the order the rows came; "
+                        f"a group with fewer keeps them all. Each group's rows come out together. {order}"),
+            "input_highlights": {**_row_highlights(input_state, kept), "columns": keys, "row_colors": row_colors},
+            "output_highlights": {"row_colors": [slots.get(k) for k in out_keys[:len(_state(output)["preview"])]]},
+        },
+    ]
+    return _record('group_by', args, kwargs, arg_sources, sources, input_state, output, explanation, steps, label)
+
+
+def _on(receiver, call):
+    """The call with what it is called on, when that is short: df['score'].is_null()."""
+    return f"{receiver}.{call}" if receiver and len(receiver) <= 30 else call
+
+
+def _series_step(name, s, args, kwargs, arg_sources, sources, input_state, output, receiver=''):
+    """A Series method: the Series is shown as a one-column table."""
+    if name == 'value_counts':
+        return _value_counts(s, args, kwargs, arg_sources, sources, input_state, output)
+    if name in ('is_in', 'is_null'):
+        return _ask_values(name, s, args, kwargs, arg_sources, sources, input_state, output, receiver)
+    if name == 'fill_null':
+        with_what = _fill_with(args, kwargs, arg_sources, sources)
+        cells = _null_cells(input_state)
+        filled = _filled(input_state, _series_state(output), cells)
+        n = s.null_count() - output.null_count()
+        steps = [_find_nulls(input_state), {
+            "stage": "Fill them in",
+            "message": f"Then each null is replaced by {with_what}: {_plural(n, 'null')} filled.",
+            "input_highlights": {"cells": cells}, "output_highlights": {"cells": filled}}]
+        return _record('fill_null', args, kwargs, arg_sources, sources, input_state, output,
+                       f"Filled {_plural(n, 'null')} with {with_what}.", steps)
+    if not _is_series(output):
+        return None
+    call = _on(receiver, _call(name, args, kwargs, arg_sources, sources))
+    if name == 'sort':
+        descending = kwargs.get('descending', args[0] if args else False)
+        message = (f"{call} returns the values {'largest' if descending else 'smallest'} first"
+                   f"{'' if kwargs.get('nulls_last') else ', nulls first'}. Nothing is added or removed.")
+        explanation = f"Sorted {_plural(s.len(), 'value')}."
+    elif name == 'unique':
+        message = (f"{call} keeps one of each value: {_plural(s.len(), 'value')} became {output.len()}."
+                   + ("" if kwargs.get('maintain_order') else
+                      " Without maintain_order=True, polars may return them in any order."))
+        explanation = f"Kept {_plural(output.len(), 'distinct value')}."
+    else:
+        message = (f"{call} turns every value into {_type_name(output.dtype)}, all at once "
+                   f"({_type_name(s.dtype)} → {_type_name(output.dtype)}). A value that does not fit raises an "
+                   "error, unless strict=False makes it null.")
+        explanation = f"Cast {_type_name(s.dtype)} to {_type_name(output.dtype)}."
+    steps = [{"stage": "Work out the Series", "message": message, "input_highlights": {"columns": [s.name]},
+              "output_highlights": {"columns": [output.name]}, "output_label": "Series"}]
+    return _record(name, args, kwargs, arg_sources, sources, input_state, output, explanation, steps)
+
+
+def _ask_values(name, s, args, kwargs, arg_sources, sources, input_state, output, receiver=''):
+    mask = output.to_list()
+    question = (f"is in {arg_sources[0] if arg_sources and arg_sources[0] else _fmt_val(args[0]) if args else 'the values given'}"
+                if name == 'is_in' else "is null")
+    condition = _on(receiver, _call(name, args, kwargs, arg_sources, sources))
+    n_true = sum(1 for m in mask if m is True)
+    explanation = f"{n_true} of {_plural(len(mask), 'value')} {'are' if n_true != 1 else 'is'} True."
+    rows = [[row[0], _cell(mask[i])] for i, row in enumerate(input_state["preview"])]
+    nulls = name == 'is_in' and any(m is None for m in mask)
+    steps = [{
+        "stage": "Ask every value",
+        "message": (f"{condition} asks every value at once whether it {question}, giving a Series of True and False: "
+                    f"{n_true} True." + (" A null is neither in nor out, so it gives null." if nulls else "")),
+        "input_highlights": {"columns": [s.name]},
+        "output_state": {**_make_state([s.name, condition], rows,
+                                       column_types=[input_state["column_types"][0], 'bool']),
+                         "num_rows": input_state["num_rows"]},
+        "output_label": "True or False for each value",
+        "output_highlights": {"columns": [condition]},
+    }]
+    return _record(name, args, kwargs, arg_sources, sources, input_state, output, explanation, steps)
+
+
+def _value_counts(s, args, kwargs, arg_sources, sources, input_state, output):
+    explanation = f"Counted {_plural(output.height, 'distinct value')} in {_plural(s.len(), 'value')}."
+    if not _is_frame(output) or output.width != 2:
+        return _record('value_counts', args, kwargs, arg_sources, sources, input_state, output, explanation, None)
+    value_col, count_col = output.columns
+    keys = [key_of(_cell(v)) for v in s.to_list()]
+    out_state = _state(output)
+    groups = []
+    for row in out_state["preview"]:
+        members = [i for i, k in enumerate(keys) if k == key_of(row[0])]
+        groups.append({"key": [row[0]], "members": members, "size": len(members),
+                       "values": [{"column": count_col, "values": [], "result": row[1], "fn": "count()"}]})
+    sort = kwargs.get('sort', args[0] if args else False)
+    order = ("The most common value comes first (sort=True)." if sort else
+             "With sort=False (the default), polars returns the values in no particular order; sort=True puts the most common first.")
+    steps = group_stages(key_names=[s.name], groups=groups, input_state=input_state, out_state=out_state,
+                         key_columns=[s.name], value_columns=[],
+                         note=("value_counts is a group by on the values, then a count of each group: polars "
+                               "keeps one counter per distinct value in a hash table, in one pass."),
+                         order_note=order)
+    return _record('value_counts', args, kwargs, arg_sources, sources, input_state, output, explanation, steps)

@@ -233,13 +233,135 @@ class LazyTest(unittest.TestCase):
         self.assertEqual([r['operation'] for r in records], ['filter', 'sort', 'collect', 'filter', 'select', 'collect'])
 
 
+NULLS = """
+ratings = pl.DataFrame({
+    'Flavor': ['mint', 'chocolate', 'vanilla', None, 'chocolate'],
+    'Stars': [4.0, None, 5.0, 3.0, None],
+})
+"""
+
+
+class RowsByPositionTest(unittest.TestCase):
+    def test_head_keeps_the_first_rows(self):
+        record = one("cones.head(2)")
+        [take] = record['sub_steps']
+        self.assertEqual(take['input_highlights'], {'rows': [0, 1], 'rows_removed': [2, 3, 4, 5]})
+        self.assertIn('positions 0 to 1', take['message'])
+
+    def test_a_head_that_keeps_every_row_is_not_a_step(self):
+        self.assertEqual(trace("cones.head(10)"), [])
+
+    def test_tail_and_slice(self):
+        self.assertEqual(one("cones.tail(1)")['sub_steps'][0]['input_highlights']['rows'], [5])
+        self.assertIn('the last row', one("cones.tail(1)")['explanation'])
+        self.assertEqual(one("cones.slice(2, 3)")['sub_steps'][0]['input_highlights']['rows'], [2, 3, 4])
+
+    def test_rows_and_columns_by_subscript(self):
+        record = one("cones[1:3, ['Flavor', 'Price']]")
+        self.assertEqual(record['operation'], '[]')
+        self.assertEqual(record['label'], "cones[1:3, ['Flavor', 'Price']]")
+        self.assertEqual(record['sub_steps'][0]['input_highlights'],
+                         {'rows': [1, 2], 'rows_removed': [0, 3, 4, 5], 'columns': ['Flavor', 'Price']})
+        self.assertIn('end position is left out', record['sub_steps'][0]['message'])
+
+    def test_a_column_is_a_series(self):
+        record = one("cones['Price']")
+        self.assertEqual(record['label'], "cones['Price']")
+        self.assertEqual(record['output']['columns'], ['Price'])
+        self.assertEqual(record['output']['column_types'], ['f64'])
+        self.assertEqual(record['sub_steps'][0]['output_label'], 'Series')
+        self.assertEqual(one("cones.get_column('Price')")['output']['preview'][0], [3.55])
+
+
+class DropRenameTest(unittest.TestCase):
+    def test_drop_and_rename(self):
+        drop = one("cones.drop('Color')")
+        self.assertEqual(drop['sub_steps'][0]['input_highlights'], {'columns': ['Color']})
+        rename = one("cones.rename({'Price': 'Cost'})")
+        self.assertEqual(rename['sub_steps'][0]['output_highlights'], {'columns': ['Cost']})
+        self.assertIn("'Price' → 'Cost'", rename['explanation'])
+
+
+class NullsTest(unittest.TestCase):
+    def test_null_count_finds_then_counts(self):
+        record = tracer.run(CONES + NULLS + "ratings.null_count()")[0]
+        find, count = record['sub_steps']
+        self.assertEqual(find['input_highlights']['cells'], [[1, 'Stars'], [3, 'Flavor'], [4, 'Stars']])
+        self.assertEqual(record['output']['preview'], [[1, 2]])
+        self.assertEqual(count['output_highlights'], {'columns': ['Flavor', 'Stars']})
+
+    def test_drop_nulls_strikes_rows_with_a_null(self):
+        record = tracer.run(CONES + NULLS + "ratings.drop_nulls()")[0]
+        self.assertEqual(record['sub_steps'][1]['input_highlights']['rows_removed'], [1, 3, 4])
+        subset = tracer.run(CONES + NULLS + "ratings.drop_nulls(subset='Flavor')")[0]
+        self.assertEqual(subset['sub_steps'][1]['input_highlights']['rows_removed'], [3])
+
+    def test_fill_null_says_which_nulls_stay(self):
+        record = tracer.run(CONES + NULLS + "ratings.fill_null(0)")[0]
+        fill = record['sub_steps'][1]
+        self.assertEqual(fill['output_highlights'], {'cells': [[1, 'Stars'], [4, 'Stars']]})
+        self.assertIn("The nulls in the column 'Flavor' stay", fill['message'])
+
+    def test_nan_is_not_null(self):
+        record = tracer.run(CONES + "pl.DataFrame({'x': [1.0, float('nan'), None]}).null_count()")[0]
+        self.assertIn('NaN', record['sub_steps'][0]['message'])
+        self.assertEqual(record['output']['preview'], [[1]])
+
+
+class RepeatsTest(unittest.TestCase):
+    def test_unique_colours_copies_then_keeps_one(self):
+        record = one("cones.unique(subset='Flavor', keep='first', maintain_order=True)")
+        find, keep = record['sub_steps']
+        self.assertEqual(find['input_highlights']['row_colors'], [0, 1, None, 1, 0, None])
+        self.assertEqual(keep['input_highlights']['rows_removed'], [3, 4])
+
+    def test_without_maintain_order_says_so(self):
+        record = one("cones.unique()")
+        self.assertIn('any order', record['sub_steps'][1]['message'])
+
+    def test_group_head_keeps_the_first_rows_of_each(self):
+        record = one("cones.group_by('Flavor', maintain_order=True).head(1)")
+        self.assertEqual(record['label'], 'group_by().head()')
+        group, keep = record['sub_steps']
+        self.assertEqual(keep['input_highlights']['rows'], [0, 1, 2, 5])
+        self.assertEqual(keep['output_highlights']['row_colors'], [0, 1, 2, 3])
+
+
+class SeriesTest(unittest.TestCase):
+    def test_value_counts_groups_then_counts(self):
+        column, counts = trace("cones['Flavor'].value_counts(sort=True)")
+        self.assertEqual([s['stage'] for s in counts['sub_steps']],
+                         ['Sort rows into groups', 'Combine each group', 'One row per group'])
+        cards = counts['sub_steps'][1]['panel']['groups']
+        self.assertEqual(cards[0]['values'][0]['formula'], 'count() = 2')
+
+    def test_is_in_asks_every_value(self):
+        column, ask = trace("cones['Flavor'].is_in(['mint', 'vanilla'])")
+        table = ask['sub_steps'][0]['output_state']
+        self.assertEqual(table['columns'], ['Flavor', "cones['Flavor'].is_in(['mint', 'vanilla'])"])
+        self.assertEqual([r[1] for r in table['preview']], [False, False, True, False, False, True])
+
+    def test_one_frame_series_methods(self):
+        for code, operation in [("cones['Price'].sort()", 'sort'), ("cones['Flavor'].unique(maintain_order=True)", 'unique'),
+                                ("cones['Price'].cast(pl.Int64)", 'cast')]:
+            with self.subTest(code=code):
+                self.assertEqual(trace(code)[-1]['operation'], operation)
+        self.assertEqual(trace("cones['Price'].cast(pl.Int64)")[-1]['output']['column_types'], ['i64'])
+
+
 class SafetyTest(unittest.TestCase):
     def test_other_objects_with_the_same_method_names_are_untouched(self):
         self.assertEqual(trace("x = ', '.join(['a', 'b'])\ny = [1, 1].count(1)\nz = sorted([2, 1])"), [])
 
     def test_untraced_methods_still_run(self):
-        records = trace("cones.head(2).filter(pl.col('Price') > 4)")
+        records = trace("cones.clone().filter(pl.col('Price') > 4)")
         self.assertEqual([r['operation'] for r in records], ['filter'])
+
+    def test_subscripts_on_anything_else_are_untouched(self):
+        self.assertEqual(trace("x = [1, 2, 3][1:]\ny = {'a': 1}['a']\nz = cones.columns[0]"), [])
+
+    def test_a_single_value_is_not_a_step(self):
+        self.assertEqual(trace("v = cones[0, 'Flavor']\nr = cones.row(0)\nn = cones['Price'].arg_max()")[1:], [])
 
     def test_errors_reach_the_student_unchanged(self):
         with self.assertRaises(Exception) as caught:

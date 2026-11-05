@@ -99,6 +99,18 @@ label). Expressions are shown as written: the condition column for
 | `group_by(...).agg(...)` | sort rows into groups; combine each group; one row per group. Note: a hash table of row lists per key |
 | `join(...)` | which keys match; how rows pair; the result. Nulls never match unless `nulls_equal=True` |
 | `pivot(...)` | lay out the grid; gather each cell's values; combine each cell; empty cells |
+| `head`, `tail`, `slice`, `df[rows, cols]`, `df[i]` | take rows by position: the rows kept highlighted with their positions, the rest struck through (and the columns kept, for `df[rows, cols]`). A `head()` that keeps every row is not a step, just as showing a DataFrame is not |
+| `df['col']`, `get_column` | take one column: the column highlighted, the Series it returns as a one-column table |
+| `drop`, `rename` | one frame: the columns left out (or renamed, old name to new) highlighted; rows and values unchanged |
+| `null_count`, `drop_nulls`, `fill_null` | find the nulls (each null cell highlighted; NaN is not null); then count them per column, drop the rows that have one, or fill them in (the filled cells highlighted, and a null whose column's type the value does not fit is said to stay) |
+| `unique` | find repeated rows (copies share a colour); keep one of each (the rest struck through). Note: no row order unless `maintain_order=True` |
+| `group_by(...).head(n)`, `.tail(n)` | sort rows into groups; keep the first (or last) n rows of each |
+| Series: `value_counts` | the group by stages, counting: group equal values; count each; one row per value |
+| Series: `is_in`, `is_null` | ask every value: the values beside a column of True and False, as a filter's first frame |
+| Series: `sort`, `unique`, `fill_null`, `cast` | one frame: the Series as a one-column table, before and after |
+
+A method that returns a number or a Python object rather than a table or a Series (`shape`,
+`row(i)`, `arg_max`, `to_list`) is not a step.
 
 `group_by` gets `maintain_order=True` in every example so the groups come out in a stable
 order, and the tracer shows groups in the order polars returns them.
@@ -137,6 +149,11 @@ the step is about as you step through.
   each side (or USING one column) gets the plain view.
 - A bare `SELECT * FROM cones` is not a step, just as showing a DataFrame is not.
 - Queries with WITH, UNION or QUALIFY run and show their result without steps.
+
+A query that calls `random()` (`ORDER BY RANDOM() LIMIT 5`, a random sample) would draw
+again for every step. The tracer picks one seed for the query and sets it (`setseed`) before
+each step runs and before the cell's own result, so every step and the result show the same
+draw; running the cell again draws anew.
 
 The tracer runs DuckDB on one thread, so each step's query returns rows in the same order, and
 with Python replacement scans off, so `FROM text` cannot find one of the tracer's own

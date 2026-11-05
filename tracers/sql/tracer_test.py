@@ -183,6 +183,20 @@ class ModifierTest(unittest.TestCase):
         self.assertEqual(limit['label'], 'LIMIT 2 OFFSET 1')
         self.assertEqual(limit['sub_steps'][0]['input_highlights']['rows'], [1, 2])
 
+    def test_a_random_sample_is_one_draw_in_every_step_and_the_result(self):
+        # ORDER BY RANDOM() LIMIT n draws a sample; every step reruns the query, so each would
+        # draw again without one seed for the whole query
+        namespace = {}
+        tracer.run(TABLES, namespace)
+        tracer.reset()
+        result = tracer._run_sql("SELECT Flavor, Price FROM cones ORDER BY RANDOM() LIMIT 3", namespace)
+        order, limit = tracer.get_trace()[-2:]
+        self.assertEqual(order['output']['preview'], limit['input']['preview'])
+        self.assertEqual(limit['output']['preview'], limit['input']['preview'][:3])
+        self.assertEqual([list(r) for r in result.fetchall()], limit['output']['preview'])
+        # The seed is only for that query: random() afterwards is random again
+        self.assertIsNone(tracer._seed)
+
 
 class CellTest(unittest.TestCase):
     def test_the_cell_shows_the_last_query(self):

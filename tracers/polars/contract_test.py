@@ -92,9 +92,30 @@ EDGE_NOTEBOOKS = {
         CONES,
         "kept = cones.filter(pl.col('Flavor') == 'chocolate')\nkept.select('Nope')",
     ], True),
+    # Everything else on Data 100's polars reference sheet that returns a table or a Series
+    'reference-sheet': ([
+        CONES,
+        "cones.head(3)", "cones.tail(2)", "cones.slice(1, 2)", "cones[1:3, ['Flavor', 'Price']]", "cones[0]",
+        "cones[[0, 5]]", "cones[:, ['Flavor']]", "cones['Price']", "cones.get_column('Flavor')",
+        "cones.drop('Color')", "cones.rename({'Price': 'Cost'})",
+        "t = pl.DataFrame({'a': [1, None, 1, 4], 'b': ['x', 'y', 'x', None], 'c': [0.5, float('nan'), 0.5, None]})",
+        "t.null_count()", "t.drop_nulls()", "t.drop_nulls('a')", "t.fill_null(0)", "t.fill_null(strategy='forward')",
+        "t.unique(maintain_order=True)", "t.unique(subset='a', keep='last', maintain_order=True)", "t.unique(keep='none')",
+        "cones.group_by('Flavor', maintain_order=True).head(1)", "cones.group_by('Flavor').tail(1)",
+        "cones['Flavor'].value_counts(sort=True)", "cones['Flavor'].value_counts(normalize=True)",
+        "cones['Flavor'].is_in(['mint'])", "t['b'].is_in(['x'])", "t['a'].is_null()",
+        "cones['Price'].sort(descending=True)", "cones['Flavor'].unique(maintain_order=True)", "t['a'].fill_null(0)",
+        "cones['Price'].cast(pl.Int64)", "cones.join(cones.select('Color').head(2), how='cross')",
+        "cones.lazy().drop('Color').unique(maintain_order=True).head(3).collect()",
+        "cones.lazy().group_by('Flavor', maintain_order=True).head(1).collect()",
+        "big = pl.DataFrame({'n': range(100), 'm': [i % 3 for i in range(100)]})\nbig.tail(3)",
+        "big[50:60]", "big.unique(subset='m', maintain_order=True)", "big['m'].value_counts(sort=True)",
+    ], False),
 }
 
-TRACED_OPERATIONS = {'filter', 'with_columns', 'select', 'sort', 'group_by', 'join', 'pivot', 'collect'}
+TRACED_OPERATIONS = {'filter', 'with_columns', 'select', 'sort', 'group_by', 'join', 'pivot', 'collect',
+                     'head', 'tail', 'slice', '[]', 'get_column', 'drop', 'rename', 'null_count', 'drop_nulls',
+                     'fill_null', 'unique', 'value_counts', 'is_in', 'is_null', 'cast'}
 
 
 def _module(name, path, filename):
@@ -194,10 +215,19 @@ class ContractTest(unittest.TestCase):
         self.assertTrue(any('row_colors for' in p for p in trace_problems([record])))
 
     def test_joins_and_groups_show_their_stages(self):
-        stages = {r['operation']: [s.get('stage') for s in r.get('sub_steps', [])]
-                  for result in self.results.values() for r in result['trace']}
-        self.assertEqual(stages['join'], ['Which keys match', 'How rows pair', 'Result'])
-        self.assertEqual(stages['group_by'], ['Sort rows into groups', 'Combine each group', 'One row per group'])
+        joins = [[s.get('stage') for s in r.get('sub_steps', [])] for result in self.results.values()
+                 for r in result['trace'] if r['operation'] == 'join']
+        groups = {r.get('label'): [s.get('stage') for s in r.get('sub_steps', [])]
+                  for result in self.results.values() for r in result['trace'] if r['operation'] == 'group_by'}
+        self.assertIn(['Which keys match', 'How rows pair', 'Result'], joins)
+        self.assertIn(['Pair every row with every row'], joins)
+        self.assertEqual(groups['group_by().agg()'], ['Sort rows into groups', 'Combine each group', 'One row per group'])
+        self.assertEqual(groups['group_by().head()'], ['Sort rows into groups', 'Keep the first rows of each'])
+
+    def test_every_operation_on_the_reference_sheet_shows_a_walkthrough(self):
+        for record in self.results['edge reference-sheet']['trace']:
+            with self.subTest(step=record.get('label') or record['operation']):
+                self.assertGreater(len(record.get('sub_steps', [])), 0)
 
     def test_students_never_see_the_rewriting(self):
         for name, result in self.results.items():

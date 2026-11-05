@@ -84,13 +84,20 @@ def source(node):
         return ''
 
 
+def key_source(node):
+    """A subscript's key as written: df[1:3, 'a'] has the key 1:3, 'a' (unparse would add parentheses)."""
+    if isinstance(node, ast.Tuple) and node.elts:
+        return ', '.join(source(e) for e in node.elts)
+    return source(node)
+
+
 class Rewriter(ast.NodeTransformer):
     """Routes the cell's operations through the tracer's helpers.
 
     `x.m(...)`, for each m in methods, becomes `_dstutor_method(x, 'm', line, {keyword: source},
     [argument sources], 'x')(...)`, so a step can show each argument (and name each table) as written (an expression
     like pl.col('Price') > 4 is an object by the time it runs). With subscripts=True, `x[key]`
-    becomes `_dstutor_getitem(x, key, key_source, line)` and `df[k] = v` becomes
+    becomes `_dstutor_getitem(x, key, key_source, line, 'x')` and `df[k] = v` becomes
     `_dstutor_setitem(df, k, v, key_source, line, value_source)`. Sources are captured before
     anything inside them is rewritten, so no _dstutor_* name ever reaches a step.
     """
@@ -118,22 +125,25 @@ class Rewriter(ast.NodeTransformer):
     def visit_Subscript(self, node):
         if not self.subscripts:
             return self.generic_visit(node)
-        key_source = source(node.slice)
+        key_text = key_source(node.slice)
+        # What is indexed, as written (df in df[1:3]), for the step's title
+        receiver_source = source(node.value)
         self.generic_visit(node)
         if not isinstance(node.ctx, ast.Load):
             return node
         return helper_call('_dstutor_getitem', [node.value, as_expression(node.slice),
-                                                ast.Constant(key_source), ast.Constant(node.lineno)], node)
+                                                ast.Constant(key_text), ast.Constant(node.lineno),
+                                                ast.Constant(receiver_source)], node)
 
     def visit_Assign(self, node):
         # df['col'] = value: a column added or replaced in place
         if self.subscripts and len(node.targets) == 1 and isinstance(node.targets[0], ast.Subscript):
             target = node.targets[0]
-            key_source = source(target.slice)
+            key_text = key_source(target.slice)
             value_source = source(node.value)
             self.generic_visit(node)
             call = helper_call('_dstutor_setitem', [target.value, as_expression(target.slice), node.value,
-                                                    ast.Constant(key_source), ast.Constant(node.lineno),
+                                                    ast.Constant(key_text), ast.Constant(node.lineno),
                                                     ast.Constant(value_source)], node)
             return ast.copy_location(ast.Expr(call), node)
         self.generic_visit(node)

@@ -26,6 +26,11 @@
       "description": "Choose and compute columns"
     },
     {
+      "id": "cleaning",
+      "name": "Cleaning",
+      "description": "Nulls, copies and counts"
+    },
+    {
       "id": "lazy",
       "name": "Lazy",
       "description": "Plan a query, then run it"
@@ -233,6 +238,104 @@
         "import polars as pl",
         "# An ice cream shop's menu\ncones = pl.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
         "deals = (\n    cones.filter(pl.col('Price') > 4)\n    .with_columns((pl.col('Price') * 0.9).alias('Sale'))\n    .sort('Sale')\n)\ndeals"
+      ]
+    },
+    {
+      "id": "rows-by-position",
+      "title": "Rows by Position",
+      "description": "The first rows, or rows and columns by position",
+      "category": "filtering",
+      "operations": [
+        "head",
+        "[]"
+      ],
+      "markdown": "## Rows by position\n\npolars has no index: a row's position, counting from 0, is how you pick it. `head(n)` keeps the first n rows, and `df[rows, cols]` takes rows by position and columns by name. As in a Python slice, `1:3` stops before position 3.",
+      "cells": [
+        "import polars as pl",
+        "# An ice cream shop's menu\ncones = pl.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "# The first three rows\ncones.head(3)",
+        "# Rows 1 and 2, two of the columns\ncones[1:3, ['Flavor', 'Price']]"
+      ]
+    },
+    {
+      "id": "drop-rename",
+      "title": "Dropping and Renaming",
+      "description": "Leave a column out and rename another",
+      "category": "columns",
+      "operations": [
+        "drop",
+        "rename"
+      ],
+      "markdown": "## Dropping and renaming\n\n`drop` leaves columns out and `rename` changes names with a dictionary from old to new. Neither changes a value or a row.",
+      "cells": [
+        "import polars as pl",
+        "# An ice cream shop's menu\ncones = pl.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "menu = cones.drop('Color').rename({'Price': 'Price ($)'})\nmenu"
+      ]
+    },
+    {
+      "id": "missing-values",
+      "title": "Missing Values",
+      "description": "Count, drop and fill nulls",
+      "category": "cleaning",
+      "operations": [
+        "null_count",
+        "drop_nulls",
+        "fill_null"
+      ],
+      "markdown": "## Missing values\n\npolars marks a missing value as `null`. `null_count()` counts them in each column, `drop_nulls()` drops every row that has one, and `fill_null(0)` puts 0 in place of each null in a column 0 fits; a null in a text column stays.",
+      "cells": [
+        "import polars as pl",
+        "# Ratings, some missing\nratings = pl.DataFrame({\n    'Flavor': ['mint', 'chocolate', 'vanilla', None, 'chocolate'],\n    'Stars': [4.0, None, 5.0, 3.0, None],\n})\nratings",
+        "ratings.null_count()",
+        "# Only the rows with nothing missing\nratings.drop_nulls()",
+        "# No rating counts as 0 stars\nratings.fill_null(0)"
+      ]
+    },
+    {
+      "id": "unique-rows",
+      "title": "Removing Copies",
+      "description": "One row per flavor with unique",
+      "category": "cleaning",
+      "operations": [
+        "unique"
+      ],
+      "markdown": "## Removing copies\n\n`unique` keeps one of each set of rows that are the same. With `subset`, rows only need to match in those columns; `keep='first'` keeps the first of each, and `maintain_order=True` keeps the rows in their order.",
+      "cells": [
+        "import polars as pl",
+        "# An ice cream shop's menu\ncones = pl.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "# One cone of each flavor\ncones.unique(subset='Flavor', keep='first', maintain_order=True)"
+      ]
+    },
+    {
+      "id": "value-counts",
+      "title": "Counting Values",
+      "description": "How often each value appears in a column",
+      "category": "cleaning",
+      "operations": [
+        "value_counts"
+      ],
+      "markdown": "## Counting values\n\n`cones['Flavor']` is one column, a Series. `value_counts()` counts how often each value appears, giving a table of values and counts; `sort=True` puts the most common first.",
+      "cells": [
+        "import polars as pl",
+        "# An ice cream shop's menu\ncones = pl.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "cones['Flavor'].value_counts(sort=True)"
+      ]
+    },
+    {
+      "id": "group-head",
+      "title": "First Row of Each Group",
+      "description": "Keep rows from every group without combining them",
+      "category": "grouping",
+      "operations": [
+        "group_by",
+        "head"
+      ],
+      "markdown": "## First row of each group\n\n`group_by(...).head(n)` keeps the first n rows of each group as they are, instead of combining each group into one row.",
+      "cells": [
+        "import polars as pl",
+        "# An ice cream shop's menu\ncones = pl.DataFrame({\n    'Flavor': ['strawberry', 'chocolate', 'vanilla', 'chocolate', 'strawberry', 'mint'],\n    'Color': ['pink', 'light brown', 'white', 'dark brown', 'pink', 'green'],\n    'Price': [3.55, 4.75, 4.25, 5.25, 3.95, 4.50],\n})\ncones",
+        "# The first cone listed of each flavor\ncones.group_by('Flavor', maintain_order=True).head(1)"
       ]
     }
   ]

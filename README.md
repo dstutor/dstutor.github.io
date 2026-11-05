@@ -151,7 +151,11 @@ its first frame shows the condition as a column of True and False.
 
 The polars tracer rewrites cells the same way, with the same shared code. It traces `filter`,
 `with_columns`, `select`, `sort`, `group_by` with `agg` or a shortcut such as `len()`, `join`
-and `pivot`, and shows each expression as written (`pl.col('Price') > 4`). polars has no index,
+and `pivot`, and shows each expression as written (`pl.col('Price') > 4`). It also traces the
+rest of Data 100's polars reference sheet that returns a table or a Series: rows and columns by
+position (`head`, `tail`, `slice`, `df[1:3, ['a', 'b']]`, `df['col']`), `drop`, `rename`,
+`null_count`, `drop_nulls`, `fill_null`, `unique`, `group_by(...).head(n)`, and the Series
+methods `value_counts`, `is_in`, `is_null`, `sort`, `unique`, `fill_null` and `cast`. polars has no index,
 so rows are shown in order. A LazyFrame only records a plan, so nothing is shown until
 `collect()`. Then the tracer runs the chain one step at a time, shows the table after each
 step, and ends with a `collect()` step that shows polars' optimized plan.
@@ -163,7 +167,9 @@ them: FROM (and JOIN), WHERE, GROUP BY, HAVING, SELECT, DISTINCT, ORDER BY, LIMI
 reads DuckDB's own parse of the query (`json_serialize_sql`). For each step it rebuilds the
 query with only the clauses so far, turns it back into SQL (`json_deserialize_sql`) and runs it.
 Each step is labelled with its clause as written, and the notebook marks that clause while you
-are on its step. Errors are DuckDB's own messages, with the line and a caret.
+are on its step. A query that calls `random()` (`ORDER BY RANDOM() LIMIT 5`) runs every step
+with one seed, so the steps and the result show the same draw. Errors are DuckDB's own
+messages, with the line and a caret.
 
 How each tutor turns columnar, large and lazy data into frames, and where Cel stands in each
 frame, is in [docs/visualizing-steps.md](docs/visualizing-steps.md).

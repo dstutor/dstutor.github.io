@@ -25,6 +25,7 @@ import datetime
 import decimal
 import json
 import math
+import random
 import re
 
 from dstutor_rewriting import (
@@ -41,9 +42,14 @@ AGGREGATES = {'avg', 'mean', 'sum', 'min', 'max', 'count', 'count_star', 'median
               'arg_min', 'arg_max', 'bool_and', 'bool_or', 'mode', 'product', 'array_agg', 'group_concat'}
 # Keywords that start a clause of a SELECT (outside parentheses)
 CLAUSE_WORDS = {'SELECT', 'FROM', 'WHERE', 'GROUP', 'HAVING', 'QUALIFY', 'WINDOW', 'ORDER', 'LIMIT', 'OFFSET'}
+# Functions that draw a new random value on every run (ORDER BY RANDOM() LIMIT 5)
+RANDOM_CALL = re.compile(r'\b(random|rand|uuid|gen_random_uuid)\s*\(', re.IGNORECASE)
 
 _log = Log()
 _enabled = False
+# The seed for the SELECT being run when it calls random(), else None: set before every query
+# that runs it (each step and the cell's own result), so they all show the same draw
+_seed = None
 
 
 # ---------------------------------------------------------------------------------------------
@@ -117,7 +123,14 @@ def _connection(namespace):
     return con
 
 
+def _reseed(con):
+    """Start the query's random() from the seed again, when it has one."""
+    if _seed is not None:
+        con.execute("SELECT setseed(?)", [_seed])
+
+
 def _run_sql(code, namespace):
+    global _seed
     import duckdb
     con = _connection(namespace)
     result = None
@@ -128,14 +141,22 @@ def _run_sql(code, namespace):
         start = offset if start < 0 else start
         offset = start + len(text)
         if statement.type == duckdb.StatementType.SELECT:
-            # Run it first, so an error stops the cell before any step is recorded
-            con.execute(text).fetchall()
-            if _enabled:
-                try:
-                    _trace_select(con, text, code.count('\n', 0, start) + 1)
-                except Exception:
-                    pass
-            result = con.sql(text)
+            # A new draw each time the cell runs, the same draw for every step of this run
+            _seed = random.uniform(-1, 1) if RANDOM_CALL.search(text) else None
+            try:
+                # Run it first, so an error stops the cell before any step is recorded
+                _reseed(con)
+                con.execute(text).fetchall()
+                if _enabled:
+                    try:
+                        _trace_select(con, text, code.count('\n', 0, start) + 1)
+                    except Exception:
+                        pass
+                # The relation runs when the cell shows it, right after this
+                _reseed(con)
+                result = con.sql(text)
+            finally:
+                _seed = None
         else:
             con.execute(text)
             result = None
@@ -279,6 +300,7 @@ class _Query:
         return self.con.execute("SELECT json_deserialize_sql(?)", [json.dumps(envelope)]).fetchone()[0]
 
     def run(self, sql):
+        _reseed(self.con)
         cursor = self.con.execute(sql)
         names = _Columns([d[0] for d in cursor.description], [_type_name(d[1]) for d in cursor.description])
         return names, cursor.fetchall()
@@ -478,6 +500,7 @@ _PLAN_DETAILS = ('Table', 'Filters', 'Join Type', 'Conditions', 'Groups', 'Aggre
 
 def _plan_steps(con, text):
     """DuckDB's physical plan for the query, first operator to last, with the rows out of each."""
+    _reseed(con)
     tree = json.loads(con.execute("EXPLAIN (ANALYZE, FORMAT JSON) " + text).fetchall()[0][1])
     steps = []
 

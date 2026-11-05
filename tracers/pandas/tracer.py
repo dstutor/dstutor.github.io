@@ -163,7 +163,7 @@ def _remember_source(groupby, frame):
         pass
 
 
-def _getitem(container, key, key_source, line):
+def _getitem(container, key, key_source, line, receiver_source=''):
     result = container[key]
     if not _enabled:
         return result
