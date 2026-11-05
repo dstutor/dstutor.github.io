@@ -183,6 +183,8 @@ GitHub Actions ([.github/workflows/deploy.yml](.github/workflows/deploy.yml)) ru
 
 ## Credits
 
+Built by [Edwin Vargas Navarro](https://www.linkedin.com/in/edwin-vargas-navarro-423014237/).
+
 Inspired by [Python Tutor](https://pythontutor.com/) and [Pandas Tutor](https://pandastutor.com/).
 Successor to the [Data 8 Table Tutor](https://data-8.github.io/table-function-visualizer/).
 
