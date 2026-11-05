@@ -17,7 +17,7 @@
     "@dstutor/viz": "0.0.0",
     "@monaco-editor/react": "4.7.0",
     "fflate": "0.8.3",
-    "katex": "0.16.28",
+    "katex": "0.18.2",
     "monaco-editor": "0.57.0",
     "react-markdown": "10.1.0",
     "rehype-katex": "7.0.1",
